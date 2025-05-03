@@ -1,2 +1,11 @@
-# song-player
-play songs word-by-word transcription. use ://elevenlabs.io/app/speech-to-text to get the json (do json export and DO NOT CHECK "include speakers" and paste it into the mixer with the mp3 file of your song then upload the .songfile to the mixer html file
+# 🎵 song-player
+
+## 🧪 How to Use
+
+1. 🎧 Download your song as an MP3
+2. 🗣️ Upload the MP3 to [https://elevenlabs.io/app/speech-to-text](https://elevenlabs.io/app/speech-to-text)
+3. 📤 Export the transcript as **JSON** — **do not** check "include speakers"
+4. 🧪 Open `mixer.html` and upload **both** the MP3 and the JSON file
+   → You’ll get a `.songfile` download
+5. 🎬 Open `player.html`, load the `.songfile`
+   → Done. Word-by-word playback.
