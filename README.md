@@ -1,4 +1,4 @@
-# 🎵 song-player
+# 🎵 MP3 Player with word-by-word live transcript
 
 ## 🧪 How to Use
 
