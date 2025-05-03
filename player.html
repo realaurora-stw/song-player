@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synced Lyrics Player (Looping & Autoplay)</title>
+    <title>Synced Lyrics Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -961,7 +961,7 @@
                         checkEnablePlayer();
 
                         if (audioLoaded && lyricsLoaded) {
-                             playAudio(); // AUTOPLAY ENABLED HERE
+                             playAudio();
                         }
                     }).catch(e => {
                         throw new Error(`Audio decoding failed: ${e.message}`);
