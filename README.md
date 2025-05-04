@@ -1,9 +1,9 @@
 # 🎵 MP3 Player with word-by-word live transcript
 > ❤️ Spotify Lyrics App · **Mix any MP3 with ElevenLabs JSON transcripts to create a word-by-word synced lyrics file — just like Spotify Lyrics, but offline.** Play it in `player.html` with live highlighting, volume control, and optional audio effects like nightcore, slow + reverb, and more. You can even decode and edit your custom `.songlyrics` files anytime.<br>
 > Demo:<br>
-> * Player: http://realaurora-stw.github.io
-> * Mixer: http://realaurora-stw.github.io/mixer
-> * Decode: http://realaurora-stw.github.io/decode
+> * Player: https://realaurora-stw.github.io/song-player/player
+> * Mixer: https://realaurora-stw.github.io/song-player/mixer
+> * Decode: https://realaurora-stw.github.io/song-player/decode
 ## 🧪 How to Use
 
 1. 🎧 Download your song as an MP3
