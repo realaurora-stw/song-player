@@ -24,7 +24,6 @@
             --code-bg: #282828;
         }
 
-
         @keyframes processingPulse {
              0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.4); }
              70% { box-shadow: 0 0 0 8px rgba(0, 188, 212, 0); }
@@ -38,7 +37,6 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-
             background-color: var(--bg-color);
             display: flex;
             justify-content: center;
@@ -50,15 +48,14 @@
         }
 
         .container {
-            background-color: #080808;
+            background-color: var(--container-bg);
             padding: 30px 35px;
             border-radius: 24px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             text-align: center;
             width: 100%;
             max-width: 420px;
-            border: 1px solid #1e1e1e;
-
+            border: 1px solid var(--border-color);
         }
 
         h1 {
@@ -87,7 +84,6 @@
         .input-group {
             margin-bottom: 20px;
             text-align: left;
-
         }
 
         label {
@@ -109,7 +105,7 @@
             border-radius: 18px;
             margin-bottom: 5px;
             font-size: 0.9em;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
             cursor: pointer;
         }
          input[type="file"]::file-selector-button {
@@ -125,6 +121,70 @@
          }
          input[type="file"]::file-selector-button:hover {
              background-color: var(--accent-hover);
+         }
+         input[type="file"]:disabled {
+            background-color: var(--disabled-bg);
+            color: var(--disabled-text);
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: #333;
+         }
+         input[type="file"]:disabled::file-selector-button {
+             background-color: var(--disabled-bg);
+             color: var(--disabled-text);
+             cursor: not-allowed;
+             opacity: 0.7;
+         }
+
+        /* Styling for the new checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: -10px; /* Adjust spacing relative to JSON input */
+            margin-bottom: 20px;
+            text-align: left;
+            padding-left: 5px; /* Small indent */
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            cursor: pointer;
+            position: relative;
+            top: 2px; /* Align vertically better */
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .checkbox-group input[type="checkbox"]:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        .checkbox-group input[type="checkbox"]:checked::after {
+             content: '';
+             position: absolute;
+             left: 4px;
+             top: 1px;
+             width: 4px;
+             height: 8px;
+             border: solid #000; /* Checkmark color */
+             border-width: 0 2px 2px 0;
+             transform: rotate(45deg);
+        }
+        .checkbox-group label {
+            font-size: 0.85em; /* Slightly smaller label */
+            color: var(--text-secondary);
+            margin-bottom: 0; /* Remove bottom margin for inline alignment */
+            cursor: pointer;
+            font-weight: normal; /* Normal weight */
+        }
+         /* Style label when JSON input is disabled */
+         .input-group label.disabled-label {
+             color: var(--disabled-text);
+             opacity: 0.7;
          }
 
 
@@ -203,18 +263,25 @@
 
         <div class="input-group">
             <label for="mp3File">1. Select MP3 Audio</label>
-            <input type="file" id="mp3File" accept=".mp3,audio/mpeg">
+            <!-- Changed accept to audio/* to allow various audio types -->
+            <input type="file" id="mp3File" accept="audio/*">
             <div class="file-status" id="mp3Status">No file selected.</div>
         </div>
 
         <div class="input-group">
-            <label for="jsonFile">2. Select JSON Lyrics</label>
+            <label for="jsonFile" id="jsonFileLabel">2. Select JSON Lyrics</label>
             <input type="file" id="jsonFile" accept=".json,application/json">
              <div class="file-status" id="jsonStatus">No file selected.</div>
         </div>
 
+        <!-- "No Lyrics" Checkbox -->
+        <div class="checkbox-group">
+            <input type="checkbox" id="noLyricsCheckbox">
+            <label for="noLyricsCheckbox">This song has no lyrics</label>
+        </div>
+
         <button id="combineBtn" disabled>Combine Files</button>
-        <div id="status">Select both files to combine.</div>
+        <div id="status">Select required file(s) to combine.</div>
 
         <a href="#" id="downloadLink" download="combined.songlyrics"></a>
     </div>
@@ -222,6 +289,8 @@
     <script>
         const mp3FileInput = document.getElementById('mp3File');
         const jsonFileInput = document.getElementById('jsonFile');
+        const jsonFileLabel = document.getElementById('jsonFileLabel');
+        const noLyricsCheckbox = document.getElementById('noLyricsCheckbox');
         const mp3Status = document.getElementById('mp3Status');
         const jsonStatus = document.getElementById('jsonStatus');
         const combineBtn = document.getElementById('combineBtn');
@@ -230,10 +299,13 @@
         let mp3Data = null;
         let jsonData = null;
         let mp3FileName = 'audio';
+        const EMPTY_JSON_LYRICS = '{"segments": []}'; // Define empty lyrics JSON
 
         function setStatus(element, message, type = 'info') {
             element.textContent = message;
+            // Reset classes first
             element.className = element.id === 'status' ? '' : 'file-status';
+            // Add specific type class
             if (type === 'loaded' && element.id !== 'status') {
                 element.classList.add('loaded');
             } else if (type === 'error') {
@@ -246,12 +318,20 @@
          function resetUI() {
              mp3FileInput.value = null;
              jsonFileInput.value = null;
+             noLyricsCheckbox.checked = false; // Uncheck the checkbox
+
              mp3Data = null;
              jsonData = null;
              mp3FileName = 'audio';
+
              setStatus(mp3Status, 'No file selected.');
              setStatus(jsonStatus, 'No file selected.');
-             setStatus(statusDiv, 'Select both files to combine.');
+             setStatus(statusDiv, 'Select required file(s) to combine.');
+
+             // Ensure JSON input is enabled and styled correctly
+             jsonFileInput.disabled = false;
+             jsonFileLabel.classList.remove('disabled-label');
+
              combineBtn.disabled = true;
              combineBtn.classList.remove('processing');
              combineBtn.textContent = 'Combine Files';
@@ -259,33 +339,49 @@
 
 
         function checkFiles() {
-             let mp3Ready = !!mp3Data;
-             let jsonReady = !!jsonData;
+             const mp3Ready = !!mp3Data;
+             const jsonReady = !!jsonData;
+             const noLyricsMode = noLyricsCheckbox.checked;
 
-            if (mp3Ready && jsonReady) {
-                combineBtn.disabled = false;
-                setStatus(statusDiv, 'Ready to combine!', 'success');
-            } else {
-                combineBtn.disabled = true;
-                 if (!mp3Ready && !jsonReady) setStatus(statusDiv, 'Select both files to combine.');
-                 else if (!mp3Ready) setStatus(statusDiv, 'Waiting for MP3 file.');
-                 else setStatus(statusDiv, 'Waiting for JSON file.');
-            }
+             if (noLyricsMode) {
+                 // In "No Lyrics" mode, only MP3 is needed
+                 if (mp3Ready) {
+                     combineBtn.disabled = false;
+                     setStatus(statusDiv, 'Ready to create lyric-less file!', 'success');
+                 } else {
+                     combineBtn.disabled = true;
+                     setStatus(statusDiv, 'Select MP3 file.');
+                 }
+             } else {
+                 // Normal mode, require both files
+                 if (mp3Ready && jsonReady) {
+                     combineBtn.disabled = false;
+                     setStatus(statusDiv, 'Ready to combine!', 'success');
+                 } else {
+                     combineBtn.disabled = true;
+                      if (!mp3Ready && !jsonReady) setStatus(statusDiv, 'Select both MP3 and JSON files.');
+                      else if (!mp3Ready) setStatus(statusDiv, 'Waiting for MP3 file.');
+                      else setStatus(statusDiv, 'Waiting for JSON file.');
+                 }
+             }
         }
 
         function validateJsonStructure(parsedData) {
+            // Basic validation remains, ensure it doesn't break on empty segments
             if (typeof parsedData !== 'object' || parsedData === null) {
                 return { valid: false, message: "JSON is not an object." };
             }
             if (!Array.isArray(parsedData.segments)) {
                  return { valid: false, message: "Missing or invalid 'segments' array." };
             }
+            // Allow empty segments array
             if (parsedData.segments.length > 0) {
                  const firstSegment = parsedData.segments[0];
                  if (typeof firstSegment !== 'object' || firstSegment === null) {
                      return { valid: false, message: "Segment is not an object." };
                  }
                  if (!Array.isArray(firstSegment.words)) {
+                    // Allow segments without words if needed, or keep validation strict
                     return { valid: false, message: "Segment missing 'words' array." };
                  }
                  if (firstSegment.words.length > 0) {
@@ -304,34 +400,36 @@
              return { valid: true, message: "JSON structure appears valid." };
         }
 
-
         mp3FileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
-             mp3Data = null;
+             mp3Data = null; // Reset data first
             if (file) {
-                mp3FileName = file.name.replace(/\.[^/.]+$/, "");
+                mp3FileName = file.name.replace(/\.[^/.]+$/, ""); // Get filename without extension
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     mp3Data = e.target.result;
                     setStatus(mp3Status, `Loaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`, 'loaded');
-                    checkFiles();
+                    checkFiles(); // Check readiness
                 };
                  reader.onerror = () => {
-                     setStatus(mp3Status, 'Error reading MP3 file.', 'error');
+                     setStatus(mp3Status, 'Error reading audio file.', 'error');
+                     mp3Data = null; // Ensure data is null on error
                      checkFiles();
                  };
                  reader.readAsArrayBuffer(file);
-                 setStatus(mp3Status, 'Loading MP3...');
+                 setStatus(mp3Status, `Loading ${file.name}...`);
             } else {
                  setStatus(mp3Status, 'No file selected.');
-                 checkFiles();
+                 mp3FileName = 'audio';
+                 checkFiles(); // Re-check state
             }
         });
 
         jsonFileInput.addEventListener('change', (event) => {
+            // This should only trigger if the input is enabled (checkbox unchecked)
             const file = event.target.files[0];
-             jsonData = null;
-            if (file) {
+             jsonData = null; // Reset data first
+            if (file && !noLyricsCheckbox.checked) { // Double check if enabled
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const rawJsonString = e.target.result;
@@ -343,30 +441,64 @@
                             throw new Error(validationResult.message);
                         }
 
-                        jsonData = rawJsonString;
+                        jsonData = rawJsonString; // Store the raw string
                         setStatus(jsonStatus, `Loaded: ${file.name}`, 'loaded');
-                         checkFiles();
+                         checkFiles(); // Check readiness
                     } catch(error) {
                          setStatus(jsonStatus, `Error: Invalid JSON. ${error.message}`, 'error');
+                         jsonData = null; // Ensure data is null on error
                          checkFiles();
                     }
                 };
                  reader.onerror = () => {
                      setStatus(jsonStatus, 'Error reading JSON file.', 'error');
+                     jsonData = null; // Ensure data is null on error
                      checkFiles();
                  };
                 reader.readAsText(file);
-                setStatus(jsonStatus, 'Loading JSON...');
+                setStatus(jsonStatus, `Loading ${file.name}...`);
             } else {
                  setStatus(jsonStatus, 'No file selected.');
-                 checkFiles();
+                 checkFiles(); // Re-check state
             }
         });
 
+        // Event listener for the checkbox
+        noLyricsCheckbox.addEventListener('change', (event) => {
+            const isChecked = event.target.checked;
+            if (isChecked) {
+                // Disable JSON input
+                jsonFileInput.disabled = true;
+                jsonFileLabel.classList.add('disabled-label'); // Style label as disabled
+                jsonFileInput.value = null; // Clear the file input visually
+                jsonData = null; // Clear stored JSON data
+                setStatus(jsonStatus, 'Lyrics input disabled.');
+            } else {
+                // Enable JSON input
+                jsonFileInput.disabled = false;
+                jsonFileLabel.classList.remove('disabled-label');
+                setStatus(jsonStatus, 'No file selected.'); // Reset status
+            }
+            checkFiles(); // Update button state and main status message
+        });
+
+
         combineBtn.addEventListener('click', () => {
-            if (!mp3Data || !jsonData) {
-                setStatus(statusDiv, 'Error: Missing required files.', 'error');
-                return;
+            const noLyricsMode = noLyricsCheckbox.checked;
+            let effectiveJsonData = null;
+
+            if (noLyricsMode) {
+                if (!mp3Data) {
+                    setStatus(statusDiv, 'Error: Missing MP3 file.', 'error');
+                    return;
+                }
+                effectiveJsonData = EMPTY_JSON_LYRICS; // Use empty JSON
+            } else {
+                if (!mp3Data || !jsonData) {
+                    setStatus(statusDiv, 'Error: Missing required files.', 'error');
+                    return;
+                }
+                effectiveJsonData = jsonData; // Use uploaded JSON
             }
 
             setStatus(statusDiv, 'Combining...');
@@ -374,29 +506,44 @@
             combineBtn.classList.add('processing');
             combineBtn.textContent = 'Processing...';
 
+            // Use setTimeout to allow UI update before blocking potentially large operations
             setTimeout(() => {
                 try {
-                    const jsonBytes = new TextEncoder().encode(jsonData);
+                    // Encode the effective JSON (either uploaded or empty)
+                    const jsonBytes = new TextEncoder().encode(effectiveJsonData);
                     const jsonLength = jsonBytes.byteLength;
-                    const magicBytes = new Uint8Array([76, 89, 82, 88]);
-                    const totalSize = magicBytes.byteLength + 4 + jsonLength + mp3Data.byteLength;
+
+                    // Prepare header and calculate total size
+                    const magicBytes = new Uint8Array([76, 89, 82, 88]); // "LYRX"
+                    const totalSize = magicBytes.byteLength + 4 + jsonLength + mp3Data.byteLength; // 4 bytes for JSON length
+
+                    // Create buffer and views
                     const combinedBuffer = new ArrayBuffer(totalSize);
                     const combinedView = new DataView(combinedBuffer);
                     const combinedBytes = new Uint8Array(combinedBuffer);
                     let offset = 0;
 
+                    // Write magic bytes
                     combinedBytes.set(magicBytes, offset);
                     offset += magicBytes.byteLength;
-                    combinedView.setUint32(offset, jsonLength, false);
+
+                    // Write JSON length (32-bit unsigned integer, big-endian)
+                    combinedView.setUint32(offset, jsonLength, false); // false for big-endian
                     offset += 4;
+
+                    // Write JSON data
                     combinedBytes.set(jsonBytes, offset);
                     offset += jsonLength;
+
+                    // Write MP3 (or other audio) data
                     combinedBytes.set(new Uint8Array(mp3Data), offset);
 
+                    // Create Blob and trigger download
                     const blob = new Blob([combinedBuffer], { type: 'application/octet-stream' });
                     const tempLink = document.createElement('a');
                     const url = URL.createObjectURL(blob);
                     tempLink.href = url;
+                    // Use the original audio filename (without extension) for the download
                     tempLink.download = `${mp3FileName}.songlyrics`;
 
                     document.body.appendChild(tempLink);
@@ -405,23 +552,25 @@
 
                     setStatus(statusDiv, 'Download initiated! Clearing form...', 'success');
 
+                    // Clean up after a short delay
                     setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                        resetUI();
+                        URL.revokeObjectURL(url); // Release object URL memory
+                        resetUI(); // Reset the form completely
                     }, 1500);
 
                 } catch (error) {
                     setStatus(statusDiv, `Error during combination: ${error.message}`, 'error');
                     console.error("Combination Error:", error);
+                     // Re-enable button and reset text only if an error occurred before cleanup
                      combineBtn.disabled = false;
                      combineBtn.classList.remove('processing');
                      combineBtn.textContent = 'Combine Files';
-                     checkFiles();
+                     checkFiles(); // Re-evaluate button state
                 }
-            }, 50);
+            }, 50); // Short timeout for UI responsiveness
         });
 
-
+         // Initialize the UI state on load
          resetUI();
 
     </script>
