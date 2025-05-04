@@ -7,7 +7,7 @@
 3. 📤 Export the transcript as **JSON** — **do not** check "include speakers"
 4. 🧪 Open `mixer.html` and upload **both** the MP3 and the JSON file
    → You’ll get a `.songlyrics` download
-5. 🎬 Open `player.html`, load the `.songfile`
+5. 🎬 Open `player.html`, load the `.songlyrics`
    → Done. Word-by-word playback.
 ## 📁 Files
 - `player.html` = MP3 Player
