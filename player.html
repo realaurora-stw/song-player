@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-        /* --- Base and Dark Mode Styles (DO NOT CHANGE) --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -20,10 +19,10 @@
         html, body {
             height: 100%;
             font-family: 'Poppins', sans-serif;
-            background-color: #000000; /* Dark mode default */
-            color: #f0f0f0; /* Dark mode default */
+            background-color: #000000;
+            color: #f0f0f0;
             overflow: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Added for smooth theme transition */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body {
@@ -60,7 +59,7 @@
             opacity: 0;
             transform: translateY(15px) scale(0.9);
             transform-origin: center left;
-            color: #f0f0f0; /* Dark mode default */
+            color: #f0f0f0;
             margin: 0 0.1em;
             cursor: default;
             transition: opacity 0.45s ease-out,
@@ -79,7 +78,7 @@
         }
 
         #lyrics-output span.highlighted {
-            color: #50d060; /* Dark mode highlight */
+            color: #50d060;
             font-weight: 600;
             transform: translateY(-1px) scale(1.05);
         }
@@ -89,7 +88,7 @@
              display: block;
              opacity: 1;
              transform: none;
-             color: #555; /* Dark mode placeholder */
+             color: #555;
              font-style: italic;
              text-align: center;
              margin: auto;
@@ -102,12 +101,12 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #000000; /* Dark mode default */
+            background-color: #000000;
             padding: 15px 30px;
-            border-top: 1px solid #0c0c0c; /* Dark mode default */
+            border-top: 1px solid #0c0c0c;
             z-index: 10;
-            color: #aaa; /* Dark mode default */
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* Added for smooth theme transition */
+            color: #aaa;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
         .file-inputs {
@@ -127,15 +126,15 @@
         .file-inputs input[type="file"] {
             font-size: 0.8em;
             max-width: 250px;
-            color: #aaa; /* Dark mode default */
+            color: #aaa;
             font-family: inherit;
         }
         .file-inputs input[type="file"]::file-selector-button {
             padding: 5px 10px;
-            border: 1px solid #444; /* Dark mode default */
+            border: 1px solid #444;
             border-radius: 4px;
-            background-color: #222; /* Dark mode default */
-            color: #ccc; /* Dark mode default */
+            background-color: #222;
+            color: #ccc;
             cursor: pointer;
             font-size: 0.9em;
             margin-right: 10px;
@@ -143,7 +142,7 @@
             font-family: inherit;
         }
         .file-inputs input[type="file"]::file-selector-button:hover {
-            background-color: #333; /* Dark mode default */
+            background-color: #333;
         }
 
         .player-controls {
@@ -155,8 +154,8 @@
         }
 
         #playPauseBtn {
-            background-color: #141414; /* Dark mode default */
-            color: #eee; /* Dark mode default */
+            background-color: #141414;
+            color: #eee;
             border: none;
             padding: 8px 15px;
             font-size: 1em;
@@ -167,12 +166,12 @@
             font-family: inherit;
         }
         #playPauseBtn:hover:enabled {
-             background-color: #1f1f1f; /* Dark mode default */
+             background-color: #1f1f1f;
         }
 
         #playPauseBtn:disabled {
-            background-color: #141414; /* Dark mode default */
-            color: #666; /* Dark mode default */
+            background-color: #141414;
+            color: #666;
             cursor: not-allowed;
         }
 
@@ -183,7 +182,7 @@
             height: 8px;
             -webkit-appearance: none;
             appearance: none;
-            background: #0d0d0d; /* Dark mode default */
+            background: #0d0d0d;
             border-radius: 5px;
             outline: none;
             transition: background-color 0.2s;
@@ -194,13 +193,13 @@
           appearance: none;
           width: 16px;
           height: 16px;
-          background: #1c1c1c; /* Dark mode default */
+          background: #1c1c1c;
           border-radius: 50%;
           cursor: pointer;
           transition: background-color 0.2s, transform 0.15s ease-out;
         }
          #progressBar:hover::-webkit-slider-thumb {
-              background: #2e2e2e; /* Dark mode default */
+              background: #2e2e2e;
          }
          #progressBar:active::-webkit-slider-thumb {
              transform: scale(1.1);
@@ -210,14 +209,14 @@
         #progressBar::-moz-range-thumb {
           width: 16px;
           height: 16px;
-          background: #666; /* Dark mode default */
+          background: #666;
           border-radius: 50%;
           cursor: pointer;
           border: none;
           transition: background-color 0.2s, transform 0.15s ease-out;
         }
          #progressBar:hover::-moz-range-thumb {
-              background: #888; /* Dark mode default */
+              background: #888;
          }
          #progressBar:active::-moz-range-thumb {
              transform: scale(1.1);
@@ -225,20 +224,20 @@
 
 
         #progressBar:disabled::-webkit-slider-thumb {
-            background: #333; /* Dark mode default */
+            background: #333;
             cursor: not-allowed;
             transition: none;
              transform: none;
         }
         #progressBar:disabled::-moz-range-thumb {
-            background: #333; /* Dark mode default */
+            background: #333;
             cursor: not-allowed;
              transition: none;
              transform: none;
         }
         #progressBar:disabled {
             cursor: not-allowed;
-             background: #0a0a0a; /* Dark mode default */
+             background: #0a0a0a;
         }
 
 
@@ -246,10 +245,10 @@
             font-size: 0.9em;
             min-width: 45px;
             text-align: center;
-            color: #aaa; /* Dark mode default */
+            color: #aaa;
             font-family: inherit;
             white-space: nowrap;
-            transition: color 0.3s ease; /* Added for smooth theme transition */
+            transition: color 0.3s ease;
         }
 
         #audioPlayer {
@@ -258,18 +257,18 @@
 
         #loadStatus {
              font-size: 0.8em;
-             color: #888; /* Dark mode default */
+             color: #888;
              margin-left: 15px;
              min-height: 1.2em;
              font-family: inherit;
-             transition: color 0.3s ease; /* Added for smooth theme transition */
+             transition: color 0.3s ease;
         }
 
 
-       .control-icon-btn {
+        .control-icon-btn {
             background: none;
             border: none;
-            color: #141414;
+            color: #aaa;
             font-size: 1.2em;
             padding: 5px;
             cursor: pointer;
@@ -278,10 +277,10 @@
             font-family: inherit;
        }
        .control-icon-btn:hover:enabled {
-           color: #eee; /* Dark mode default */
+           color: #eee;
        }
        .control-icon-btn:disabled {
-           color: #555; /* Dark mode default */
+           color: #555;
            cursor: not-allowed;
        }
 
@@ -298,10 +297,10 @@
             bottom: calc(100% + 10px);
             left: 50%;
             transform: translateX(-50%) translateY(10px);
-            background-color: #111111; /* Dark mode default */
+            background-color: #111111;
             padding: 15px 15px 15px 15px;
             border-radius: 12px;
-            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5); /* Dark mode default */
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);
             z-index: 20;
             width: 50px;
             height: 160px;
@@ -312,7 +311,7 @@
 
             visibility: hidden;
             opacity: 0;
-            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0.25s, background-color 0.3s ease, box-shadow 0.3s ease; /* Added for smooth theme transition */
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0.25s, background-color 0.3s ease, box-shadow 0.3s ease;
             will-change: opacity, transform, visibility;
         }
 
@@ -332,7 +331,7 @@
             width: 90px;
             height: 8px;
             cursor: pointer;
-            background: #2c2c2c; /* Dark mode default */
+            background: #2c2c2c;
             border-radius: 10px;
             outline: none;
             display: block;
@@ -343,29 +342,29 @@
 
         .slider-vertical::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            width: 16px; height: 16px; background: #ccc; /* Dark mode default */
+            width: 16px; height: 16px; background: #ccc;
             border-radius: 50%; cursor: pointer; border: none;
             transition: background-color 0.2s;
         }
         .slider-vertical::-moz-range-thumb {
-            width: 16px; height: 16px; background: #ccc; /* Dark mode default */
+            width: 16px; height: 16px; background: #ccc;
             border-radius: 50%; cursor: pointer; border: none;
             transition: background-color 0.2s;
         }
 
 
-        .slider-vertical:disabled { cursor: not-allowed; background: #444; /* Dark mode default */ }
-        .slider-vertical:disabled::-webkit-slider-thumb { background: #666; /* Dark mode default */ cursor: not-allowed; }
-        .slider-vertical:disabled::-moz-range-thumb { background: #666; /* Dark mode default */ cursor: not-allowed; }
+        .slider-vertical:disabled { cursor: not-allowed; background: #444; }
+        .slider-vertical:disabled::-webkit-slider-thumb { background: #666; cursor: not-allowed; }
+        .slider-vertical:disabled::-moz-range-thumb { background: #666; cursor: not-allowed; }
 
         .popup-text-display {
-            color: #f0f0f0; /* Dark mode default */
+            color: #f0f0f0;
             font-size: 0.8em;
             text-align: center;
             width: 100%;
             margin-top: auto;
             font-family: inherit;
-            transition: color 0.3s ease; /* Added for smooth theme transition */
+            transition: color 0.3s ease;
         }
 
 
@@ -373,7 +372,7 @@
             visibility: visible;
             opacity: 1;
             transform: translateX(-50%) translateY(0);
-            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0s, background-color 0.3s ease, box-shadow 0.3s ease; /* Added for smooth theme transition */
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0s, background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
 
@@ -408,7 +407,6 @@
            .popup-text-display { font-size: 0.75em; }
         }
 
-        /* --- Light Mode Styles --- */
         body.light-mode {
             background-color: #f0f0f0;
             color: #1a1a1a;
@@ -419,19 +417,18 @@
         }
 
         body.light-mode #lyrics-output span.highlighted {
-            color: #007bff; /* Example light mode highlight color */
-            /* font-weight: 600; */ /* Already set */
-            /* transform: translateY(-1px) scale(1.05); */ /* Already set */
+            color: #007bff;
+
         }
 
         body.light-mode #lyrics-output.placeholder {
-            color: #888; /* Light mode placeholder */
+            color: #888;
         }
 
         body.light-mode #controls-container {
             background-color: #ffffff;
             border-top: 1px solid #dddddd;
-            color: #555; /* Light mode default text */
+            color: #555;
         }
 
         body.light-mode .file-inputs input[type="file"] {
@@ -469,7 +466,7 @@
          body.light-mode #progressBar:hover::-webkit-slider-thumb {
               background: #888888;
          }
-         /* Active state transform is fine */
+
 
         body.light-mode #progressBar::-moz-range-thumb {
           background: #aaaaaa;
@@ -477,7 +474,7 @@
          body.light-mode #progressBar:hover::-moz-range-thumb {
               background: #888888;
          }
-         /* Active state transform is fine */
+
 
         body.light-mode #progressBar:disabled::-webkit-slider-thumb {
             background: #cccccc;
@@ -580,11 +577,11 @@
                 </div>
             </div>
 
-            <!-- Theme Toggle Button -->
+
             <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme">
                 <i id="themeIcon" class="fas fa-sun"></i>
             </button>
-            <!-- End Theme Toggle Button -->
+
 
         </div>
     </div>
@@ -607,7 +604,7 @@
         const speedPopup = document.getElementById('speedPopup');
         const speedSlider = document.getElementById('speedSlider');
         const speedRateDisplay = document.getElementById('speedRateDisplay');
-        // Theme Toggle Elements
+
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
 
@@ -634,8 +631,8 @@
 
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
-        const THEME_STORAGE_KEY = 'playerTheme'; // Local storage key for theme
-        const LIGHT_MODE_CLASS = 'light-mode'; // CSS class for light mode
+        const THEME_STORAGE_KEY = 'playerTheme';
+        const LIGHT_MODE_CLASS = 'light-mode';
 
         let volumePopupTimeout = null;
         let speedPopupTimeout = null;
@@ -678,14 +675,14 @@
              try {
                 const savedValue = localStorage.getItem(key);
                 if (savedValue !== null) {
-                    // For theme, it's a string, not float
+
                     if (key === THEME_STORAGE_KEY) {
                         if (validator(savedValue)) return savedValue;
                     } else {
                         const parsedValue = parseFloat(savedValue);
                         if (validator(parsedValue)) return parsedValue;
                     }
-                    localStorage.removeItem(key); // Remove invalid value
+                    localStorage.removeItem(key);
                 }
             } catch (e) { console.error("Error loading setting:", key, e); }
             return defaultValue;
@@ -717,7 +714,7 @@
              updateTotalDurationDisplay();
         }
 
-        // --- Theme Functions ---
+
         function applyTheme(theme) {
             if (theme === 'light') {
                 document.body.classList.add(LIGHT_MODE_CLASS);
@@ -725,7 +722,7 @@
                 themeIcon.classList.add('fa-moon');
                 themeToggleBtn.title = 'Dark Mode';
                 saveSetting(THEME_STORAGE_KEY, 'light');
-            } else { // Default to dark
+            } else {
                 document.body.classList.remove(LIGHT_MODE_CLASS);
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
@@ -743,7 +740,7 @@
             const isLightMode = document.body.classList.contains(LIGHT_MODE_CLASS);
             applyTheme(isLightMode ? 'dark' : 'light');
         }
-        // --- End Theme Functions ---
+
 
 
         function setVolume(newVolume) {
@@ -798,7 +795,7 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
-             loadTheme(); // Load theme first
+             loadTheme();
              loadVolumeSetting();
              loadSpeedSetting();
              resetPlayerAndLyrics(false);
@@ -944,7 +941,7 @@
         volumePopup.addEventListener('click', (event) => event.stopPropagation());
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
 
-        // Theme Toggle Listener
+
         themeToggleBtn.addEventListener('click', toggleTheme);
 
 
@@ -975,7 +972,7 @@
             seekAudio(seekBufferTime);
             isSeeking = false;
             if (isPlaying) {
-                // Time update will resume in the animation loop
+
             } else {
                 updateCurrentTimeDisplay(startOffset);
                 updateLyricsHighlight(startOffset, true, false);
@@ -993,7 +990,7 @@
             const currentValue = parseFloat(volumeSlider.value);
             let step = 0.01;
 
-            if (Math.abs(delta) > 50) step = 0.01; // Keep small step for wheel
+            if (Math.abs(delta) > 50) step = 0.01;
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             setVolume(newValue);
@@ -1011,7 +1008,7 @@
             const maxSpeed = parseFloat(speedSlider.max);
             let step = 0.01;
 
-            if (Math.abs(delta) > 50) step = 0.01; // Keep small step for wheel
+            if (Math.abs(delta) > 50) step = 0.01;
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
@@ -1026,15 +1023,15 @@
 
             const delta = event.deltaY;
             const currentBufferTime = getCurrentBufferTime();
-            let seekAmount = 1; // Default seek amount
+            let seekAmount = 1;
 
             if (Math.abs(delta) > 50) seekAmount = 3;
             if (Math.abs(delta) > 100) seekAmount = 5;
 
             let newTime;
-            if (delta < 0) { // Wheel up / scroll left equivalent
+            if (delta < 0) {
                 newTime = currentBufferTime + seekAmount;
-            } else { // Wheel down / scroll right equivalent
+            } else {
                 newTime = currentBufferTime - seekAmount;
             }
 
@@ -1063,7 +1060,7 @@
              let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
 
              if (duration > 0 && currentPlaybackRate > 0) {
-                const effectiveBufferTime = clampedBufferTime % duration; // Use modulo for looping display
+                const effectiveBufferTime = clampedBufferTime % duration;
 
                 const displayTime = effectiveBufferTime / currentPlaybackRate;
                 currentTimeDisplay.textContent = formatTime(displayTime);
@@ -1088,7 +1085,7 @@
                 const dataView = new DataView(arrayBuffer);
                 let offset = 0;
 
-                // Check magic bytes
+
                 const magicBytes = new Uint8Array(arrayBuffer, offset, 4);
                 const magic = String.fromCharCode(...magicBytes);
                 offset += 4;
@@ -1096,34 +1093,34 @@
                     throw new Error("Invalid file signature. Expected 'LYRX'.");
                 }
 
-                // Read JSON length
+
                 if (offset + 4 > arrayBuffer.byteLength) {
                     throw new Error("File incomplete: Cannot read JSON length.");
                 }
-                const jsonLength = dataView.getUint32(offset, false); // Big-Endian
+                const jsonLength = dataView.getUint32(offset, false);
                 offset += 4;
 
-                // Validate JSON length
+
                 if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
                     throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
                 }
 
                 let jsonData = null;
                 let jsonParseSuccess = false;
-                lyricsData = []; // Reset lyrics data
+                lyricsData = [];
 
-                // Parse JSON if length > 0
+
                 if (jsonLength > 0) {
                     const jsonBytes = new Uint8Array(arrayBuffer, offset, jsonLength);
                     const jsonString = new TextDecoder().decode(jsonBytes);
-                    offset += jsonLength; // Move offset past JSON data
+                    offset += jsonLength;
 
                     try {
                         jsonData = JSON.parse(jsonString);
-                        // Basic validation of expected structure
+
                         if (jsonData && typeof jsonData === 'object' && Array.isArray(jsonData.segments)) {
                             jsonParseSuccess = true;
-                            // Extract words with timestamps
+
                             jsonData.segments.forEach(segment => {
                                 segment.words?.forEach(word => {
                                     if (word && typeof word === 'object' &&
@@ -1134,35 +1131,35 @@
                                 })
                             });
                         } else {
-                             jsonParseSuccess = false; // Mark as failed if structure is wrong
+                             jsonParseSuccess = false;
                         }
                     } catch (jsonError) {
                         jsonParseSuccess = false;
                         throw new Error(`Invalid JSON format: ${jsonError.message}`);
                     }
                 } else {
-                    // If jsonLength is 0, skip reading JSON, consider it 'successful' (no JSON data)
-                    offset += jsonLength; // Still need to advance offset if 0
+
+                    offset += jsonLength;
                     jsonParseSuccess = true;
                 }
 
-                // Handle case where JSON parsing failed but length was > 0
+
                 if (!jsonParseSuccess && jsonLength > 0) {
-                     lyricsData = []; // Ensure lyrics are empty if JSON was expected but failed
+                     lyricsData = [];
                 }
 
-                // Sort lyrics by start time
+
                 lyricsData.sort((a, b) => a.start - b.start);
                 lyricsLoaded = lyricsData.length > 0;
-                renderLyrics(); // Render lyrics (or placeholder) immediately
+                renderLyrics();
 
-                // Process Audio Data
+
                 const audioData = arrayBuffer.slice(offset);
                 if (audioData.byteLength === 0) {
                     throw new Error("No audio data found after JSON in the file.");
                 }
 
-                // Ensure AudioContext is ready
+
                 if (!audioContext) {
                     initializeAudioContext();
                     if (!audioContext) {
@@ -1172,7 +1169,7 @@
 
                 loadStatus.textContent = 'Decoding audio...';
 
-                // Decode Audio
+
                 audioContext.decodeAudioData(audioData)
                     .then(buffer => {
                         if (!(buffer?.duration > 0)) {
@@ -1181,36 +1178,33 @@
                         audioBuffer = buffer;
                         audioLoaded = true;
 
-                        // Update UI related to audio duration
+
                         progressBar.max = buffer.duration;
                         updateTotalDurationDisplay();
-                        updateCurrentTimeDisplay(0); // Reset time display
-                        updateLyricsHighlight(0, true, false); // Initial highlight
+                        updateCurrentTimeDisplay(0);
+                        updateLyricsHighlight(0, true, false);
 
                         loadStatus.textContent = 'File loaded successfully.';
-                        checkEnablePlayer(); // Enable controls
+                        checkEnablePlayer();
 
-                        // Optionally auto-play if desired (currently starts paused)
-                        // if (audioLoaded) {
-                        //      playAudio();
-                        // }
+
                     })
                     .catch(e => {
-                        // Handle audio decoding errors
+
                         audioLoaded = false;
                         audioBuffer = null;
-                        checkEnablePlayer(); // Disable controls
+                        checkEnablePlayer();
                         loadStatus.textContent = `Error decoding audio: ${e.message}`;
                         console.error("Audio Decoding Error:", e);
-                        // Optionally reset lyrics display if audio fails? Depends on desired behavior.
-                        // resetPlayerAndLyrics(true); // Could do this
+
+
                     });
 
             } catch (error) {
-                // Catch errors from file reading, parsing, or setup
+
                 alert(`Error processing file: ${error.message}`);
                 console.error("File Parse/Setup Error:", error);
-                resetPlayerAndLyrics(true); // Reset everything on critical error
+                resetPlayerAndLyrics(true);
                 loadStatus.textContent = `Error: ${error.message}`;
             }
         }
@@ -1226,7 +1220,7 @@
         function playAudio() {
             if (!audioContext || !audioBuffer || isPlaying) return;
 
-            // Resume AudioContext if suspended (required by browser autoplay policies)
+
             if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
                     playAudioInternal();
@@ -1234,155 +1228,152 @@
                     console.error("AudioContext resume failed:", e);
                     loadStatus.textContent = 'Error: Click page or button to enable audio.';
                 });
-                return; // Don't proceed until resumed
+                return;
             }
 
-            playAudioInternal(); // Play directly if context is running
+            playAudioInternal();
         }
 
         function playAudioInternal() {
-            if (isPlaying || !audioContext || !audioBuffer) return; // Double check
+            if (isPlaying || !audioContext || !audioBuffer) return;
 
-            // Ensure startOffset is valid
+
             startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
 
-            // Reset to beginning if playback reached the end
+
             if (startOffset >= audioBuffer.duration) {
                 startOffset = 0;
             }
 
-            // Create and configure the source node
+
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
-            sourceNode.loop = true; // Enable looping
+            sourceNode.loop = true;
             sourceNode.connect(gainNode);
-            sourceNode.onended = handleAudioEnd; // Handle unexpected ends
+            sourceNode.onended = handleAudioEnd;
 
-            // Start playback from the current offset
-            startTime = audioContext.currentTime; // Record the time playback *actually* starts
-            sourceNode.start(0, startOffset); // Start immediately at the calculated offset
+
+            startTime = audioContext.currentTime;
+            sourceNode.start(0, startOffset);
 
             isPlaying = true;
             isPaused = false;
             playPauseBtn.textContent = '❚❚ Pause';
-            startUpdatingTime(); // Begin updating the UI
+            startUpdatingTime();
         }
 
         function pauseAudio() {
             if (!isPlaying || !sourceNode || !audioContext) return;
 
-            // Calculate how much buffer time has passed since the last start/resume
+
             const elapsedRealTime = audioContext.currentTime - startTime;
             const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
 
-            // Update the offset where playback stopped, wrapping around with modulo
-            startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
-            startOffset = Math.max(0, startOffset); // Ensure non-negative
 
-            stopAudioInternals(); // Stop the source node and animation frame
+            startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
+            startOffset = Math.max(0, startOffset);
+
+            stopAudioInternals();
 
             isPlaying = false;
             isPaused = true;
             playPauseBtn.textContent = '▶ Play';
 
-            // Update display to the exact paused time
+
             updateCurrentTimeDisplay(startOffset);
         }
 
 
         function stopAudioInternals() {
              if (sourceNode) {
-                sourceNode.onended = null; // Prevent handleAudioEnd from firing on manual stop
-                sourceNode.loop = false; // Disable loop before stopping
+                sourceNode.onended = null;
+                sourceNode.loop = false;
                 try {
-                    sourceNode.stop(0); // Stop playback immediately
+                    sourceNode.stop(0);
                 } catch (e) {
-                    // Ignore DOMException: The node has already been stopped.
+
                 }
-                sourceNode.disconnect(); // Disconnect from the graph
-                sourceNode = null; // Release the reference
+                sourceNode.disconnect();
+                sourceNode = null;
             }
-            stopUpdatingTime(); // Stop the requestAnimationFrame loop
+            stopUpdatingTime();
         }
 
 
         function stopAudio() {
-            stopAudioInternals(); // Stop node and animation
-            isPlaying = false; // Update state flag
-            // Note: startOffset is preserved, representing the last known position
+            stopAudioInternals();
+            isPlaying = false;
+
         }
 
         function seekAudio(bufferTime) {
             if (!audioBuffer || !audioContext) return;
 
-            const wasPlaying = isPlaying; // Remember if it was playing before seek
-            stopAudio(); // Stop current playback completely
+            const wasPlaying = isPlaying;
+            stopAudio();
 
-            // Set the new start offset, clamped to valid range
+
             startOffset = Math.max(0, bufferTime);
             startOffset = Math.min(startOffset, audioBuffer.duration);
 
-            // Update UI immediately to reflect the seek position
+
             progressBar.value = startOffset;
             updateCurrentTimeDisplay(startOffset);
-            updateLyricsHighlight(startOffset, true, false); // Force lyrics update, no scroll animation
+            updateLyricsHighlight(startOffset, true, false);
 
-            // If it was playing before, resume playback from the new position
+
             if (wasPlaying) {
                  playAudio();
             } else {
-                // If it was paused, remain paused but update the button text
-                isPaused = true; // Ensure paused state is set
+
+                isPaused = true;
                 playPauseBtn.textContent = '▶ Play';
             }
         }
 
 
         function handleAudioEnd() {
-             // This might be called if the source node finishes unexpectedly.
-             // Since we use loop=true, this shouldn't normally happen during playback.
-             // It might occur if the buffer is very short or during cleanup.
-             // We simply nullify the sourceNode reference here.
-             // The main loop logic handles time wrapping.
+
+
+
+
              sourceNode = null;
-             // console.log("Audio source ended."); // Optional debug log
+
         }
 
 
 
         function startUpdatingTime() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId); // Clear previous frame
-            // Ensure startTime is set correctly if resuming or starting fresh
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
             if (!isPlaying || startTime <= 0 || !audioContext) {
                 startTime = audioContext.currentTime;
             }
 
             function updateLoop() {
-                // Stop loop if not playing, buffer/context lost, or source node gone
+
                 if (!isPlaying || !audioBuffer || !sourceNode || !audioContext) {
                     animationFrameId = null; return;
                 }
 
-                // Calculate current buffer time based on elapsed real time and rate
+
                 const elapsedRealTime = audioContext.currentTime - startTime;
                 let currentBufferTime = startOffset + (elapsedRealTime * currentPlaybackRate);
-                // No need to manually wrap time here, getCurrentBufferTime handles it if needed elsewhere
-                // and the display/highlight functions use modulo anyway.
 
-                // Update lyrics highlight based on calculated buffer time
-                // Allow scrolling only during normal playback (not seeking)
+
+
                 updateLyricsHighlight(currentBufferTime, false, true);
 
-                // Update time display and progress bar if not currently seeking
+
                 if (!isSeeking) {
                     updateCurrentTimeDisplay(currentBufferTime);
                 }
 
-                // Request the next frame
+
                 animationFrameId = requestAnimationFrame(updateLoop);
             }
-            // Start the loop
+
             animationFrameId = requestAnimationFrame(updateLoop);
         }
 
@@ -1403,15 +1394,15 @@
             volumeSlider.disabled = !audioReady;
             speedBtn.disabled = !audioReady;
             speedSlider.disabled = !audioReady;
-            // Theme toggle should always be enabled
-            // themeToggleBtn.disabled = !audioReady; // Keep enabled
+
+
 
             if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
             }
 
-            // Update displays even when disabled, showing defaults/saved values
+
             if (audioContext) {
                 const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
                 updateVolumeIcon(currentVolume);
@@ -1420,7 +1411,7 @@
             }
             if (audioReady) {
                 updateTotalDurationDisplay();
-                updateCurrentTimeDisplay(startOffset); // Show 0:00 or last paused time
+                updateCurrentTimeDisplay(startOffset);
             } else {
                  totalDurationDisplay.textContent = '0:00';
                  currentTimeDisplay.textContent = '0:00';
@@ -1430,20 +1421,20 @@
         }
 
         function resetPlayerAndLyrics(resetSettings = false) {
-            stopAudio(); // Stop playback and animation
+            stopAudio();
 
-            // Reset state variables
+
             audioLoaded = false; lyricsLoaded = false; audioBuffer = null;
             lyricsData = []; currentWordSpans = [];
             currentWordIndex = -1; previousWordIndex = -1;
             startOffset = 0; startTime = 0; isPaused = false; isPlaying = false;
 
-            // Reset UI elements
+
             lyricsOutput.innerHTML = 'Load a .songlyrics file.';
-            lyricsOutput.className = 'placeholder'; // Ensure placeholder class is set
-            lyricsContainer.style.justifyContent = 'center'; // Center placeholder text
+            lyricsOutput.className = 'placeholder';
+            lyricsContainer.style.justifyContent = 'center';
             lyricsContainer.style.alignItems = 'center';
-            lyricsContainer.scrollTop = 0; // Scroll to top
+            lyricsContainer.scrollTop = 0;
 
             playPauseBtn.textContent = '▶ Play';
             progressBar.value = 0; progressBar.max = 1;
@@ -1451,57 +1442,57 @@
             totalDurationDisplay.textContent = '0:00';
             loadStatus.textContent = '';
 
-            // Handle settings reset or reload
+
             if (resetSettings) {
                 const defaultVolume = 1;
                 const defaultSpeed = 1.0;
                  setVolume(defaultVolume);
                  setPlaybackSpeed(defaultSpeed, false);
                  updateTotalDurationDisplay();
-                 // Don't reset theme here, keep user preference unless explicitly requested
-                 // loadTheme(); // Reload theme in case it was affected
+
+
             } else {
-                 // Reload existing settings
+
                  loadVolumeSetting();
                  loadSpeedSetting();
                  updateTotalDurationDisplay();
-                 // Theme is loaded on DOMContentLoaded, no need to reload here unless forced
+
             }
 
-            // Ensure popups are hidden
+
             hidePopup(volumePopup);
             hidePopup(speedPopup);
-            checkEnablePlayer(); // Update control enabled/disabled states
+            checkEnablePlayer();
         }
 
 
         function renderLyrics() {
-            lyricsOutput.innerHTML = ''; // Clear previous lyrics
-            currentWordSpans = []; // Reset span array
-            currentWordIndex = -1; // Reset index tracking
+            lyricsOutput.innerHTML = '';
+            currentWordSpans = [];
+            currentWordIndex = -1;
             previousWordIndex = -1;
-            lyricsContainer.scrollTop = 0; // Scroll to top
+            lyricsContainer.scrollTop = 0;
 
-            // lyricsLoaded is now accurately set in parseCombinedFile
+
             if (lyricsLoaded && lyricsData.length > 0) {
-                lyricsOutput.className = ''; // Remove placeholder class
-                lyricsContainer.style.justifyContent = 'flex-start'; // Align text normally
+                lyricsOutput.className = '';
+                lyricsContainer.style.justifyContent = 'flex-start';
                 lyricsContainer.style.alignItems = 'flex-start';
 
-                // Create spans for each word
+
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
-                    span.textContent = line.word + ' '; // Add space after word
+                    span.textContent = line.word + ' ';
                     span.id = `word-${index}`;
                     span.dataset.startTime = line.start;
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
-                // Initial highlight/visibility will be handled by updateLyricsHighlight
-                // called after audio is ready in parseCombinedFile.
+
+
             } else {
-                // If no lyrics loaded or data is empty, show placeholder
-                lyricsOutput.innerHTML = '...'; // Or 'No lyrics available.'
+
+                lyricsOutput.innerHTML = '...';
                 lyricsOutput.className = 'placeholder';
                 lyricsContainer.style.justifyContent = 'center';
                 lyricsContainer.style.alignItems = 'center';
@@ -1509,72 +1500,71 @@
         }
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
-             // Use modulo to handle looping audio time correctly
+
              const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
 
-            // If no lyrics or spans, ensure nothing is highlighted
+
             if (!lyricsLoaded || currentWordSpans.length === 0) {
-                 if (currentWordIndex !== -1) { // If something was highlighted before
-                     highlightWord(-1, false); // Clear highlight
+                 if (currentWordIndex !== -1) {
+                     highlightWord(-1, false);
                      currentWordIndex = -1;
                      previousWordIndex = -1;
                  }
-                return; // Nothing more to do
+                return;
             }
 
-            // Find the index of the word that should be currently active
+
             let newWordIndex = -1;
-            // Look slightly ahead to make highlighting feel more responsive
-            const lookaheadTime = effectiveTime + 0.05; // 50ms lookahead
+
+            const lookaheadTime = effectiveTime + 0.05;
             for (let i = 0; i < lyricsData.length; i++) {
                 if (lyricsData[i].start <= lookaheadTime) {
-                    newWordIndex = i; // This word (or a previous one) is the latest match
+                    newWordIndex = i;
                 } else {
-                    break; // Found the first word that starts *after* the lookahead time
+                    break;
                 }
             }
 
-             // Update DOM only if the highlighted word changes or if forced
+
              if (newWordIndex !== currentWordIndex || forceUpdate) {
-                // Determine if scrolling should happen: only during active playback, not seeking
+
                 const shouldScroll = allowScroll && !isSeeking && isPlaying;
-                highlightWord(newWordIndex, shouldScroll); // Update classes and potentially scroll
-                previousWordIndex = currentWordIndex; // Store the old index
-                currentWordIndex = newWordIndex; // Update the current index
+                highlightWord(newWordIndex, shouldScroll);
+                previousWordIndex = currentWordIndex;
+                currentWordIndex = newWordIndex;
              }
         }
 
 
         function highlightWord(indexToHighlight, shouldAutoScroll = false) {
-            let wordToScroll = null; // The span element to potentially scroll into view
+            let wordToScroll = null;
 
-            // Iterate through all word spans to set visibility and highlight
+
             currentWordSpans.forEach((span, index) => {
-                // A word is 'visible' if its index is less than or equal to the target index
+
                 const isVisible = index <= indexToHighlight;
                 span.classList.toggle('visible', isVisible);
 
-                // A word is 'highlighted' only if its index *exactly* matches the target
+
                 const isHighlighted = index === indexToHighlight;
                 span.classList.toggle('highlighted', isHighlighted);
 
-                // If this is the highlighted word, mark it for potential scrolling
+
                 if(isHighlighted) wordToScroll = span;
             });
 
-             // If indexToHighlight is -1 (before first word), ensure all classes are removed
+
              if (indexToHighlight < 0) {
                  currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
              }
 
 
-            // --- Scrolling Logic ---
-            // 1. Auto-scroll during playback
+
             if (shouldAutoScroll && wordToScroll) {
                 const containerRect = lyricsContainer.getBoundingClientRect();
                 const wordRect = wordToScroll.getBoundingClientRect();
                 const containerH = lyricsContainer.clientHeight;
-                // Define a vertical "focus zone" within the container (e.g., middle 50%)
+
                 const zoneTop = containerRect.top + containerH * 0.25;
                 const zoneBottom = containerRect.bottom - containerH * 0.25;
 
@@ -1582,22 +1572,22 @@
                 const isBelowZone = wordRect.bottom > zoneBottom;
                 const isLastWord = indexToHighlight === lyricsData.length - 1;
 
-                 // Special case: If it's the last word and near the bottom, scroll to end
+
                  if (isLastWord && wordRect.bottom > containerRect.bottom - 20) {
                      wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
                  }
-                 // Otherwise, if word is outside the focus zone, scroll it to the center
+
                  else if (isAboveZone || isBelowZone) {
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
              }
-             // 2. Scroll immediately (no animation) when seeking, if needed
+
              else if (isSeeking && wordToScroll) {
                   const cRect = lyricsContainer.getBoundingClientRect();
                   const wRect = wordToScroll.getBoundingClientRect();
-                  // If the word is completely outside the visible container bounds
+
                   if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) {
-                      // Scroll instantly to the center
+
                       wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' });
                   }
              }
@@ -1607,7 +1597,7 @@
 
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
-            volumeIcon.className = 'fas '; // Reset classes, keep fas base
+            volumeIcon.className = 'fas ';
             if (volume <= 0) {
                 volumeIcon.classList.add('fa-volume-mute');
             } else if (volume < 0.5) {
@@ -1619,14 +1609,14 @@
 
 
         function resetPopupTimer(popupElement) {
-            clearPopupTimer(popupElement); // Clear any existing timer for this popup
+            clearPopupTimer(popupElement);
 
-            // Define the function to hide the popup
+
             const timerCallback = () => {
                 hidePopup(popupElement);
             };
 
-            // Set a new timeout based on which popup it is
+
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === speedPopup) {
@@ -1636,13 +1626,13 @@
 
 
         function clearPopupTimer(popupElement) {
-             // Clear the timeout associated with the specific popup
+
              if (popupElement === volumePopup && volumePopupTimeout) {
                 clearTimeout(volumePopupTimeout);
-                volumePopupTimeout = null; // Reset the timer ID
+                volumePopupTimeout = null;
             } else if (popupElement === speedPopup && speedPopupTimeout) {
                 clearTimeout(speedPopupTimeout);
-                speedPopupTimeout = null; // Reset the timer ID
+                speedPopupTimeout = null;
             }
         }
 
@@ -1654,7 +1644,7 @@
 
         function hidePopup(el) {
             el.classList.remove('show');
-            clearPopupTimer(el); // Also clear any associated timer when hiding manually
+            clearPopupTimer(el);
         }
 
 
@@ -1663,43 +1653,43 @@
             const totalSeconds = Math.floor(seconds);
             const minutes = Math.floor(totalSeconds / 60);
             const secs = totalSeconds % 60;
-            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`; // Pad seconds with leading zero if needed
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
 
-        // --- Keyboard Shortcuts ---
+
         document.addEventListener('keydown', handleKeyboardShortcuts);
 
         function handleKeyboardShortcuts(event) {
             const activeElement = document.activeElement;
-            // Ignore shortcuts if focus is on an input field where typing is expected
+
             const isTextInputFocused = (activeElement.tagName === 'INPUT' && /text|search|password|email|number|tel|url/.test(activeElement.type)) ||
                                       activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
 
-            if (isTextInputFocused) return; // Don't interfere with typing
+            if (isTextInputFocused) return;
 
             const playerReady = isPlayerReady();
-            // Check if focus is specifically on a range input (like sliders)
+
             const isRangeInputFocused = activeElement.tagName === 'INPUT' && activeElement.type === 'range';
 
-            let currentBufferTime = getCurrentBufferTime(); // Get current time for seeking
+            let currentBufferTime = getCurrentBufferTime();
 
             switch (event.code) {
-                case 'Space': // Play/Pause
-                case 'KeyK':  // Play/Pause (YouTube style)
-                    // Allow space/k if player is ready AND focus is not on a button OR if focus IS on a range input (allow override)
+                case 'Space':
+                case 'KeyK':
+
                     if (playerReady && (activeElement.tagName !== 'BUTTON' || isRangeInputFocused)) {
-                        event.preventDefault(); // Prevent default space bar scroll
+                        event.preventDefault();
                         togglePlayback();
                     }
-                    // Also allow if focus IS on a button (like play/pause itself)
+
                     else if (playerReady && activeElement.tagName === 'BUTTON') {
-                         event.preventDefault(); // Prevent button's default click action if triggered by space
+                         event.preventDefault();
                          togglePlayback();
                     }
                     break;
 
-                case 'KeyJ': // Seek back 10s (YouTube style)
+                case 'KeyJ':
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.max(0, currentBufferTime - 10);
@@ -1707,7 +1697,7 @@
                     }
                     break;
 
-                case 'KeyL': // Seek forward 10s (YouTube style)
+                case 'KeyL':
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.min(audioBuffer.duration, currentBufferTime + 10);
@@ -1715,8 +1705,8 @@
                     }
                     break;
 
-                case 'ArrowLeft': // Seek back 5s
-                    // Allow if player is ready AND focus is not on a range input (to let range input handle arrows)
+                case 'ArrowLeft':
+
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         const newTime = Math.max(0, currentBufferTime - 5);
@@ -1724,8 +1714,8 @@
                     }
                     break;
 
-                case 'ArrowRight': // Seek forward 5s
-                    // Allow if player is ready AND focus is not on a range input
+                case 'ArrowRight':
+
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         const newTime = Math.min(audioBuffer.duration, currentBufferTime + 5);
@@ -1733,22 +1723,22 @@
                     }
                     break;
 
-                case 'ArrowUp': // Increase Volume
-                    // Allow if player is ready AND focus is not on a range input
+                case 'ArrowUp':
+
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
-                        let newVolume = Math.min(1, currentVolume + 0.05); // Increase by 5%
+                        let newVolume = Math.min(1, currentVolume + 0.05);
                         setVolume(newVolume);
                     }
                     break;
 
-                case 'ArrowDown': // Decrease Volume
-                    // Allow if player is ready AND focus is not on a range input
+                case 'ArrowDown':
+
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
-                        let newVolume = Math.max(0, currentVolume - 0.05); // Decrease by 5%
+                        let newVolume = Math.max(0, currentVolume - 0.05);
                         setVolume(newVolume);
                     }
                     break;
