@@ -501,9 +501,8 @@
 
 
         function isPlayerReady() {
-            return audioLoaded && lyricsLoaded && !!audioContext && !!audioBuffer;
+            return audioLoaded && !!audioContext && !!audioBuffer;
         }
-
         function getCurrentBufferTime() {
              let time = startOffset;
              if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
@@ -904,77 +903,122 @@
         }
 
 
-
         function parseCombinedFile(arrayBuffer) {
             resetPlayerAndLyrics(false);
+            loadStatus.textContent = 'Processing file...';
+
             try {
                 const dataView = new DataView(arrayBuffer);
                 let offset = 0;
 
-                const magic = String.fromCharCode(...Array(4).fill().map(() => dataView.getUint8(offset++)));
-                if (magic !== "LYRX") throw new Error("Invalid file signature. Expected 'LYRX'.");
+                const magicBytes = new Uint8Array(arrayBuffer, offset, 4);
+                const magic = String.fromCharCode(...magicBytes);
+                offset += 4;
+                if (magic !== "LYRX") {
+                    throw new Error("Invalid file signature. Expected 'LYRX'.");
+                }
 
+                if (offset + 4 > arrayBuffer.byteLength) {
+                    throw new Error("File incomplete: Cannot read JSON length.");
+                }
                 const jsonLength = dataView.getUint32(offset, false);
                 offset += 4;
-                if (jsonLength <= 0 || offset + jsonLength > arrayBuffer.byteLength) {
-                    throw new Error(`Invalid JSON data length: ${jsonLength}`);
+
+                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
+                    throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
                 }
 
-                const jsonString = new TextDecoder().decode(new Uint8Array(arrayBuffer, offset, jsonLength));
-                offset += jsonLength;
-                const jsonData = JSON.parse(jsonString);
-
+                let jsonData = null;
+                let jsonParseSuccess = false;
                 lyricsData = [];
-                if (jsonData?.segments) {
-                    jsonData.segments.forEach(segment =>
-                        segment.words?.forEach(word => {
-                            if(word.type === 'word' && typeof word.start === 'number' && word.text?.trim()) {
-                                lyricsData.push({ word: word.text.trim(), start: word.start });
-                            }
-                        })
-                    );
-                } else if (Array.isArray(jsonData)) {
-                    jsonData.forEach(item => {
-                        if(item?.word && typeof item.start === 'number') {
-                            lyricsData.push({ word: item.word.trim(), start: item.start });
+
+                if (jsonLength > 0) {
+                    const jsonBytes = new Uint8Array(arrayBuffer, offset, jsonLength);
+                    const jsonString = new TextDecoder().decode(jsonBytes);
+                    offset += jsonLength;
+
+                    try {
+                        jsonData = JSON.parse(jsonString);
+                        if (jsonData && typeof jsonData === 'object' && Array.isArray(jsonData.segments)) {
+                            jsonParseSuccess = true;
+                            jsonData.segments.forEach(segment => {
+                                segment.words?.forEach(word => {
+                                    if (word && typeof word === 'object' &&
+                                        typeof word.start === 'number' && isFinite(word.start) && word.start >= 0 &&
+                                        typeof word.text === 'string' && word.text.trim()) {
+                                        lyricsData.push({ word: word.text.trim(), start: word.start });
+                                    }
+                                })
+                            });
+                        } else {
+                             jsonParseSuccess = false;
                         }
-                    });
+                    } catch (jsonError) {
+                        jsonParseSuccess = false;
+                        throw new Error(`Invalid JSON format: ${jsonError.message}`);
+                    }
+                } else {
+                    offset += jsonLength;
+                    jsonParseSuccess = true;
                 }
+
+                if (!jsonParseSuccess && jsonLength > 0) {
+                     lyricsData = [];
+                }
+
                 lyricsData.sort((a, b) => a.start - b.start);
                 lyricsLoaded = lyricsData.length > 0;
                 renderLyrics();
 
                 const audioData = arrayBuffer.slice(offset);
-                if (audioData.byteLength === 0) throw new Error("No audio data found in the file.");
-                if (!audioContext) throw new Error("AudioContext not available for decoding.");
+                if (audioData.byteLength === 0) {
+                    throw new Error("No audio data found after JSON in the file.");
+                }
+
+                if (!audioContext) {
+                    initializeAudioContext();
+                    if (!audioContext) {
+                        throw new Error("AudioContext could not be initialized. Cannot decode audio.");
+                    }
+                }
+
+                loadStatus.textContent = 'Decoding audio...';
 
                 audioContext.decodeAudioData(audioData)
                     .then(buffer => {
-                        if (!(buffer?.duration > 0)) throw new Error("Decoded audio appears to be empty or invalid.");
+                        if (!(buffer?.duration > 0)) {
+                            throw new Error("Decoded audio appears to be empty or invalid (duration 0).");
+                        }
                         audioBuffer = buffer;
                         audioLoaded = true;
+
                         progressBar.max = buffer.duration;
                         updateTotalDurationDisplay();
                         updateCurrentTimeDisplay(0);
-                        if(lyricsLoaded) updateLyricsHighlight(0, true, false);
+                        updateLyricsHighlight(0, true, false);
+
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
 
-                        if (audioLoaded && lyricsLoaded) {
+                        if (audioLoaded) {
                              playAudio();
                         }
-                    }).catch(e => {
-                        throw new Error(`Audio decoding failed: ${e.message}`);
+                    })
+                    .catch(e => {
+                        audioLoaded = false;
+                        audioBuffer = null;
+                        checkEnablePlayer();
+                        loadStatus.textContent = `Error decoding audio: ${e.message}`;
+                        console.error("Audio Decoding Error:", e);
                     });
 
             } catch (error) {
                 alert(`Error processing file: ${error.message}`);
-                console.error("File Parse/Decode Error:", error);
+                console.error("File Parse/Setup Error:", error);
                 resetPlayerAndLyrics(true);
+                loadStatus.textContent = `Error: ${error.message}`;
             }
         }
-
-
 
         function togglePlayback() {
             if (isPlaying) {
@@ -1129,27 +1173,35 @@
 
 
         function checkEnablePlayer() {
-            const enabled = isPlayerReady();
-            playPauseBtn.disabled = !enabled;
-            progressBar.disabled = !enabled;
-            volumeBtn.disabled = !enabled;
-            volumeSlider.disabled = !enabled;
-            speedBtn.disabled = !enabled;
-            speedSlider.disabled = !enabled;
+            const audioReady = audioLoaded && !!audioContext && !!audioBuffer;
+            playPauseBtn.disabled = !audioReady;
+            progressBar.disabled = !audioReady;
+            volumeBtn.disabled = !audioReady;
+            volumeSlider.disabled = !audioReady;
+            speedBtn.disabled = !audioReady;
+            speedSlider.disabled = !audioReady;
 
-            if (!enabled) {
+            if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
             }
 
-            const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
-            updateVolumeIcon(currentVolume);
-            volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
-            speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
-            updateTotalDurationDisplay();
-            updateCurrentTimeDisplay(startOffset);
+            if (audioContext) {
+                const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
+                updateVolumeIcon(currentVolume);
+                if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
+                if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
+            }
+            if (audioReady) {
+                updateTotalDurationDisplay();
+                updateCurrentTimeDisplay(startOffset);
+            } else {
+                 totalDurationDisplay.textContent = '0:00';
+                 currentTimeDisplay.textContent = '0:00';
+                 progressBar.value = 0;
+                 progressBar.max = 1;
+            }
         }
-
 
         function resetPlayerAndLyrics(resetSettings = false) {
             stopAudio();
@@ -1190,17 +1242,19 @@
         }
 
 
-
         function renderLyrics() {
             lyricsOutput.innerHTML = '';
-            lyricsOutput.className = '';
-            lyricsContainer.style.justifyContent = 'flex-start';
-            lyricsContainer.style.alignItems = 'flex-start';
             currentWordSpans = [];
-            currentWordIndex = -1; previousWordIndex = -1;
+            currentWordIndex = -1;
+            previousWordIndex = -1;
             lyricsContainer.scrollTop = 0;
 
-            if (lyricsData.length > 0) {
+            // lyricsLoaded is now accurately set in parseCombinedFile
+            if (lyricsLoaded && lyricsData.length > 0) {
+                lyricsOutput.className = ''; // Reset class if there are lyrics
+                lyricsContainer.style.justifyContent = 'flex-start';
+                lyricsContainer.style.alignItems = 'flex-start';
+
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
                     span.textContent = line.word + ' ';
@@ -1209,16 +1263,14 @@
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
-                updateLyricsHighlight(startOffset, true, false);
+                // Call updateLyricsHighlight from parseCombinedFile after audio is ready instead of here
             } else {
-                lyricsOutput.innerHTML = 'No valid lyrics found in file.';
+                lyricsOutput.innerHTML = '...';
                 lyricsOutput.className = 'placeholder';
                 lyricsContainer.style.justifyContent = 'center';
                 lyricsContainer.style.alignItems = 'center';
-                lyricsLoaded = false;
             }
         }
-
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
              const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
