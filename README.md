@@ -3,7 +3,9 @@
 > Demo:<br>
 > * Player: https://realaurora-stw.github.io/song-player/player
 > * Mixer: https://realaurora-stw.github.io/song-player/mixer
-> * Decode: https://realaurora-stw.github.io/song-player/decode
+> * Decode: https://realaurora-stw.github.io/song-player/decode <br>
+> * ⚠️ Open Source Beta - Report bugs or feedback to [GitHub Issues kindly!](https://github.com/realaurora-stw/song-player/issues)
+
 ## 🧪 How to Use
 
 1. 🎧 Download your song as an MP3
