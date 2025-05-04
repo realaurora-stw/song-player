@@ -1183,19 +1183,13 @@
                         }
                         audioBuffer = buffer;
                         audioLoaded = true;
-
-
                         progressBar.max = buffer.duration;
                         updateTotalDurationDisplay();
                         updateCurrentTimeDisplay(0);
                         updateLyricsHighlight(0, true, false);
-
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
-
-                        // Autoplay the audio
                         playAudio();
-
                     })
                     .catch(e => {
 
