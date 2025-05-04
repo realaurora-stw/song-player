@@ -265,7 +265,7 @@
         }
 
 
-        .control-icon-btn {
+       .control-icon-btn {
             background: none;
             border: none;
             color: #aaa;
@@ -418,7 +418,6 @@
 
         body.light-mode #lyrics-output span.highlighted {
             color: #007bff;
-
         }
 
         body.light-mode #lyrics-output.placeholder {
@@ -467,14 +466,12 @@
               background: #888888;
          }
 
-
         body.light-mode #progressBar::-moz-range-thumb {
           background: #aaaaaa;
         }
          body.light-mode #progressBar:hover::-moz-range-thumb {
               background: #888888;
          }
-
 
         body.light-mode #progressBar:disabled::-webkit-slider-thumb {
             background: #cccccc;
@@ -496,10 +493,10 @@
         }
 
        body.light-mode .control-icon-btn {
-            color: #555;
+            color: #444;
        }
        body.light-mode .control-icon-btn:hover:enabled {
-           color: #222;
+           color: #000;
        }
        body.light-mode .control-icon-btn:disabled {
            color: #bbbbbb;
@@ -558,7 +555,7 @@
                 </button>
                 <div id="volumePopup" class="popup-control">
                     <div class="slider-wrapper-vertical">
-                        <input type="range" id="volumeSlider" class="slider-vertical" min="0" max="1" step="0.01" value="1">
+                        <input type="range" id="volumeSlider" class="slider-vertical" min="0" max="1" step="0.01" value="1" disabled>
                     </div>
                     <span id="volumePercentage" class="popup-text-display">100%</span>
                 </div>
@@ -571,14 +568,14 @@
                 </button>
                 <div id="speedPopup" class="popup-control">
                     <div class="slider-wrapper-vertical">
-                        <input type="range" id="speedSlider" class="slider-vertical" min="0.3" max="2" step="0.01" value="1">
+                        <input type="range" id="speedSlider" class="slider-vertical" min="0.3" max="2" step="0.01" value="1" disabled>
                     </div>
                     <span id="speedRateDisplay" class="popup-text-display">1.00x</span>
                 </div>
             </div>
 
 
-            <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme">
+            <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme" disabled>
                 <i id="themeIcon" class="fas fa-sun"></i>
             </button>
 
@@ -604,7 +601,6 @@
         const speedPopup = document.getElementById('speedPopup');
         const speedSlider = document.getElementById('speedSlider');
         const speedRateDisplay = document.getElementById('speedRateDisplay');
-
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
 
@@ -675,7 +671,6 @@
              try {
                 const savedValue = localStorage.getItem(key);
                 if (savedValue !== null) {
-
                     if (key === THEME_STORAGE_KEY) {
                         if (validator(savedValue)) return savedValue;
                     } else {
@@ -799,6 +794,7 @@
              loadVolumeSetting();
              loadSpeedSetting();
              resetPlayerAndLyrics(false);
+             checkEnablePlayer();
         });
 
 
@@ -806,12 +802,16 @@
             const file = event.target.files[0];
             resetPlayerAndLyrics(false);
             loadStatus.textContent = '';
-            if (!file) return;
+            if (!file) {
+                checkEnablePlayer();
+                return;
+            }
 
             if (!file.name.toLowerCase().endsWith('.songlyrics')) {
                 alert('Invalid file type. Please select a .songlyrics file.');
                 songLyricsFileInput.value = '';
                 resetPlayerAndLyrics(false);
+                checkEnablePlayer();
                 return;
             }
 
@@ -819,6 +819,7 @@
             if (!audioContext) {
                 loadStatus.textContent = 'Error: Audio system not ready.';
                 resetPlayerAndLyrics(true);
+                checkEnablePlayer();
                 return;
             }
 
@@ -829,6 +830,7 @@
                 alert("Error reading the selected file.");
                 loadStatus.textContent = 'Error reading file.';
                 resetPlayerAndLyrics(true);
+                checkEnablePlayer();
             };
             reader.readAsArrayBuffer(file);
         });
@@ -942,7 +944,11 @@
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
 
 
-        themeToggleBtn.addEventListener('click', toggleTheme);
+        themeToggleBtn.addEventListener('click', () => {
+            if (!themeToggleBtn.disabled) {
+                 toggleTheme();
+            }
+        });
 
 
         playPauseBtn.addEventListener('click', () => {
@@ -1187,6 +1193,8 @@
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
 
+                        // Autoplay the audio
+                        playAudio();
 
                     })
                     .catch(e => {
@@ -1205,6 +1213,7 @@
                 alert(`Error processing file: ${error.message}`);
                 console.error("File Parse/Setup Error:", error);
                 resetPlayerAndLyrics(true);
+                checkEnablePlayer();
                 loadStatus.textContent = `Error: ${error.message}`;
             }
         }
@@ -1387,14 +1396,14 @@
 
 
         function checkEnablePlayer() {
-            const audioReady = audioLoaded && !!audioContext && !!audioBuffer;
+            const audioReady = isPlayerReady();
             playPauseBtn.disabled = !audioReady;
             progressBar.disabled = !audioReady;
             volumeBtn.disabled = !audioReady;
             volumeSlider.disabled = !audioReady;
             speedBtn.disabled = !audioReady;
             speedSlider.disabled = !audioReady;
-
+            themeToggleBtn.disabled = !audioReady;
 
 
             if (!audioReady) {
