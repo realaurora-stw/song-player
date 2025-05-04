@@ -19,3 +19,4 @@
 - `player.html` = MP3 Player
 - `mixer.html` = Mix MP3 + JSON for .songlyrics
 - `decode.html` = Decode .songlyrics and get MP3 and JSON downloads
+<img src="https://sdmntprnorthcentralus.oaiusercontent.com/files/00000000-da14-622f-9888-408f6976bb71/raw?se=2025-05-04T05%3A48%3A11Z&amp;sp=r&amp;sv=2024-08-04&amp;sr=b&amp;scid=4de52f3a-31b9-5d19-98b0-2cd1c313b4b0&amp;skoid=de76bc29-7017-43d4-8d90-7a49512bae0f&amp;sktid=a48cca56-e6da-484e-a814-9c849652bcb3&amp;skt=2025-05-03T19%3A35%3A30Z&amp;ske=2025-05-04T19%3A35%3A30Z&amp;sks=b&amp;skv=2024-08-04&amp;sig=y8CTi0AWrIsNC9KT4tkifwqsj4ypo6gY0hbqeaApYpw%3D" alt="Generated image"/>![image](https://github.com/user-attachments/assets/9434a3f3-d07d-4537-b4a0-5cf3fba1e665)
