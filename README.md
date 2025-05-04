@@ -9,3 +9,7 @@
    → You’ll get a `.songfile` download
 5. 🎬 Open `player.html`, load the `.songfile`
    → Done. Word-by-word playback.
+## 📁 Files
+- `player.html` = MP3 Player
+- `mixer.html` = Mix MP3 + JSON for .songlyrics
+- `decode.html` = Decode .songlyric and get MP3 and JSON downloads
