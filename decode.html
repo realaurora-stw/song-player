@@ -330,7 +330,6 @@
                     fileInput.value = '';
                 }
             };
-
             reader.onerror = () => {
                 statusDiv.textContent = 'Error reading the file.';
                 statusDiv.className = 'error';
@@ -338,12 +337,9 @@
                 cleanupUrls();
                 fileInput.value = '';
             };
-
             reader.readAsArrayBuffer(file);
         });
-
         window.addEventListener('unload', cleanupUrls);
-
     </script>
 </body>
 </html>
