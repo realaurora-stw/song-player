@@ -12,4 +12,4 @@
 ## 📁 Files
 - `player.html` = MP3 Player
 - `mixer.html` = Mix MP3 + JSON for .songlyrics
-- `decode.html` = Decode .songlyric and get MP3 and JSON downloads
+- `decode.html` = Decode .songlyrics and get MP3 and JSON downloads
