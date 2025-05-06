@@ -18,3 +18,9 @@
 - `player.html` = MP3 Player
 - `mixer.html` = Mix MP3 + JSON for .songlyrics
 - `decode.html` = Decode .songlyrics and get MP3 and JSON downloads
+
+## 📋 To do
+- Add native support for up/down arrow keys for volume/slider popups
+- Add animation for incoming words
+- Remove file loaded successfully
+- Fix light mode styling
