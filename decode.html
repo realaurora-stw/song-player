@@ -9,34 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="icon" href="https://raw.githubusercontent.com/realaurora-stw/song-player/refs/heads/main/icons/hammer.png" type="image/png">
     <style>
-        :root {
-            --background-color: #000000;
-            --container-bg: #1a1a1a;
-            --text-primary: #e0e0e0;
-            --text-secondary: #aaaaaa;
-            --text-heading: #ffffff;
-            --border-color: #333333;
-            --input-bg: #2c2c2c;
-            --input-border: #555555;
-            --button-bg: #444444;
-            --button-text: #ffffff;
-            --button-hover-bg: #555555;
-            --link-mp3-bg: #1f5c3b;
-            --link-mp3-hover-bg: #28a745;
-            --link-json-bg: #004a99;
-            --link-json-hover-bg: #007bff;
-            --link-text: #ffffff;
-            --error-color: #ff5555;
-            --shadow-color: rgba(0, 0, 0, 0.7);
-        }
-
         body, button, input, label, select, textarea, a {
             font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background-color: var(--background-color);
-            color: var(--text-primary);
+            background-color: #000000;
+            color: #e0e0e0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -47,19 +26,19 @@
         }
 
         .container {
-            background-color: var(--container-bg);
+            background-color: #070707;
             padding: 35px 40px;
-            border-radius: 10px;
-            box-shadow: 0 8px 25px var(--shadow-color);
+            border-radius: 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
             text-align: center;
             max-width: 500px;
             width: 100%;
-            border: 1px solid var(--border-color);
+            border: 1px solid #333333;
         }
 
         h1 {
             margin-bottom: 30px;
-            color: var(--text-heading);
+            color: #ffffff;
             font-weight: 600;
         }
 
@@ -72,7 +51,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #aaaaaa;
             font-size: 0.9em;
         }
 
@@ -80,40 +59,33 @@
             display: block;
             width: 100%;
             padding: 10px;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            background-color: var(--input-bg);
-            color: var(--text-primary);
+            border: 1px solid #171717;
+            border-radius: 12px;
+            background-color: #0f0f0f;
+            color: #e0e0e0;
             box-sizing: border-box;
             margin-bottom: 5px;
             cursor: pointer;
-             transition: border-color 0.2s;
-        }
-        input[type="file"]:hover {
-             border-color: #777;
+            transition: border-color 0.2s;
         }
 
-         input[type="file"]::file-selector-button {
+        input[type="file"]::file-selector-button {
             font-family: 'Poppins', sans-serif;
             padding: 8px 15px;
-            border: 1px solid var(--input-border);
-            border-radius: 4px;
-            background-color: var(--button-bg);
-            color: var(--button-text);
+            border: 1px solid #171717;
+            border-radius: 12px;
+            background-color: #0f0f0f;
+            color: #ffffff;
             cursor: pointer;
             margin-right: 15px;
             transition: background-color 0.2s ease;
             font-weight: 600;
-         }
-
-         input[type="file"]::file-selector-button:hover {
-             background-color: var(--button-hover-bg);
-         }
+        }
 
         #status {
             margin-top: 20px;
             font-size: 0.95em;
-            color: var(--text-secondary);
+            color: #aaaaaa;
             min-height: 1.2em;
             font-weight: 400;
             transition: color 0.3s ease;
@@ -121,59 +93,51 @@
 
         .download-area {
             margin-top: 30px;
-            border-top: 1px solid var(--border-color);
             padding-top: 25px;
             display: none;
         }
-         .download-area p {
-             margin-bottom: 15px;
-             color: var(--text-primary);
-             font-weight: 400;
-         }
+
+        .download-area p {
+            margin-bottom: 15px;
+            color: #e0e0e0;
+            font-weight: 400;
+        }
 
         .download-link {
             font-family: 'Poppins', sans-serif;
             display: inline-block;
             margin: 10px 8px 0 8px;
             padding: 12px 22px;
-            color: var(--link-text);
+            color: #ffffff;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Keep shadow transition */
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
             font-size: 0.9em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
             border: none;
         }
 
-         .download-link:hover {
-             box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Keep shadow change */
-             /* Removed transform: translateY(-2px); */
-         }
+        .download-link:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
 
-         .download-link:active {
-             /* Keep active state simple or adjust shadow */
-             box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-         }
+        .download-link:active {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
 
-         .download-link.json {
-             background-color: var(--link-json-bg);
-         }
-         .download-link.json:hover {
-             background-color: var(--link-json-hover-bg);
-         }
+        .download-link.json {
+            background-color: #004a99;
+        }
 
-         .download-link.mp3 {
-             background-color: var(--link-mp3-bg);
-         }
-         .download-link.mp3:hover {
-             background-color: var(--link-mp3-hover-bg);
-         }
+        .download-link.mp3 {
+            background-color: #1f5c3b;
+        }
 
-         .error {
-             color: var(--error-color) !important;
-             font-weight: 600 !important;
-         }
+        .error {
+            color: #ff5555 !important;
+            font-weight: 600 !important;
+        }
     </style>
 </head>
 <body>
@@ -181,16 +145,14 @@
         <h1>SongLyrics File Decoder</h1>
 
         <div class="input-group">
-            <label for="songlyricsFile">Select .songlyrics File:</label>
             <input type="file" id="songlyricsFile" accept=".songlyrics">
         </div>
 
         <div id="status">Select a .songlyrics file to decode.</div>
 
         <div id="downloadArea" class="download-area">
-            <p>Successfully decoded! Download the separated files:</p>
-            <a href="#" id="downloadJsonLink" class="download-link json" download="lyrics.json">Download JSON Lyrics</a>
-            <a href="#" id="downloadMp3Link" class="download-link mp3" download="audio.mp3">Download MP3 Audio</a>
+            <a href="#" id="downloadJsonLink" class="download-link json" download="lyrics.json">[JSON]</a>
+            <a href="#" id="downloadMp3Link" class="download-link mp3" download="audio.mp3">[MP3]</a>
         </div>
     </div>
 
@@ -237,24 +199,24 @@
             cleanupUrls();
 
             if (!file) {
-                 statusDiv.textContent = 'Select a .songlyrics file to decode.';
+                statusDiv.textContent = 'Select a .songlyrics file to decode.';
                 return;
             }
 
             if (!file.name.toLowerCase().endsWith('.songlyrics')) {
-                 statusDiv.textContent = 'Error: Please select a valid .songlyrics file.';
-                 statusDiv.className = 'error';
-                 fileInput.value = '';
-                 return;
+                statusDiv.textContent = 'Error: Please select a valid .songlyrics file.';
+                statusDiv.className = 'error';
+                fileInput.value = '';
+                return;
             }
 
-            statusDiv.textContent = `Loading ${file.name}...`;
+            statusDiv.textContent = ``;
             statusDiv.className = '';
 
             const reader = new FileReader();
 
             reader.onload = (e) => {
-                statusDiv.textContent = 'Processing file...';
+                statusDiv.textContent = '';
                 try {
                     const buffer = e.target.result;
                     const dataView = new DataView(buffer);
@@ -294,12 +256,12 @@
 
                     const mp3StartOffset = headerLength + jsonLength;
                     if (mp3StartOffset > buffer.byteLength) {
-                         throw new Error('File structure error: JSON length indicates data beyond file size.');
+                        throw new Error('File structure error: JSON length indicates data beyond file size.');
                     }
                     const mp3Bytes = buffer.slice(mp3StartOffset);
 
                     if (mp3Bytes.byteLength === 0) {
-                         console.warn("Warning: MP3 data part is empty.");
+                        console.warn("Warning: MP3 data part is empty.");
                     }
 
                     const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json;charset=utf-8' });
@@ -318,7 +280,7 @@
                     downloadMp3Link.href = currentMp3Url;
                     downloadMp3Link.download = `${baseFileName}.mp3`;
 
-                    statusDiv.textContent = `Successfully decoded ${file.name}.`;
+                    statusDiv.textContent = ``;
                     statusDiv.className = '';
                     downloadArea.style.display = 'block';
 
