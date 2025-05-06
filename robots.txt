@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: http://auroraverse.shop/sitemap.xml
