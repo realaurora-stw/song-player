@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,17 +12,19 @@
         body, button, input, label, select, textarea, a {
             font-family: 'Poppins', sans-serif;
         }
+
         body {
-            background-color: #000;
+            background-color: #000000;
             color: #e0e0e0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            margin: 0;
             box-sizing: border-box;
+            margin: 0;
         }
+
         .container {
             background-color: #070707;
             padding: 35px 40px;
@@ -33,22 +35,25 @@
             width: 100%;
             border: 1px solid #101010;
         }
+
         h1 {
             margin-bottom: 30px;
-            color: #fff;
+            color: #ffffff;
             font-weight: 600;
         }
+
         .input-group {
-            margin-bottom: 15px;
             text-align: left;
         }
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #aaa;
+            color: #aaaaaa;
             font-size: 0.9em;
         }
+
         input[type="file"] {
             display: block;
             width: 100%;
@@ -57,55 +62,74 @@
             border-radius: 12px;
             background-color: #0f0f0f;
             color: #e0e0e0;
+            box-sizing: border-box;
+            margin-bottom: 5px;
             cursor: pointer;
             transition: border-color 0.2s;
         }
+
         input[type="file"]::file-selector-button {
             font-family: 'Poppins', sans-serif;
             padding: 8px 15px;
             border: 1px solid #171717;
             border-radius: 12px;
             background-color: #0f0f0f;
-            color: #fff;
+            color: #ffffff;
             cursor: pointer;
             margin-right: 15px;
             transition: background-color 0.2s ease;
             font-weight: 600;
         }
+
         #status {
-            margin-top: 10px;
             font-size: 0.95em;
-            color: #aaa;
+            color: #aaaaaa;
             min-height: 1.2em;
             font-weight: 400;
             transition: color 0.3s ease;
-            text-align: left;
         }
+
         .download-area {
-            margin-top: 30px;
-            padding-top: 25px;
             display: none;
         }
+
+        .download-area p {
+            margin-bottom: 15px;
+            color: #e0e0e0;
+            font-weight: 400;
+        }
+
         .download-link {
+            font-family: 'Poppins', sans-serif;
             display: inline-block;
-            margin: 10px 8px 0;
+            margin: 10px 8px 0 8px;
             padding: 12px 22px;
-            color: #fff;
+            color: #ffffff;
             text-decoration: none;
             border-radius: 18px;
             font-weight: 600;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
             font-size: 0.9em;
-            background-color: #121212;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-            transition: box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
             border: none;
         }
+
         .download-link:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
+
         .download-link:active {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
         }
+
+        .download-link.json {
+            background-color: #121212;
+        }
+
+        .download-link.mp3 {
+            background-color: #121212;
+        }
+
         .error {
             color: #ff5555 !important;
             font-weight: 600 !important;
@@ -119,11 +143,12 @@
         <div class="input-group">
             <input type="file" id="songlyricsFile" accept=".songlyrics">
         </div>
-        <div id="status">Select a .songlyrics file to decode.</div>
+
+        <div id="status"></div>
 
         <div id="downloadArea" class="download-area">
-            <a href="#" id="downloadJsonLink" class="download-link" download="lyrics.json">Download JSON</a>
-            <a href="#" id="downloadMp3Link" class="download-link" download="audio.mp3">Download MP3</a>
+            <a href="#" id="downloadJsonLink" class="download-link json" download="lyrics.json">JSON</a>
+            <a href="#" id="downloadMp3Link" class="download-link mp3" download="audio.mp3">MP3</a>
         </div>
     </div>
 
@@ -136,12 +161,18 @@
 
         let currentJsonUrl = null;
         let currentMp3Url = null;
+
         const MAGIC_BYTES = new Uint8Array([76, 89, 82, 88]);
 
         function cleanupUrls() {
-            if (currentJsonUrl) URL.revokeObjectURL(currentJsonUrl);
-            if (currentMp3Url) URL.revokeObjectURL(currentMp3Url);
-            currentJsonUrl = currentMp3Url = null;
+            if (currentJsonUrl) {
+                URL.revokeObjectURL(currentJsonUrl);
+                currentJsonUrl = null;
+            }
+            if (currentMp3Url) {
+                URL.revokeObjectURL(currentMp3Url);
+                currentMp3Url = null;
+            }
         }
 
         function resetUI() {
@@ -155,64 +186,107 @@
         }
 
         fileInput.addEventListener('change', (event) => {
-            resetUI();
             const file = event.target.files[0];
-            if (!file) return;
+            statusDiv.textContent = 'Select a .songlyrics file to decode.';
+            statusDiv.className = '';
+            downloadArea.style.display = 'none';
+            downloadJsonLink.removeAttribute('href');
+            downloadMp3Link.removeAttribute('href');
+            cleanupUrls();
+
+            if (!file) {
+                statusDiv.textContent = 'Select a .songlyrics file to decode.';
+                return;
+            }
 
             if (!file.name.toLowerCase().endsWith('.songlyrics')) {
                 statusDiv.textContent = 'Error: Please select a valid .songlyrics file.';
                 statusDiv.className = 'error';
+                fileInput.value = '';
                 return;
             }
 
+            statusDiv.textContent = ``;
+            statusDiv.className = '';
+
             const reader = new FileReader();
+
             reader.onload = (e) => {
+                statusDiv.textContent = '';
                 try {
                     const buffer = e.target.result;
                     const dataView = new DataView(buffer);
                     const uint8Array = new Uint8Array(buffer);
 
-                    if (buffer.byteLength < 8) throw new Error('File too small.');
-
-                    // Check magic bytes "LYRX"
-                    for (let i = 0; i < MAGIC_BYTES.length; i++) {
-                        if (uint8Array[i] !== MAGIC_BYTES[i]) {
-                            throw new Error('Magic bytes "LYRX" not found.');
+                    if (buffer.byteLength < 8) {
+                        throw new Error('File is too small to be a valid .songlyrics file.');
+                    }
+                    const fileMagicBytes = uint8Array.slice(0, MAGIC_BYTES.length);
+                    let magicMatch = true;
+                    for(let i = 0; i < MAGIC_BYTES.length; i++) {
+                        if (fileMagicBytes[i] !== MAGIC_BYTES[i]) {
+                            magicMatch = false;
+                            break;
                         }
+                    }
+                    if (!magicMatch) {
+                        throw new Error('Invalid file format: Magic bytes "LYRX" not found.');
                     }
 
                     const jsonLength = dataView.getUint32(MAGIC_BYTES.length, false);
                     const headerLength = MAGIC_BYTES.length + 4;
-                    if (headerLength + jsonLength > buffer.byteLength) {
-                        throw new Error(`Invalid JSON length: ${jsonLength}.`);
+
+                    if (jsonLength < 0 || headerLength + jsonLength > buffer.byteLength) {
+                        throw new Error(`Invalid JSON length read from file: ${jsonLength}. File might be corrupted.`);
                     }
 
                     const jsonBytes = uint8Array.slice(headerLength, headerLength + jsonLength);
                     const jsonString = new TextDecoder('utf-8').decode(jsonBytes);
-                    const jsonData = JSON.parse(jsonString);
 
-                    const mp3Bytes = buffer.slice(headerLength + jsonLength);
-                    const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                    let jsonData;
+                    try {
+                        jsonData = JSON.parse(jsonString);
+                    } catch (jsonError) {
+                        throw new Error(`Failed to parse JSON data: ${jsonError.message}`);
+                    }
+
+                    const mp3StartOffset = headerLength + jsonLength;
+                    if (mp3StartOffset > buffer.byteLength) {
+                        throw new Error('File structure error: JSON length indicates data beyond file size.');
+                    }
+                    const mp3Bytes = buffer.slice(mp3StartOffset);
+
+                    if (mp3Bytes.byteLength === 0) {
+                        console.warn("Warning: MP3 data part is empty.");
+                    }
+
+                    const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json;charset=utf-8' });
                     const mp3Blob = new Blob([mp3Bytes], { type: 'audio/mpeg' });
 
                     cleanupUrls();
+
                     currentJsonUrl = URL.createObjectURL(jsonBlob);
                     currentMp3Url = URL.createObjectURL(mp3Blob);
 
-                    const baseName = file.name.replace(/\.songlyrics$/i, '');
-                    downloadJsonLink.href = currentJsonUrl;
-                    downloadJsonLink.download = `${baseName}.json`;
-                    downloadMp3Link.href = currentMp3Url;
-                    downloadMp3Link.download = `${baseName}.mp3`;
+                    const baseFileName = file.name.replace(/\.songlyrics$/i, '');
 
+                    downloadJsonLink.href = currentJsonUrl;
+                    downloadJsonLink.download = `${baseFileName}.json`;
+
+                    downloadMp3Link.href = currentMp3Url;
+                    downloadMp3Link.download = `${baseFileName}.mp3`;
+
+                    statusDiv.textContent = ``;
+                    statusDiv.className = '';
                     downloadArea.style.display = 'block';
-                    statusDiv.textContent = '';
-                } catch (err) {
-                    console.error('Decoding Error:', err);
-                    statusDiv.textContent = `Error: ${err.message}`;
+
+                } catch (error) {
+                    console.error("Decoding Error:", error);
+                    statusDiv.textContent = `Error: ${error.message}`;
                     statusDiv.className = 'error';
                     downloadArea.style.display = 'none';
                     cleanupUrls();
+                    fileInput.value = '';
                 }
             };
             reader.onerror = () => {
@@ -220,10 +294,10 @@
                 statusDiv.className = 'error';
                 downloadArea.style.display = 'none';
                 cleanupUrls();
+                fileInput.value = '';
             };
             reader.readAsArrayBuffer(file);
         });
-
         window.addEventListener('unload', cleanupUrls);
     </script>
 </body>
