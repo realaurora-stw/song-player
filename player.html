@@ -1353,7 +1353,7 @@
 
 
                 lyricsData.sort((a, b) => a.start - b.start); // Sort by original start time
-                lyricsLoaded = lyricsData.length > 0 || jsonLength === 0; // Loaded if parsed or intentionally empty
+                                lyricsLoaded = jsonParseSuccess; // Lyrics processing is complete if JSON parsing succeeded or if there was no JSON
                 renderLyrics();
 
 
@@ -1697,8 +1697,16 @@
                 });
 
 
-            } else { // If no lyrics or not loaded
-                lyricsOutput.innerHTML = lyricsLoaded ? '...' : 'No lyrics data found.'; // Informative placeholder
+            } else { // This block is reached if !(lyricsLoaded && lyricsData.length > 0)
+                     // which means: !lyricsLoaded (error in lyrics) OR lyricsData.length === 0 (no words)
+
+                if (!lyricsLoaded && jsonLength > 0) { // jsonLength > 0 implies lyrics were expected but failed to parse/validate
+                    lyricsOutput.innerHTML = 'Error parsing lyrics data.';
+                } else { // This covers:
+                         // 1. lyricsLoaded is true AND lyricsData.length === 0 (valid empty lyrics or jsonLength was 0)
+                         // 2. jsonLength was 0 (implicitly lyricsLoaded is true)
+                    lyricsOutput.innerHTML = 'No lyrics content in file.';
+                }
                 lyricsOutput.className = 'placeholder';
                 lyricsContainer.style.justifyContent = 'center'; // Center placeholder
                 lyricsContainer.style.alignItems = 'center';
