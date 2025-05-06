@@ -20,3 +20,11 @@
 - `player.html` = MP3 Player
 - `mixer.html` = Mix MP3 + JSON for .songlyrics
 - `decode.html` = Decode .songlyrics and get MP3 and JSON downloads
+## ⚡ Features
+- Word-by-word live lyrics
+- Speed up or slow down songs
+- Persistent Volume Slider
+- Play/Pause button
+- Infinite loops of songs
+- Download finished "Remixes" of songs (e.g. nightcore or slowed down songs)
+- Light/Dark mode (Dark mode by default)
