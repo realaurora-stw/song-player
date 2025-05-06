@@ -257,19 +257,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Lyrics Mixer</h1>
-        <p class="description">Combine an MP3 audio file and its corresponding timestamped lyrics JSON file.<br> JSON format: <code>{"segments": [{"words": [{"text": "...", "start": ...}]}]}</code></p>
+        <h1>Create .songlyrics file</h1>
 
         <div class="input-group">
-            <label for="mp3File">1. Select MP3 Audio</label>
+            <label for="mp3File">1. Audio file</label>
             <input type="file" id="mp3File" accept="audio/*">
-            <div class="file-status" id="mp3Status">No file selected.</div>
         </div>
 
         <div class="input-group">
-            <label for="jsonFile" id="jsonFileLabel">2. Select JSON Lyrics</label>
+            <label for="jsonFile" id="jsonFileLabel">2. Lyrics JSON</label>
             <input type="file" id="jsonFile" accept=".json,application/json">
-             <div class="file-status" id="jsonStatus">No file selected.</div>
         </div>
 
         <div class="checkbox-group">
@@ -278,8 +275,6 @@
         </div>
 
         <button id="combineBtn" disabled>Combine Files</button>
-        <div id="status">Select required file(s) to combine.</div>
-
         <a href="#" id="downloadLink" download="combined.songlyrics"></a>
     </div>
     <script>
