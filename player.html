@@ -80,10 +80,13 @@
             pointer-events: auto;
         }
 
-        #lyrics-output span.highlighted {
+ #lyrics-output span.highlighted {
             color: #50d060;
             font-weight: 600;
             transform: translateY(-1px) scale(1.05);
+            transition-property: color, font-weight, transform;
+            transition-duration: 0.25s, 0.25s, 0.15s;
+            transition-timing-function: ease-in-out, ease-in-out, ease-out;
         }
 
 
@@ -420,7 +423,7 @@
         }
 
         body.light-mode #lyrics-output span.highlighted {
-            color: #007bff;
+            color: #50d060;
         }
 
         body.light-mode #lyrics-output.placeholder {
