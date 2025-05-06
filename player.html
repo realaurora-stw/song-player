@@ -635,7 +635,7 @@
         let currentPlaybackRate = 1.0;
         let animationFrameId = null;
 
-        let lyricsData = []; // Stores { word: string, start: original_timestamp }
+        let lyricsData = []; 
         let currentWordSpans = [];
         let currentWordIndex = -1;
         let previousWordIndex = -1;
@@ -643,7 +643,7 @@
         let audioLoaded = false;
         let lyricsLoaded = false;
         let isSeeking = false;
-        let currentSongFilename = null; // To store the original filename for download
+        let currentSongFilename = null; 
 
 
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
@@ -664,7 +664,7 @@
              if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
                  const elapsedRealTime = audioContext.currentTime - startTime;
                  time = startOffset + (elapsedRealTime * currentPlaybackRate);
-                 time = time % audioBuffer.duration; // Ensure time wraps around for looped audio
+                 time = time % audioBuffer.duration; 
              }
              return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
         }
@@ -698,7 +698,7 @@
                         const parsedValue = parseFloat(savedValue);
                         if (validator(parsedValue)) return parsedValue;
                     }
-                    localStorage.removeItem(key); // Remove invalid setting
+                    localStorage.removeItem(key); 
                 }
             } catch (e) { console.error("Error loading setting:", key, e); }
             return defaultValue;
@@ -714,7 +714,7 @@
 
         function loadVolumeSetting() {
             const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
-            if(gainNode && audioContext) { // Ensure gainNode exists
+            if(gainNode && audioContext) { 
                 gainNode.gain.value = vol;
             }
             if(volumeSlider) {
@@ -726,7 +726,7 @@
 
         function loadSpeedSetting() {
             const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
-             setPlaybackSpeed(speed, false); // Don't adjust playback yet, just set value
+             setPlaybackSpeed(speed, false); 
              updateTotalDurationDisplay();
         }
 
@@ -738,7 +738,7 @@
                 themeIcon.classList.add('fa-moon');
                 themeToggleBtn.title = 'Dark Mode';
                 saveSetting(THEME_STORAGE_KEY, 'light');
-            } else { // Default to dark
+            } else { 
                 document.body.classList.remove(LIGHT_MODE_CLASS);
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
@@ -761,7 +761,7 @@
 
         function setVolume(newVolume) {
              const clampedVolume = Math.max(0, Math.min(1, newVolume));
-             if (gainNode && audioContext) { // Check gainNode existence
+             if (gainNode && audioContext) { 
                 gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
              }
              if (volumeSlider) {
@@ -787,28 +787,28 @@
             if(speedSlider) speedSlider.value = newRate;
             if(speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
             saveSetting(SPEED_STORAGE_KEY, newRate);
-            updateTotalDurationDisplay(); // Update duration display based on new rate
+            updateTotalDurationDisplay(); 
 
             if (adjustPlayback && audioContext && audioBuffer) {
                 if (isPlaying && sourceNode?.playbackRate) {
-                    // Calculate how much buffer time has passed at the old rate
+                    
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
 
-                    // Update startOffset to the current position in the buffer
+                    
                     startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
-                    startOffset = Math.max(0, startOffset); // Ensure non-negative
+                    startOffset = Math.max(0, startOffset); 
 
-                    // Apply new rate to the source node
+                    
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
 
-                    // Reset startTime for future calculations at the new rate
+                    
                     startTime = audioContext.currentTime;
 
-                } else if (sourceNode?.playbackRate) { // If paused but sourceNode exists
+                } else if (sourceNode?.playbackRate) { 
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
                 }
-                // Update current time display immediately if not playing, or it will be handled by updateLoop
+                
                 updateCurrentTimeDisplay(getCurrentBufferTime());
             }
         }
@@ -844,23 +844,23 @@
                 return;
             }
 
-            // Initialize audio context if not already done (should be by now, but good check)
+            
             initializeAudioContext();
             if (!audioContext) {
                 loadStatus.textContent = 'Error: Audio system not ready.';
-                resetPlayerAndLyrics(true); // Full reset if audio system critical error.
+                resetPlayerAndLyrics(true); 
                 checkEnablePlayer();
                 return;
             }
 
-            // Proceed to read and parse the file.
+            
             loadStatus.textContent = `Loading ${file.name}...`;
             const reader = new FileReader();
             reader.onload = (e) => parseCombinedFile(e.target.result);
             reader.onerror = () => {
                 alert("Error reading the selected file.");
                 loadStatus.textContent = 'Error reading file.';
-                resetPlayerAndLyrics(true); // Full reset on file read error.
+                resetPlayerAndLyrics(true); 
                 checkEnablePlayer();
             };
             reader.readAsArrayBuffer(file);
@@ -871,7 +871,7 @@
             if (!volumeBtn.disabled) {
                 const wasVisible = volumePopup.classList.contains('show');
                 togglePopup(volumePopup);
-                hidePopup(speedPopup); // Hide other popup
+                hidePopup(speedPopup); 
                 if (!wasVisible && volumePopup.classList.contains('show')) {
                     resetPopupTimer(volumePopup);
                 } else if (wasVisible && !volumePopup.classList.contains('show')) {
@@ -884,7 +884,7 @@
             if (!volumeSlider.disabled) {
                 const volume = parseFloat(volumeSlider.value);
                 setVolume(volume);
-                resetPopupTimer(volumePopup); // Keep popup open while interacting
+                resetPopupTimer(volumePopup); 
             }
         });
 
@@ -898,13 +898,13 @@
             const currentValue = parseFloat(volumeSlider.value);
             let step = 0.01;
 
-            if (Math.abs(delta) > 50) step = 0.03; // Larger scroll, larger step
+            if (Math.abs(delta) > 50) step = 0.03; 
             if (Math.abs(delta) > 100) step = 0.05;
 
-            let newValue = delta < 0 ? currentValue + step : currentValue - step; // delta < 0 is scroll up
-            newValue = Math.max(0, Math.min(1, newValue)); // Clamp
+            let newValue = delta < 0 ? currentValue + step : currentValue - step; 
+            newValue = Math.max(0, Math.min(1, newValue)); 
             setVolume(newValue);
-            resetPopupTimer(volumePopup); // Keep popup open
+            resetPopupTimer(volumePopup); 
         });
 
         speedBtn.addEventListener('click', (event) => {
@@ -912,7 +912,7 @@
             if (!speedBtn.disabled) {
                 const wasVisible = speedPopup.classList.contains('show');
                 togglePopup(speedPopup);
-                hidePopup(volumePopup); // Hide other popup
+                hidePopup(volumePopup); 
                  if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
@@ -924,8 +924,8 @@
         speedSlider.addEventListener('input', () => {
             if (!speedSlider.disabled) {
                 const rate = parseFloat(speedSlider.value);
-                setPlaybackSpeed(rate); // Will adjust playback if playing
-                resetPopupTimer(speedPopup); // Keep popup open
+                setPlaybackSpeed(rate); 
+                resetPopupTimer(speedPopup); 
             }
         });
 
@@ -940,22 +940,22 @@
             const minSpeed = parseFloat(speedSlider.min);
             const maxSpeed = parseFloat(speedSlider.max);
             let step = 0.01;
-            let newValue = delta < 0 ? currentValue + step : currentValue - step; // delta < 0 is scroll up
-            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue)); // Clamp
+            let newValue = delta < 0 ? currentValue + step : currentValue - step; 
+            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue)); 
             setPlaybackSpeed(newValue);
             resetPopupTimer(speedPopup);
         });
 
 
-        volumePopup.addEventListener('mousemove', () => { // Keep popup open if mouse is over it
+        volumePopup.addEventListener('mousemove', () => { 
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
         });
-        speedPopup.addEventListener('mousemove', () => { // Keep popup open if mouse is over it
+        speedPopup.addEventListener('mousemove', () => { 
              if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
         });
 
 
-        document.addEventListener('click', (event) => { // Close popups if clicking outside
+        document.addEventListener('click', (event) => { 
             if (volumePopup.classList.contains('show') && !volumeBtn.contains(event.target) && !volumePopup.contains(event.target)) {
                 hidePopup(volumePopup);
             }
@@ -965,8 +965,8 @@
         });
 
 
-        volumePopup.addEventListener('click', (event) => event.stopPropagation()); // Prevent closing if clicking inside popup
-        speedPopup.addEventListener('click', (event) => event.stopPropagation()); // Prevent closing if clicking inside popup
+        volumePopup.addEventListener('click', (event) => event.stopPropagation()); 
+        speedPopup.addEventListener('click', (event) => event.stopPropagation()); 
 
 
         themeToggleBtn.addEventListener('click', () => {
@@ -979,7 +979,7 @@
         playPauseBtn.addEventListener('click', () => {
             if (!isPlayerReady()) return;
 
-            if (audioContext.state === 'suspended') { // Handle autoplay policy
+            if (audioContext.state === 'suspended') { 
                 audioContext.resume().then(togglePlayback).catch(e => console.error("AudioContext resume failed:", e));
             } else {
                 togglePlayback();
@@ -987,26 +987,26 @@
         });
 
 
-        progressBar.addEventListener('input', () => { // While dragging
+        progressBar.addEventListener('input', () => { 
             if (!isPlayerReady()) return;
             isSeeking = true;
-            stopUpdatingTime(); // Stop time/lyric updates while dragging
+            stopUpdatingTime(); 
             const seekBufferTime = parseFloat(progressBar.value);
-            updateCurrentTimeDisplay(seekBufferTime); // Show dragged time
-            updateLyricsHighlight(seekBufferTime, true, false); // Show lyrics for dragged time, no scroll
+            updateCurrentTimeDisplay(seekBufferTime); 
+            updateLyricsHighlight(seekBufferTime, true, false); 
         });
 
 
-        progressBar.addEventListener('change', () => { // After releasing drag
+        progressBar.addEventListener('change', () => { 
             if (!isPlayerReady()) return;
             const seekBufferTime = parseFloat(progressBar.value);
-            seekAudio(seekBufferTime); // Actually seek audio
+            seekAudio(seekBufferTime); 
             isSeeking = false;
             if (isPlaying) {
-                // Playback will have been resumed by seekAudio if it was playing.
-                // startUpdatingTime() will be called by playAudioInternal via seekAudio.
+                
+                
             } else {
-                // If paused, ensure UI is correct for the new seek position.
+                
                 updateCurrentTimeDisplay(startOffset);
                 updateLyricsHighlight(startOffset, true, false);
             }
@@ -1014,7 +1014,7 @@
 
 
 
-        volumeBtn.addEventListener('wheel', (event) => { // Scroll wheel on volume icon itself
+        volumeBtn.addEventListener('wheel', (event) => { 
             if (!isPlayerReady() || volumeBtn.disabled) return;
             event.preventDefault();
             event.stopPropagation();
@@ -1027,7 +1027,7 @@
         });
 
 
-        speedBtn.addEventListener('wheel', (event) => { // Scroll wheel on speed icon itself
+        speedBtn.addEventListener('wheel', (event) => { 
             if (!isPlayerReady() || speedBtn.disabled) return;
             event.preventDefault();
             event.stopPropagation();
@@ -1036,9 +1036,9 @@
             const currentValue = parseFloat(speedSlider.value);
             const minSpeed = parseFloat(speedSlider.min);
             const maxSpeed = parseFloat(speedSlider.max);
-            let step = 0.01; // Small step for icon scroll
+            let step = 0.01; 
 
-            // if (Math.abs(delta) > 50) step = 0.01;
+            
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
@@ -1046,22 +1046,22 @@
         });
 
 
-        progressBar.addEventListener('wheel', (event) => { // Scroll wheel on progress bar
+        progressBar.addEventListener('wheel', (event) => { 
             if (!isPlayerReady() || progressBar.disabled) return;
             event.preventDefault();
             event.stopPropagation();
 
             const delta = event.deltaY;
             const currentBufferTime = getCurrentBufferTime();
-            let seekAmount = 1; // seconds
+            let seekAmount = 1; 
 
             if (Math.abs(delta) > 50) seekAmount = 3;
             if (Math.abs(delta) > 100) seekAmount = 5;
 
             let newTime;
-            if (delta < 0) { // Scroll up/forward on most systems means decrease Y -> seek forward
+            if (delta < 0) { 
                 newTime = currentBufferTime + seekAmount;
-            } else { // Scroll down/backward
+            } else { 
                 newTime = currentBufferTime - seekAmount;
             }
 
@@ -1085,10 +1085,10 @@
             loadStatus.textContent = 'Processing download...';
 
             try {
-                // 1. Prepare Lyrics JSON with adjusted timings
+                
                 const adjustedLyricsForFile = lyricsData.map(w => ({
                     text: w.word,
-                    start: w.start / currentPlaybackRate // Apply speed adjustment to lyric timestamps
+                    start: w.start / currentPlaybackRate 
                 }));
                 const lyricsJson = {
                     segments: [{
@@ -1098,15 +1098,15 @@
                 const jsonString = JSON.stringify(lyricsJson);
                 const jsonBytes = new TextEncoder().encode(jsonString);
 
-                // 2. Process Audio with OfflineAudioContext
+                
                 if (!audioBuffer) throw new Error("Audio buffer is not available.");
 
                 const targetDuration = audioBuffer.duration / currentPlaybackRate;
                 if (targetDuration <= 0 || !isFinite(targetDuration)) {
                     throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`)
                 }
-                 // Check for excessively long audio which might crash browser
-                if (targetDuration > 60 * 45) { // 45 minutes limit, arbitrary
+                 
+                if (targetDuration > 60 * 45) { 
                      throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
                 }
 
@@ -1122,7 +1122,7 @@
                 offlineSource.playbackRate.value = currentPlaybackRate;
 
                 const offlineGain = offlineCtx.createGain();
-                offlineGain.gain.value = 1.0; // 100% volume as requested
+                offlineGain.gain.value = 1.0; 
 
                 offlineSource.connect(offlineGain);
                 offlineGain.connect(offlineCtx.destination);
@@ -1130,14 +1130,14 @@
 
                 const renderedBuffer = await offlineCtx.startRendering();
 
-                // 3. Encode renderedBuffer to WAV
+                
                 const audioWavArrayBuffer = audioBufferToWav(renderedBuffer);
                 const audioWavBytes = new Uint8Array(audioWavArrayBuffer);
 
-                // 4. Combine for .songlyrics file
+                
                 const magic = new TextEncoder().encode("LYRX");
                 const jsonLengthBytes = new ArrayBuffer(4);
-                new DataView(jsonLengthBytes).setUint32(0, jsonBytes.length, false); // Big-endian for length
+                new DataView(jsonLengthBytes).setUint32(0, jsonBytes.length, false); 
 
                 const combinedData = new Uint8Array(magic.length + 4 + jsonBytes.length + audioWavBytes.length);
                 combinedData.set(magic, 0);
@@ -1145,14 +1145,14 @@
                 combinedData.set(jsonBytes, magic.length + 4);
                 combinedData.set(audioWavBytes, magic.length + 4 + jsonBytes.length);
 
-                // 5. Filename
+                
                 let baseFilename = "remix";
                 if (currentSongFilename) {
-                    baseFilename = currentSongFilename.replace(/\.[^/.]+$/, ""); // Remove original extension
+                    baseFilename = currentSongFilename.replace(/\.[^/.]+$/, ""); 
                 }
                 const downloadFilename = `${baseFilename} [auroraverse.shop].songlyrics`;
 
-                // 6. Trigger Download
+                
                 const blob = new Blob([combinedData], { type: 'application/octet-stream' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1172,7 +1172,7 @@
             } finally {
                 downloadIcon.style.display = 'inline-block';
                 downloadSpinnerIcon.style.display = 'none';
-                downloadBtn.disabled = !(isPlayerReady() && lyricsLoaded); // Re-set based on player and lyrics readiness
+                downloadBtn.disabled = !(isPlayerReady() && lyricsLoaded); 
             }
         }
 
@@ -1186,49 +1186,49 @@
             const numChannels = buffer.numberOfChannels;
             const sampleRate = buffer.sampleRate;
             const numFrames = buffer.length;
-            const bitsPerSample = 16; // Standard for WAV
+            const bitsPerSample = 16; 
 
             const blockAlign = numChannels * (bitsPerSample / 8);
             const byteRate = sampleRate * blockAlign;
             const dataSize = numFrames * blockAlign;
 
-            const bufferLength = 44 + dataSize; // WAV header is 44 bytes
+            const bufferLength = 44 + dataSize; 
             const wavBuffer = new ArrayBuffer(bufferLength);
             const view = new DataView(wavBuffer);
-            const bytes = new Uint8Array(wavBuffer); // For string writing convenience
+            const bytes = new Uint8Array(wavBuffer); 
 
             let offset = 0;
 
-            // RIFF chunk descriptor
+            
             writeStringToArray(bytes, offset, 'RIFF'); offset += 4;
-            view.setUint32(offset, 36 + dataSize, true); offset += 4; // fileSize - 8 (ChunkSize)
+            view.setUint32(offset, 36 + dataSize, true); offset += 4; 
             writeStringToArray(bytes, offset, 'WAVE'); offset += 4;
 
-            // FMT sub-chunk
+            
             writeStringToArray(bytes, offset, 'fmt '); offset += 4;
-            view.setUint32(offset, 16, true); offset += 4; // Subchunk1Size (16 for PCM)
-            view.setUint16(offset, 1, true); offset += 2;  // AudioFormat (1 for PCM)
+            view.setUint32(offset, 16, true); offset += 4; 
+            view.setUint16(offset, 1, true); offset += 2;  
             view.setUint16(offset, numChannels, true); offset += 2;
             view.setUint32(offset, sampleRate, true); offset += 4;
             view.setUint32(offset, byteRate, true); offset += 4;
             view.setUint16(offset, blockAlign, true); offset += 2;
             view.setUint16(offset, bitsPerSample, true); offset += 2;
 
-            // DATA sub-chunk
+            
             writeStringToArray(bytes, offset, 'data'); offset += 4;
-            view.setUint32(offset, dataSize, true); offset += 4; // Subchunk2Size
+            view.setUint32(offset, dataSize, true); offset += 4; 
 
-            // Write PCM data
-            // Using Int16Array for direct 16-bit sample writing
-            const pcm = new Int16Array(wavBuffer, offset); // Point to the data portion
+            
+            
+            const pcm = new Int16Array(wavBuffer, offset); 
             let pcmOffset = 0;
 
-            // Interleave channels and convert float to 16-bit PCM
+            
             for (let i = 0; i < numFrames; i++) {
                 for (let ch = 0; ch < numChannels; ch++) {
                     let sample = buffer.getChannelData(ch)[i];
-                    sample = Math.max(-1, Math.min(1, sample)); // Clamp to [-1, 1]
-                    // Convert to 16-bit signed integer
+                    sample = Math.max(-1, Math.min(1, sample)); 
+                    
                     pcm[pcmOffset++] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
                 }
             }
@@ -1240,10 +1240,10 @@
              if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const adjustedDuration = audioBuffer.duration / currentPlaybackRate;
                 totalDurationDisplay.textContent = formatTime(adjustedDuration);
-                progressBar.max = audioBuffer.duration; // Progress bar always relates to original buffer duration
+                progressBar.max = audioBuffer.duration; 
             } else {
                 totalDurationDisplay.textContent = '0:00';
-                progressBar.max = 1; // Default for disabled state
+                progressBar.max = 1; 
             }
         }
 
@@ -1251,18 +1251,18 @@
              const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
              const duration = audioBuffer?.duration ?? 0;
 
-             // Clamp bufferTime to the actual buffer's duration range [0, duration]
-             // The modulo operation for looping is handled by getCurrentBufferTime and playAudioInternal startOffset
+             
+             
              let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
 
 
              if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
-                // Display time is the effective time considering playback rate
+                
                 const displayTime = clampedBufferTime / currentPlaybackRate;
                 currentTimeDisplay.textContent = formatTime(displayTime);
 
-                if (!isSeeking) { // Only update progress bar value if not actively seeking
-                     progressBar.value = clampedBufferTime; // progressBar value is always within original buffer time
+                if (!isSeeking) { 
+                     progressBar.value = clampedBufferTime; 
                 }
              } else {
                  currentTimeDisplay.textContent = '0:00';
@@ -1274,7 +1274,7 @@
 
 
         function parseCombinedFile(arrayBuffer) {
-            resetPlayerAndLyrics(false); // Keep currentSongFilename, reset other state
+            resetPlayerAndLyrics(false); 
             loadStatus.textContent = 'Processing file...';
 
             try {
@@ -1290,20 +1290,20 @@
                 }
 
 
-                if (offset + 4 > arrayBuffer.byteLength) { // Check if enough bytes for length
+                if (offset + 4 > arrayBuffer.byteLength) { 
                     throw new Error("File incomplete: Cannot read JSON length.");
                 }
-                const jsonLength = dataView.getUint32(offset, false); // Big-endian for length
+                const jsonLength = dataView.getUint32(offset, false); 
                 offset += 4;
 
 
-                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) { // Validate length
+                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) { 
                     throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
                 }
 
                 let jsonData = null;
                 let jsonParseSuccess = false;
-                lyricsData = []; // Reset lyrics data for new file
+                lyricsData = []; 
 
 
                 if (jsonLength > 0) {
@@ -1327,25 +1327,25 @@
                                 })
                             });
                         } else {
-                             jsonParseSuccess = false; // Invalid structure
+                             jsonParseSuccess = false; 
                         }
                     } catch (jsonError) {
                         jsonParseSuccess = false;
                         throw new Error(`Invalid JSON format: ${jsonError.message}`);
                     }
-                } else { // jsonLength is 0, no JSON data
-                    offset += jsonLength; // Effectively offset += 0
-                    jsonParseSuccess = true; // Considered success (empty lyrics is valid)
+                } else { 
+                    offset += jsonLength; 
+                    jsonParseSuccess = true; 
                 }
 
 
-                if (!jsonParseSuccess && jsonLength > 0) { // If parsing failed but data was expected
-                     lyricsData = []; // Ensure lyrics are empty
+                if (!jsonParseSuccess && jsonLength > 0) { 
+                     lyricsData = []; 
                 }
 
 
-                lyricsData.sort((a, b) => a.start - b.start); // Sort by original start time
-                                lyricsLoaded = jsonParseSuccess; // Lyrics processing is complete if JSON parsing succeeded or if there was no JSON
+                lyricsData.sort((a, b) => a.start - b.start); 
+                                lyricsLoaded = jsonParseSuccess; 
                 renderLyrics();
 
 
@@ -1355,9 +1355,9 @@
                 }
 
 
-                if (!audioContext) { // Should have been initialized by file input change
+                if (!audioContext) { 
                     initializeAudioContext();
-                    if (!audioContext) { // Still no context
+                    if (!audioContext) { 
                         throw new Error("AudioContext could not be initialized. Cannot decode audio.");
                     }
                 }
@@ -1374,25 +1374,25 @@
                         audioLoaded = true;
                         progressBar.max = buffer.duration;
                         updateTotalDurationDisplay();
-                        updateCurrentTimeDisplay(0); // Set to start
-                        updateLyricsHighlight(0, true, false); // Show first lyric
+                        updateCurrentTimeDisplay(0); 
+                        updateLyricsHighlight(0, true, false); 
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
-                        playAudio(); // Autoplay after successful load
+                        playAudio(); 
                     })
                     .catch(e => {
                         audioLoaded = false;
                         audioBuffer = null;
-                        checkEnablePlayer(); // Disable player controls
+                        checkEnablePlayer(); 
                         loadStatus.textContent = `Error decoding audio: ${e.message}`;
                         console.error("Audio Decoding Error:", e);
-                        // Don't reset currentSongFilename here, user might want to try download if lyrics were OK (though unlikely if audio fails)
+                        
                     });
 
             } catch (error) {
                 alert(`Error processing file: ${error.message}`);
                 console.error("File Parse/Setup Error:", error);
-                resetPlayerAndLyrics(true); // Full reset on parse error
+                resetPlayerAndLyrics(true); 
                 checkEnablePlayer();
                 loadStatus.textContent = `Error: ${error.message}`;
             }
@@ -1410,7 +1410,7 @@
             if (!audioContext || !audioBuffer || isPlaying) return;
 
 
-            if (audioContext.state === 'suspended') { // Handle browser autoplay policies
+            if (audioContext.state === 'suspended') { 
                 audioContext.resume().then(() => {
                     playAudioInternal();
                 }).catch(e => {
@@ -1427,11 +1427,11 @@
             if (isPlaying || !audioContext || !audioBuffer) return;
 
 
-            // Ensure startOffset is valid and within buffer duration
+            
             startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
 
 
-            if (startOffset >= audioBuffer.duration) { // If at or past end, restart from beginning
+            if (startOffset >= audioBuffer.duration) { 
                 startOffset = 0;
             }
 
@@ -1439,13 +1439,13 @@
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
-            sourceNode.loop = true; // Loop the source node; time management handles effective "song end"
+            sourceNode.loop = true; 
             sourceNode.connect(gainNode);
-            sourceNode.onended = handleAudioEnd; // For unexpected stops
+            sourceNode.onended = handleAudioEnd; 
 
 
-            startTime = audioContext.currentTime; // Record the context's time when playback starts
-            // Start playback from the current startOffset within the buffer
+            startTime = audioContext.currentTime; 
+            
             sourceNode.start(0, startOffset);
 
             isPlaying = true;
@@ -1458,115 +1458,114 @@
             if (!isPlaying || !sourceNode || !audioContext) return;
 
 
-            // Calculate how much buffer time has passed since playback started or resumed
+            
             const elapsedRealTime = audioContext.currentTime - startTime;
             const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
 
 
-            // Update startOffset to the current position in the buffer, modulo duration for looping
+            
             startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
-            startOffset = Math.max(0, startOffset); // Ensure non-negative
+            startOffset = Math.max(0, startOffset); 
 
-            stopAudioInternals(); // Stop the source node and time updates
+            stopAudioInternals(); 
 
             isPlaying = false;
             isPaused = true;
             playPauseBtn.textContent = '▶ Play';
 
 
-            updateCurrentTimeDisplay(startOffset); // Ensure UI reflects paused time correctly
+            updateCurrentTimeDisplay(startOffset); 
         }
 
 
         function stopAudioInternals() {
              if (sourceNode) {
-                sourceNode.onended = null; // Avoid re-triggering handleAudioEnd if stop is manual
-                sourceNode.loop = false; // Turn off loop before stopping
+                sourceNode.onended = null; 
+                sourceNode.loop = false; 
                 try {
-                    sourceNode.stop(0); // Stop playback immediately
+                    sourceNode.stop(0); 
                 } catch (e) {
-                    // Can throw if already stopped or not started. Safe to ignore.
+                    
                 }
-                sourceNode.disconnect(); // Disconnect from gain node
+                sourceNode.disconnect(); 
                 sourceNode = null;
             }
-            stopUpdatingTime(); // Stop the requestAnimationFrame loop
+            stopUpdatingTime(); 
         }
 
 
-        function stopAudio() { // Used for full stop/reset scenarios
+        function stopAudio() { 
             stopAudioInternals();
             isPlaying = false;
-            // startOffset might be preserved or reset depending on the calling context
+            
         }
 
         function seekAudio(bufferTime) {
             if (!audioBuffer || !audioContext) return;
 
-            const wasPlaying = isPlaying; // Store current playing state
-            stopAudio(); // Stop current playback, preserving `wasPlaying` status
+            const wasPlaying = isPlaying; 
+            stopAudio(); 
 
 
-            // Set new startOffset, clamped to buffer duration
+            
             startOffset = Math.max(0, bufferTime);
             startOffset = Math.min(startOffset, audioBuffer.duration);
 
 
-            progressBar.value = startOffset; // Update UI progress bar immediately
-            updateCurrentTimeDisplay(startOffset); // Update time display
-            updateLyricsHighlight(startOffset, true, false); // Force lyrics update to new position, no scroll animation
+            progressBar.value = startOffset; 
+            updateCurrentTimeDisplay(startOffset); 
+            updateLyricsHighlight(startOffset, true, false); 
 
 
             if (wasPlaying) {
-                 playAudio(); // If it was playing before seek, resume playback from new position
+                 playAudio(); 
             } else {
-                // If it was paused, it should remain paused at the new position
-                isPaused = true; // Ensure it's marked as paused
-                playPauseBtn.textContent = '▶ Play'; // Keep play button text
+                
+                isPaused = true; 
+                playPauseBtn.textContent = '▶ Play'; 
             }
         }
 
 
         function handleAudioEnd() {
-            // This callback is mainly for unexpected stops of the sourceNode.
-            // Since we use sourceNode.loop = true, it shouldn't end "naturally" unless
-            // the buffer itself is problematic or the node is explicitly stopped.
-            // If it does stop, ensure we clean up.
-             sourceNode = null; // Clear the reference
-             // Consider if player state needs to be reset, e.g., if it wasn't a manual stop.
-             // For now, just clearing the node is a minimal safe step.
+            
+            
+            
+             sourceNode = null; 
+             
+             
         }
 
 
 
         function startUpdatingTime() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId); // Clear any existing loop
+            if (animationFrameId) cancelAnimationFrame(animationFrameId); 
 
-            // If not playing or startTime is uninitialized/invalid, reset startTime.
-            // This is crucial when resuming from pause or after a seek.
+            
+            
             if (!isPlaying || startTime <= 0 || !audioContext) {
                 startTime = audioContext.currentTime;
             }
 
             function updateLoop() {
-                // Ensure loop stops if critical components are missing or playback stops
+                
                 if (!isPlaying || !audioBuffer || !sourceNode || !audioContext) {
                     animationFrameId = null; return;
                 }
 
 
-                // Calculate current time in the buffer
+                
                 const elapsedRealTime = audioContext.currentTime - startTime;
                 let currentBufferTime = startOffset + (elapsedRealTime * currentPlaybackRate);
 
 
-                // Lyrics update should use the time within the current loop of the audio buffer
-                // The getCurrentBufferTime() function will handle the modulo for the actual playhead position
+                
+                
                 updateLyricsHighlight(getCurrentBufferTime(), false, true);
 
 
-                if (!isSeeking) { // Don't update from loop if user is dragging progress bar
-                    updateCurrentTimeDisplay(getCurrentBufferTime()); // Display time, also handles modulo via getCurrentBufferTime
+                if (!isSeeking) { 
+                    updateCurrentTimeDisplay(getCurrentBufferTime()); 
                 }
 
 
@@ -1593,17 +1592,17 @@
             volumeSlider.disabled = !audioReady;
             speedBtn.disabled = !audioReady;
             speedSlider.disabled = !audioReady;
-            themeToggleBtn.disabled = !audioReady; // Theme can be toggled even if no audio, but often linked
-            downloadBtn.disabled = !(audioReady && lyricsLoaded); // Enable download if audio AND lyrics are ready
+            themeToggleBtn.disabled = !audioReady; 
+            downloadBtn.disabled = !(audioReady && lyricsLoaded); 
 
 
-            if (!audioReady) { // If no audio, hide popups
+            if (!audioReady) { 
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
             }
 
 
-            if (audioContext) { // Update UI elements based on current state if context exists
+            if (audioContext) { 
                 const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
                 updateVolumeIcon(currentVolume);
                 if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
@@ -1611,8 +1610,8 @@
             }
             if (audioReady) {
                 updateTotalDurationDisplay();
-                updateCurrentTimeDisplay(startOffset); // Reflect current startOffset
-            } else { // Reset displays if not ready
+                updateCurrentTimeDisplay(startOffset); 
+            } else { 
                  totalDurationDisplay.textContent = '0:00';
                  currentTimeDisplay.textContent = '0:00';
                  progressBar.value = 0;
@@ -1621,16 +1620,16 @@
         }
 
         function resetPlayerAndLyrics(resetSettings = false) {
-            stopAudio(); // Stop any current playback
+            stopAudio(); 
 
 
             audioLoaded = false; lyricsLoaded = false; audioBuffer = null;
             lyricsData = []; currentWordSpans = [];
             currentWordIndex = -1; previousWordIndex = -1;
             startOffset = 0; startTime = 0; isPaused = false; isPlaying = false;
-            if (resetSettings) { // If full reset, also clear filename and potentially input
+            if (resetSettings) { 
                 currentSongFilename = null;
-                // songLyricsFileInput.value = ''; // Optionally clear file input
+                
             }
 
 
@@ -1644,75 +1643,75 @@
             progressBar.value = 0; progressBar.max = 1;
             currentTimeDisplay.textContent = '0:00';
             totalDurationDisplay.textContent = '0:00';
-            // loadStatus.textContent = ''; // Clear load status, or selectively
+            
 
-            if (resetSettings) { // If full reset, revert to default settings
+            if (resetSettings) { 
                 const defaultVolume = 1;
                 const defaultSpeed = 1.0;
                  setVolume(defaultVolume);
-                 setPlaybackSpeed(defaultSpeed, false); // Set speed, don't adjust playback
-                 updateTotalDurationDisplay(); // Reflects changes
-            } else { // Otherwise, restore persistent settings
+                 setPlaybackSpeed(defaultSpeed, false); 
+                 updateTotalDurationDisplay(); 
+            } else { 
                  loadVolumeSetting();
                  loadSpeedSetting();
-                 updateTotalDurationDisplay(); // Reflects changes
+                 updateTotalDurationDisplay(); 
             }
 
 
-            hidePopup(volumePopup); // Close popups
+            hidePopup(volumePopup); 
             hidePopup(speedPopup);
-            checkEnablePlayer(); // Update enabled state of controls
+            checkEnablePlayer(); 
         }
 
 
         function renderLyrics() {
-            lyricsOutput.innerHTML = ''; // Clear existing lyrics
+            lyricsOutput.innerHTML = ''; 
             currentWordSpans = [];
             currentWordIndex = -1;
             previousWordIndex = -1;
-            lyricsContainer.scrollTop = 0; // Scroll to top
+            lyricsContainer.scrollTop = 0; 
 
 
             if (lyricsLoaded && lyricsData.length > 0) {
-                lyricsOutput.className = ''; // Remove placeholder class
-                lyricsContainer.style.justifyContent = 'flex-start'; // Align text to start
+                lyricsOutput.className = ''; 
+                lyricsContainer.style.justifyContent = 'flex-start'; 
                 lyricsContainer.style.alignItems = 'flex-start';
 
 
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
-                    span.textContent = line.word + ' '; // Add space after each word
+                    span.textContent = line.word + ' '; 
                     span.id = `word-${index}`;
-                    span.dataset.startTime = line.start; // Store original start time
+                    span.dataset.startTime = line.start; 
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
 
 
-            } else { // This block is reached if !(lyricsLoaded && lyricsData.length > 0)
-                     // which means: !lyricsLoaded (error in lyrics) OR lyricsData.length === 0 (no words)
+            } else { 
+                     
 
-                if (!lyricsLoaded && jsonLength > 0) { // jsonLength > 0 implies lyrics were expected but failed to parse/validate
+                if (!lyricsLoaded && jsonLength > 0) { 
                     lyricsOutput.innerHTML = 'Error parsing lyrics data.';
-                } else { // This covers:
-                         // 1. lyricsLoaded is true AND lyricsData.length === 0 (valid empty lyrics or jsonLength was 0)
-                         // 2. jsonLength was 0 (implicitly lyricsLoaded is true)
+                } else { 
+                         
+                         
                     lyricsOutput.innerHTML = 'No lyrics content in file.';
                 }
                 lyricsOutput.className = 'placeholder';
-                lyricsContainer.style.justifyContent = 'center'; // Center placeholder
+                lyricsContainer.style.justifyContent = 'center'; 
                 lyricsContainer.style.alignItems = 'center';
             }
         }
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
-             // Effective time within a single playthrough of the buffer, considering looping
+             
              const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
 
 
             if (!lyricsLoaded || currentWordSpans.length === 0) {
-                 if (currentWordIndex !== -1) { // If a word was highlighted, clear it
-                     highlightWord(-1, false); // Deselect all
+                 if (currentWordIndex !== -1) { 
+                     highlightWord(-1, false); 
                      currentWordIndex = -1;
                      previousWordIndex = -1;
                  }
@@ -1721,21 +1720,21 @@
 
 
             let newWordIndex = -1;
-            // Find the latest word whose start time is before or at the current effective time
-            // A small lookahead can make highlighting feel more responsive to the audio.
-            const lookaheadTime = effectiveTime + 0.05; // 50ms lookahead, adjust as needed
+            
+            
+            const lookaheadTime = effectiveTime + 0.05; 
             for (let i = 0; i < lyricsData.length; i++) {
-                // Compare with original start times stored in lyricsData
+                
                 if (lyricsData[i].start <= lookaheadTime) {
                     newWordIndex = i;
                 } else {
-                    break; // Lyrics are sorted by start time, no need to check further
+                    break; 
                 }
             }
 
 
              if (newWordIndex !== currentWordIndex || forceUpdate) {
-                // Highlight the new word and decide if scrolling is needed
+                
                 const shouldScroll = allowScroll && !isSeeking && isPlaying;
                 highlightWord(newWordIndex, shouldScroll);
                 previousWordIndex = currentWordIndex;
@@ -1749,22 +1748,22 @@
 
 
             currentWordSpans.forEach((span, index) => {
-                // Make words up to and including the highlighted one visible (karaoke style appearance)
+                
                 const isVisible = index <= indexToHighlight;
                 span.classList.toggle('visible', isVisible);
 
 
-                // Highlight only the current exact word
+                
                 const isHighlighted = index === indexToHighlight;
                 span.classList.toggle('highlighted', isHighlighted);
 
 
-                if(isHighlighted) wordToScroll = span; // Mark this word for potential scrolling
+                if(isHighlighted) wordToScroll = span; 
             });
 
 
-             if (indexToHighlight < 0) { // No word to highlight (e.g., before first word or if lyrics are empty)
-                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible')); // Clear all states
+             if (indexToHighlight < 0) { 
+                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible')); 
              }
 
 
@@ -1772,9 +1771,10 @@
             if (shouldAutoScroll && wordToScroll) {
                 const containerRect = lyricsContainer.getBoundingClientRect();
                 const wordRect = wordToScroll.getBoundingClientRect();
-                // const containerH = lyricsContainer.clientHeight; // Not directly used here but available
+                
 
-                // Define a "focus zone" in the lyrics container (e.g., middle 50%)
+
+                
                 const zoneTop = containerRect.top + containerRect.height * 0.25;
                 const zoneBottom = containerRect.bottom - containerRect.height * 0.25;
 
@@ -1783,21 +1783,21 @@
                 const isLastWord = indexToHighlight === lyricsData.length - 1;
 
 
-                 if (isLastWord && wordRect.bottom > containerRect.bottom - 20) { // If last word is near bottom edge
+                 if (isLastWord && wordRect.bottom > containerRect.bottom - 20) { 
                      wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
                  }
-                 // If word is outside the focus zone, scroll it to center smoothly
+                 
                  else if (isAboveZone || isBelowZone) {
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
              }
-             // If seeking (not auto-scrolling smoothly), and word is off-screen, jump to it
-             else if (isSeeking && wordToScroll) { // isSeeking implies !shouldAutoScroll
+             
+             else if (isSeeking && wordToScroll) { 
                   const cRect = lyricsContainer.getBoundingClientRect();
                   const wRect = wordToScroll.getBoundingClientRect();
 
-                  if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) { // If word is fully out of view
-                      wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' }); // Instant scroll
+                  if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) { 
+                      wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' }); 
                   }
              }
         }
@@ -1806,7 +1806,7 @@
 
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
-            volumeIcon.className = 'fas '; // Reset classes first
+            volumeIcon.className = 'fas '; 
             if (volume <= 0) {
                 volumeIcon.classList.add('fa-volume-mute');
             } else if (volume < 0.5) {
@@ -1818,7 +1818,7 @@
 
 
         function resetPopupTimer(popupElement) {
-            clearPopupTimer(popupElement); // Clear existing timer for this popup
+            clearPopupTimer(popupElement); 
 
 
             const timerCallback = () => {
@@ -1826,7 +1826,7 @@
             };
 
 
-            // Assign new timer to the correct global variable
+            
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === speedPopup) {
@@ -1836,7 +1836,7 @@
 
 
         function clearPopupTimer(popupElement) {
-            // Clear the specific timer based on the popup element
+            
              if (popupElement === volumePopup && volumePopupTimeout) {
                 clearTimeout(volumePopupTimeout);
                 volumePopupTimeout = null;
@@ -1854,7 +1854,7 @@
 
         function hidePopup(el) {
             el.classList.remove('show');
-            clearPopupTimer(el); // Also clear its timer when explicitly hidden
+            clearPopupTimer(el); 
         }
 
 
@@ -1873,7 +1873,7 @@
         function handleKeyboardShortcuts(event) {
             const activeElement = document.activeElement;
 
-            // Ignore shortcuts if a text input, textarea, or contentEditable element is focused
+            
             const isTextInputFocused = (activeElement.tagName === 'INPUT' && /text|search|password|email|number|tel|url/.test(activeElement.type)) ||
                                       activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
 
@@ -1882,7 +1882,7 @@
             const playerReady = isPlayerReady();
             const isRangeInputFocused = activeElement.tagName === 'INPUT' && activeElement.type === 'range';
 
-            // Handle Up/Down arrow keys for visible popups
+            
             if (playerReady) {
                 if (volumePopup.classList.contains('show')) {
                     if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
@@ -1895,19 +1895,19 @@
 
                         if (event.code === 'ArrowUp') {
                             newValue = currentValue + step;
-                        } else { // ArrowDown
+                        } else { 
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-                        // Round to avoid floating point precision issues, matching step's precision
+                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
                         
                         setVolume(newValue);
-                        // setVolume should update volumeSlider.value, but explicitly set here for safety
+                        
                         volumeSlider.value = newValue; 
                         resetPopupTimer(volumePopup);
-                        return; // Key handled by volume popup
+                        return; 
                     }
                 }
 
@@ -1922,24 +1922,24 @@
 
                         if (event.code === 'ArrowUp') {
                             newValue = currentValue + step;
-                        } else { // ArrowDown
+                        } else { 
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-                        // Round to avoid floating point precision issues
+                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
 
                         setPlaybackSpeed(newValue);
-                        // setPlaybackSpeed should update speedSlider.value, but explicitly set here for safety
+                        
                         speedSlider.value = newValue;
                         resetPopupTimer(speedPopup);
-                        return; // Key handled by speed popup
+                        return; 
                     }
                 }
             }
 
-            // Global keyboard shortcuts (if not handled by popups)
+            
             let currentBufferTime = getCurrentBufferTime(); 
 
             switch (event.code) {
@@ -1987,7 +1987,7 @@
                     break;
 
                 case 'ArrowUp':
-                    // Global volume increase (0.05 step), only if not focusing a slider AND popups didn't handle it
+                    
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
@@ -1997,7 +1997,7 @@
                     break;
 
                 case 'ArrowDown':
-                    // Global volume decrease (0.05 step), only if not focusing a slider AND popups didn't handle it
+                    
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
