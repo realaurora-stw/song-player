@@ -636,7 +636,7 @@
         let currentPlaybackRate = 1.0;
         let animationFrameId = null;
 
-        let lyricsData = []; 
+        let lyricsData = [];
         let currentWordSpans = [];
         let currentWordIndex = -1;
         let previousWordIndex = -1;
@@ -644,7 +644,9 @@
         let audioLoaded = false;
         let lyricsLoaded = false;
         let isSeeking = false;
-        let currentSongFilename = null; 
+        let currentSongFilename = null;
+        let isMuted = false;
+        let previousVolumeBeforeMute = 1.0;
 
 
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
@@ -665,7 +667,7 @@
              if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
                  const elapsedRealTime = audioContext.currentTime - startTime;
                  time = startOffset + (elapsedRealTime * currentPlaybackRate);
-                 time = time % audioBuffer.duration; 
+                 time = time % audioBuffer.duration;
              }
              return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
         }
@@ -699,7 +701,7 @@
                         const parsedValue = parseFloat(savedValue);
                         if (validator(parsedValue)) return parsedValue;
                     }
-                    localStorage.removeItem(key); 
+                    localStorage.removeItem(key);
                 }
             } catch (e) { console.error("Error loading setting:", key, e); }
             return defaultValue;
@@ -715,7 +717,7 @@
 
         function loadVolumeSetting() {
             const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
-            if(gainNode && audioContext) { 
+            if(gainNode && audioContext) {
                 gainNode.gain.value = vol;
             }
             if(volumeSlider) {
@@ -723,11 +725,13 @@
                  if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
                  updateVolumeIcon(vol);
             }
+            isMuted = false;
+            previousVolumeBeforeMute = vol;
         }
 
         function loadSpeedSetting() {
             const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
-             setPlaybackSpeed(speed, false); 
+             setPlaybackSpeed(speed, false);
              updateTotalDurationDisplay();
         }
 
@@ -739,7 +743,7 @@
                 themeIcon.classList.add('fa-moon');
                 themeToggleBtn.title = 'Dark Mode';
                 saveSetting(THEME_STORAGE_KEY, 'light');
-            } else { 
+            } else {
                 document.body.classList.remove(LIGHT_MODE_CLASS);
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
@@ -762,14 +766,17 @@
 
         function setVolume(newVolume) {
              const clampedVolume = Math.max(0, Math.min(1, newVolume));
-             if (gainNode && audioContext) { 
+             if (gainNode && audioContext) {
                 gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
              }
              if (volumeSlider) {
                  volumeSlider.value = clampedVolume;
                  updateVolumeIcon(clampedVolume);
                  volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
-                 saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
+
+                 if (!isMuted) {
+                    saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
+                 }
             }
         }
 
@@ -788,32 +795,39 @@
             if(speedSlider) speedSlider.value = newRate;
             if(speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
             saveSetting(SPEED_STORAGE_KEY, newRate);
-            updateTotalDurationDisplay(); 
+            updateTotalDurationDisplay();
 
             if (adjustPlayback && audioContext && audioBuffer) {
                 if (isPlaying && sourceNode?.playbackRate) {
-                    
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
 
-                    
                     startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
-                    startOffset = Math.max(0, startOffset); 
+                    startOffset = Math.max(0, startOffset);
 
-                    
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
 
-                    
                     startTime = audioContext.currentTime;
 
-                } else if (sourceNode?.playbackRate) { 
+                } else if (sourceNode?.playbackRate) {
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
                 }
-                
                 updateCurrentTimeDisplay(getCurrentBufferTime());
             }
         }
 
+        function toggleMute() {
+            if (!audioContext || !gainNode) return;
+
+            if (isMuted) {
+                isMuted = false;
+                setVolume(previousVolumeBeforeMute);
+            } else {
+                isMuted = true;
+                previousVolumeBeforeMute = gainNode.gain.value;
+                setVolume(0);
+            }
+        }
 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -845,23 +859,21 @@
                 return;
             }
 
-            
             initializeAudioContext();
             if (!audioContext) {
                 loadStatus.textContent = 'Error: Audio system not ready.';
-                resetPlayerAndLyrics(true); 
+                resetPlayerAndLyrics(true);
                 checkEnablePlayer();
                 return;
             }
 
-            
             loadStatus.textContent = `Loading ${file.name}...`;
             const reader = new FileReader();
             reader.onload = (e) => parseCombinedFile(e.target.result);
             reader.onerror = () => {
                 alert("Error reading the selected file.");
                 loadStatus.textContent = 'Error reading file.';
-                resetPlayerAndLyrics(true); 
+                resetPlayerAndLyrics(true);
                 checkEnablePlayer();
             };
             reader.readAsArrayBuffer(file);
@@ -872,7 +884,7 @@
             if (!volumeBtn.disabled) {
                 const wasVisible = volumePopup.classList.contains('show');
                 togglePopup(volumePopup);
-                hidePopup(speedPopup); 
+                hidePopup(speedPopup);
                 if (!wasVisible && volumePopup.classList.contains('show')) {
                     resetPopupTimer(volumePopup);
                 } else if (wasVisible && !volumePopup.classList.contains('show')) {
@@ -883,9 +895,15 @@
 
         volumeSlider.addEventListener('input', () => {
             if (!volumeSlider.disabled) {
-                const volume = parseFloat(volumeSlider.value);
-                setVolume(volume);
-                resetPopupTimer(volumePopup); 
+                const newVolume = parseFloat(volumeSlider.value);
+                
+                if (isMuted && newVolume > 0) {
+                    isMuted = false;
+                } else if (isMuted && newVolume === 0) {
+                }
+                
+                setVolume(newVolume);
+                resetPopupTimer(volumePopup);
             }
         });
 
@@ -899,13 +917,13 @@
             const currentValue = parseFloat(volumeSlider.value);
             let step = 0.01;
 
-            if (Math.abs(delta) > 50) step = 0.03; 
+            if (Math.abs(delta) > 50) step = 0.03;
             if (Math.abs(delta) > 100) step = 0.05;
 
-            let newValue = delta < 0 ? currentValue + step : currentValue - step; 
-            newValue = Math.max(0, Math.min(1, newValue)); 
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(0, Math.min(1, newValue));
             setVolume(newValue);
-            resetPopupTimer(volumePopup); 
+            resetPopupTimer(volumePopup);
         });
 
         speedBtn.addEventListener('click', (event) => {
@@ -913,7 +931,7 @@
             if (!speedBtn.disabled) {
                 const wasVisible = speedPopup.classList.contains('show');
                 togglePopup(speedPopup);
-                hidePopup(volumePopup); 
+                hidePopup(volumePopup);
                  if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
@@ -925,8 +943,8 @@
         speedSlider.addEventListener('input', () => {
             if (!speedSlider.disabled) {
                 const rate = parseFloat(speedSlider.value);
-                setPlaybackSpeed(rate); 
-                resetPopupTimer(speedPopup); 
+                setPlaybackSpeed(rate);
+                resetPopupTimer(speedPopup);
             }
         });
 
@@ -941,22 +959,22 @@
             const minSpeed = parseFloat(speedSlider.min);
             const maxSpeed = parseFloat(speedSlider.max);
             let step = 0.01;
-            let newValue = delta < 0 ? currentValue + step : currentValue - step; 
-            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue)); 
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
             setPlaybackSpeed(newValue);
             resetPopupTimer(speedPopup);
         });
 
 
-        volumePopup.addEventListener('mousemove', () => { 
+        volumePopup.addEventListener('mousemove', () => {
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
         });
-        speedPopup.addEventListener('mousemove', () => { 
+        speedPopup.addEventListener('mousemove', () => {
              if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
         });
 
 
-        document.addEventListener('click', (event) => { 
+        document.addEventListener('click', (event) => {
             if (volumePopup.classList.contains('show') && !volumeBtn.contains(event.target) && !volumePopup.contains(event.target)) {
                 hidePopup(volumePopup);
             }
@@ -966,8 +984,8 @@
         });
 
 
-        volumePopup.addEventListener('click', (event) => event.stopPropagation()); 
-        speedPopup.addEventListener('click', (event) => event.stopPropagation()); 
+        volumePopup.addEventListener('click', (event) => event.stopPropagation());
+        speedPopup.addEventListener('click', (event) => event.stopPropagation());
 
 
         themeToggleBtn.addEventListener('click', () => {
@@ -980,7 +998,7 @@
         playPauseBtn.addEventListener('click', () => {
             if (!isPlayerReady()) return;
 
-            if (audioContext.state === 'suspended') { 
+            if (audioContext.state === 'suspended') {
                 audioContext.resume().then(togglePlayback).catch(e => console.error("AudioContext resume failed:", e));
             } else {
                 togglePlayback();
@@ -988,26 +1006,23 @@
         });
 
 
-        progressBar.addEventListener('input', () => { 
+        progressBar.addEventListener('input', () => {
             if (!isPlayerReady()) return;
             isSeeking = true;
-            stopUpdatingTime(); 
+            stopUpdatingTime();
             const seekBufferTime = parseFloat(progressBar.value);
-            updateCurrentTimeDisplay(seekBufferTime); 
-            updateLyricsHighlight(seekBufferTime, true, false); 
+            updateCurrentTimeDisplay(seekBufferTime);
+            updateLyricsHighlight(seekBufferTime, true, false);
         });
 
 
-        progressBar.addEventListener('change', () => { 
+        progressBar.addEventListener('change', () => {
             if (!isPlayerReady()) return;
             const seekBufferTime = parseFloat(progressBar.value);
-            seekAudio(seekBufferTime); 
+            seekAudio(seekBufferTime);
             isSeeking = false;
             if (isPlaying) {
-                
-                
             } else {
-                
                 updateCurrentTimeDisplay(startOffset);
                 updateLyricsHighlight(startOffset, true, false);
             }
@@ -1015,7 +1030,7 @@
 
 
 
-        volumeBtn.addEventListener('wheel', (event) => { 
+        volumeBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || volumeBtn.disabled) return;
             event.preventDefault();
             event.stopPropagation();
@@ -1028,7 +1043,7 @@
         });
 
 
-        speedBtn.addEventListener('wheel', (event) => { 
+        speedBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || speedBtn.disabled) return;
             event.preventDefault();
             event.stopPropagation();
@@ -1037,9 +1052,7 @@
             const currentValue = parseFloat(speedSlider.value);
             const minSpeed = parseFloat(speedSlider.min);
             const maxSpeed = parseFloat(speedSlider.max);
-            let step = 0.01; 
-
-            
+            let step = 0.01;
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
@@ -1047,22 +1060,22 @@
         });
 
 
-        progressBar.addEventListener('wheel', (event) => { 
+        progressBar.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || progressBar.disabled) return;
             event.preventDefault();
             event.stopPropagation();
 
             const delta = event.deltaY;
             const currentBufferTime = getCurrentBufferTime();
-            let seekAmount = 1; 
+            let seekAmount = 1;
 
             if (Math.abs(delta) > 50) seekAmount = 3;
             if (Math.abs(delta) > 100) seekAmount = 5;
 
             let newTime;
-            if (delta < 0) { 
+            if (delta < 0) {
                 newTime = currentBufferTime + seekAmount;
-            } else { 
+            } else {
                 newTime = currentBufferTime - seekAmount;
             }
 
@@ -1086,10 +1099,9 @@
             loadStatus.textContent = 'Processing download...';
 
             try {
-                
                 const adjustedLyricsForFile = lyricsData.map(w => ({
                     text: w.word,
-                    start: w.start / currentPlaybackRate 
+                    start: w.start / currentPlaybackRate
                 }));
                 const lyricsJson = {
                     segments: [{
@@ -1099,15 +1111,13 @@
                 const jsonString = JSON.stringify(lyricsJson);
                 const jsonBytes = new TextEncoder().encode(jsonString);
 
-                
                 if (!audioBuffer) throw new Error("Audio buffer is not available.");
 
                 const targetDuration = audioBuffer.duration / currentPlaybackRate;
                 if (targetDuration <= 0 || !isFinite(targetDuration)) {
                     throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`)
                 }
-                 
-                if (targetDuration > 60 * 45) { 
+                 if (targetDuration > 60 * 45) {
                      throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
                 }
 
@@ -1117,13 +1127,12 @@
                     Math.ceil(targetDuration * audioBuffer.sampleRate),
                     audioBuffer.sampleRate
                 );
-                
                 const offlineSource = offlineCtx.createBufferSource();
                 offlineSource.buffer = audioBuffer;
                 offlineSource.playbackRate.value = currentPlaybackRate;
 
                 const offlineGain = offlineCtx.createGain();
-                offlineGain.gain.value = 1.0; 
+                offlineGain.gain.value = 1.0;
 
                 offlineSource.connect(offlineGain);
                 offlineGain.connect(offlineCtx.destination);
@@ -1131,14 +1140,12 @@
 
                 const renderedBuffer = await offlineCtx.startRendering();
 
-                
                 const audioWavArrayBuffer = audioBufferToWav(renderedBuffer);
                 const audioWavBytes = new Uint8Array(audioWavArrayBuffer);
 
-                
                 const magic = new TextEncoder().encode("LYRX");
                 const jsonLengthBytes = new ArrayBuffer(4);
-                new DataView(jsonLengthBytes).setUint32(0, jsonBytes.length, false); 
+                new DataView(jsonLengthBytes).setUint32(0, jsonBytes.length, false);
 
                 const combinedData = new Uint8Array(magic.length + 4 + jsonBytes.length + audioWavBytes.length);
                 combinedData.set(magic, 0);
@@ -1146,14 +1153,12 @@
                 combinedData.set(jsonBytes, magic.length + 4);
                 combinedData.set(audioWavBytes, magic.length + 4 + jsonBytes.length);
 
-                
                 let baseFilename = "remix";
                 if (currentSongFilename) {
-                    baseFilename = currentSongFilename.replace(/\.[^/.]+$/, ""); 
+                    baseFilename = currentSongFilename.replace(/\.[^/.]+$/, "");
                 }
                 const downloadFilename = `${baseFilename} [auroraverse.shop].songlyrics`;
 
-                
                 const blob = new Blob([combinedData], { type: 'application/octet-stream' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1173,7 +1178,7 @@
             } finally {
                 downloadIcon.style.display = 'inline-block';
                 downloadSpinnerIcon.style.display = 'none';
-                downloadBtn.disabled = !(isPlayerReady() && lyricsLoaded); 
+                downloadBtn.disabled = !(isPlayerReady() && lyricsLoaded);
             }
         }
 
@@ -1187,49 +1192,42 @@
             const numChannels = buffer.numberOfChannels;
             const sampleRate = buffer.sampleRate;
             const numFrames = buffer.length;
-            const bitsPerSample = 16; 
+            const bitsPerSample = 16;
 
             const blockAlign = numChannels * (bitsPerSample / 8);
             const byteRate = sampleRate * blockAlign;
             const dataSize = numFrames * blockAlign;
 
-            const bufferLength = 44 + dataSize; 
+            const bufferLength = 44 + dataSize;
             const wavBuffer = new ArrayBuffer(bufferLength);
             const view = new DataView(wavBuffer);
-            const bytes = new Uint8Array(wavBuffer); 
+            const bytes = new Uint8Array(wavBuffer);
 
             let offset = 0;
 
-            
             writeStringToArray(bytes, offset, 'RIFF'); offset += 4;
-            view.setUint32(offset, 36 + dataSize, true); offset += 4; 
+            view.setUint32(offset, 36 + dataSize, true); offset += 4;
             writeStringToArray(bytes, offset, 'WAVE'); offset += 4;
 
-            
             writeStringToArray(bytes, offset, 'fmt '); offset += 4;
-            view.setUint32(offset, 16, true); offset += 4; 
-            view.setUint16(offset, 1, true); offset += 2;  
+            view.setUint32(offset, 16, true); offset += 4;
+            view.setUint16(offset, 1, true); offset += 2;
             view.setUint16(offset, numChannels, true); offset += 2;
             view.setUint32(offset, sampleRate, true); offset += 4;
             view.setUint32(offset, byteRate, true); offset += 4;
             view.setUint16(offset, blockAlign, true); offset += 2;
             view.setUint16(offset, bitsPerSample, true); offset += 2;
 
-            
             writeStringToArray(bytes, offset, 'data'); offset += 4;
-            view.setUint32(offset, dataSize, true); offset += 4; 
+            view.setUint32(offset, dataSize, true); offset += 4;
 
-            
-            
-            const pcm = new Int16Array(wavBuffer, offset); 
+            const pcm = new Int16Array(wavBuffer, offset);
             let pcmOffset = 0;
 
-            
             for (let i = 0; i < numFrames; i++) {
                 for (let ch = 0; ch < numChannels; ch++) {
                     let sample = buffer.getChannelData(ch)[i];
-                    sample = Math.max(-1, Math.min(1, sample)); 
-                    
+                    sample = Math.max(-1, Math.min(1, sample));
                     pcm[pcmOffset++] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
                 }
             }
@@ -1241,10 +1239,10 @@
              if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const adjustedDuration = audioBuffer.duration / currentPlaybackRate;
                 totalDurationDisplay.textContent = formatTime(adjustedDuration);
-                progressBar.max = audioBuffer.duration; 
+                progressBar.max = audioBuffer.duration;
             } else {
                 totalDurationDisplay.textContent = '0:00';
-                progressBar.max = 1; 
+                progressBar.max = 1;
             }
         }
 
@@ -1252,18 +1250,15 @@
              const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
              const duration = audioBuffer?.duration ?? 0;
 
-             
-             
              let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
 
 
              if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
-                
                 const displayTime = clampedBufferTime / currentPlaybackRate;
                 currentTimeDisplay.textContent = formatTime(displayTime);
 
-                if (!isSeeking) { 
-                     progressBar.value = clampedBufferTime; 
+                if (!isSeeking) {
+                     progressBar.value = clampedBufferTime;
                 }
              } else {
                  currentTimeDisplay.textContent = '0:00';
@@ -1275,7 +1270,7 @@
 
 
         function parseCombinedFile(arrayBuffer) {
-            resetPlayerAndLyrics(false); 
+            resetPlayerAndLyrics(false);
             loadStatus.textContent = 'Processing file...';
 
             try {
@@ -1291,20 +1286,20 @@
                 }
 
 
-                if (offset + 4 > arrayBuffer.byteLength) { 
+                if (offset + 4 > arrayBuffer.byteLength) {
                     throw new Error("File incomplete: Cannot read JSON length.");
                 }
-                const jsonLength = dataView.getUint32(offset, false); 
+                const jsonLength = dataView.getUint32(offset, false);
                 offset += 4;
 
 
-                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) { 
+                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
                     throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
                 }
 
                 let jsonData = null;
                 let jsonParseSuccess = false;
-                lyricsData = []; 
+                lyricsData = [];
 
 
                 if (jsonLength > 0) {
@@ -1328,25 +1323,25 @@
                                 })
                             });
                         } else {
-                             jsonParseSuccess = false; 
+                             jsonParseSuccess = false;
                         }
                     } catch (jsonError) {
                         jsonParseSuccess = false;
                         throw new Error(`Invalid JSON format: ${jsonError.message}`);
                     }
-                } else { 
-                    offset += jsonLength; 
-                    jsonParseSuccess = true; 
+                } else {
+                    offset += jsonLength;
+                    jsonParseSuccess = true;
                 }
 
 
-                if (!jsonParseSuccess && jsonLength > 0) { 
-                     lyricsData = []; 
+                if (!jsonParseSuccess && jsonLength > 0) {
+                     lyricsData = [];
                 }
 
 
-                lyricsData.sort((a, b) => a.start - b.start); 
-                                lyricsLoaded = jsonParseSuccess; 
+                lyricsData.sort((a, b) => a.start - b.start);
+                                lyricsLoaded = jsonParseSuccess;
                 renderLyrics();
 
 
@@ -1356,9 +1351,9 @@
                 }
 
 
-                if (!audioContext) { 
+                if (!audioContext) {
                     initializeAudioContext();
-                    if (!audioContext) { 
+                    if (!audioContext) {
                         throw new Error("AudioContext could not be initialized. Cannot decode audio.");
                     }
                 }
@@ -1375,25 +1370,24 @@
                         audioLoaded = true;
                         progressBar.max = buffer.duration;
                         updateTotalDurationDisplay();
-                        updateCurrentTimeDisplay(0); 
-                        updateLyricsHighlight(0, true, false); 
+                        updateCurrentTimeDisplay(0);
+                        updateLyricsHighlight(0, true, false);
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
-                        playAudio(); 
+                        playAudio();
                     })
                     .catch(e => {
                         audioLoaded = false;
                         audioBuffer = null;
-                        checkEnablePlayer(); 
+                        checkEnablePlayer();
                         loadStatus.textContent = `Error decoding audio: ${e.message}`;
                         console.error("Audio Decoding Error:", e);
-                        
                     });
 
             } catch (error) {
                 alert(`Error processing file: ${error.message}`);
                 console.error("File Parse/Setup Error:", error);
-                resetPlayerAndLyrics(true); 
+                resetPlayerAndLyrics(true);
                 checkEnablePlayer();
                 loadStatus.textContent = `Error: ${error.message}`;
             }
@@ -1411,7 +1405,7 @@
             if (!audioContext || !audioBuffer || isPlaying) return;
 
 
-            if (audioContext.state === 'suspended') { 
+            if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
                     playAudioInternal();
                 }).catch(e => {
@@ -1428,11 +1422,10 @@
             if (isPlaying || !audioContext || !audioBuffer) return;
 
 
-            
             startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
 
 
-            if (startOffset >= audioBuffer.duration) { 
+            if (startOffset >= audioBuffer.duration) {
                 startOffset = 0;
             }
 
@@ -1440,12 +1433,12 @@
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
-            sourceNode.loop = true; 
+            sourceNode.loop = true;
             sourceNode.connect(gainNode);
-            sourceNode.onended = handleAudioEnd; 
+            sourceNode.onended = handleAudioEnd;
 
 
-            startTime = audioContext.currentTime; 
+            startTime = audioContext.currentTime;
             
             sourceNode.start(0, startOffset);
 
@@ -1459,114 +1452,97 @@
             if (!isPlaying || !sourceNode || !audioContext) return;
 
 
-            
             const elapsedRealTime = audioContext.currentTime - startTime;
             const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
 
 
-            
             startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
-            startOffset = Math.max(0, startOffset); 
+            startOffset = Math.max(0, startOffset);
 
-            stopAudioInternals(); 
+            stopAudioInternals();
 
             isPlaying = false;
             isPaused = true;
             playPauseBtn.textContent = '▶ Play';
 
 
-            updateCurrentTimeDisplay(startOffset); 
+            updateCurrentTimeDisplay(startOffset);
         }
 
 
         function stopAudioInternals() {
              if (sourceNode) {
-                sourceNode.onended = null; 
-                sourceNode.loop = false; 
+                sourceNode.onended = null;
+                sourceNode.loop = false;
                 try {
-                    sourceNode.stop(0); 
+                    sourceNode.stop(0);
                 } catch (e) {
-                    
                 }
-                sourceNode.disconnect(); 
+                sourceNode.disconnect();
                 sourceNode = null;
             }
-            stopUpdatingTime(); 
+            stopUpdatingTime();
         }
 
 
-        function stopAudio() { 
+        function stopAudio() {
             stopAudioInternals();
             isPlaying = false;
-            
         }
 
         function seekAudio(bufferTime) {
             if (!audioBuffer || !audioContext) return;
 
-            const wasPlaying = isPlaying; 
-            stopAudio(); 
+            const wasPlaying = isPlaying;
+            stopAudio();
 
 
-            
             startOffset = Math.max(0, bufferTime);
             startOffset = Math.min(startOffset, audioBuffer.duration);
 
 
-            progressBar.value = startOffset; 
-            updateCurrentTimeDisplay(startOffset); 
-            updateLyricsHighlight(startOffset, true, false); 
+            progressBar.value = startOffset;
+            updateCurrentTimeDisplay(startOffset);
+            updateLyricsHighlight(startOffset, true, false);
 
 
             if (wasPlaying) {
-                 playAudio(); 
+                 playAudio();
             } else {
-                
-                isPaused = true; 
-                playPauseBtn.textContent = '▶ Play'; 
+                isPaused = true;
+                playPauseBtn.textContent = '▶ Play';
             }
         }
 
 
         function handleAudioEnd() {
-            
-            
-            
-             sourceNode = null; 
-             
-             
+             sourceNode = null;
         }
 
 
 
         function startUpdatingTime() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId); 
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-            
-            
             if (!isPlaying || startTime <= 0 || !audioContext) {
                 startTime = audioContext.currentTime;
             }
 
             function updateLoop() {
-                
                 if (!isPlaying || !audioBuffer || !sourceNode || !audioContext) {
                     animationFrameId = null; return;
                 }
 
 
-                
                 const elapsedRealTime = audioContext.currentTime - startTime;
                 let currentBufferTime = startOffset + (elapsedRealTime * currentPlaybackRate);
 
 
-                
-                
                 updateLyricsHighlight(getCurrentBufferTime(), false, true);
 
 
-                if (!isSeeking) { 
-                    updateCurrentTimeDisplay(getCurrentBufferTime()); 
+                if (!isSeeking) {
+                    updateCurrentTimeDisplay(getCurrentBufferTime());
                 }
 
 
@@ -1593,17 +1569,17 @@
             volumeSlider.disabled = !audioReady;
             speedBtn.disabled = !audioReady;
             speedSlider.disabled = !audioReady;
-            themeToggleBtn.disabled = !audioReady; 
-            downloadBtn.disabled = !(audioReady && lyricsLoaded); 
+            themeToggleBtn.disabled = !audioReady;
+            downloadBtn.disabled = !(audioReady && lyricsLoaded);
 
 
-            if (!audioReady) { 
+            if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
             }
 
 
-            if (audioContext) { 
+            if (audioContext) {
                 const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
                 updateVolumeIcon(currentVolume);
                 if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
@@ -1611,8 +1587,8 @@
             }
             if (audioReady) {
                 updateTotalDurationDisplay();
-                updateCurrentTimeDisplay(startOffset); 
-            } else { 
+                updateCurrentTimeDisplay(startOffset);
+            } else {
                  totalDurationDisplay.textContent = '0:00';
                  currentTimeDisplay.textContent = '0:00';
                  progressBar.value = 0;
@@ -1621,18 +1597,16 @@
         }
 
         function resetPlayerAndLyrics(resetSettings = false) {
-            stopAudio(); 
-
+            stopAudio();
 
             audioLoaded = false; lyricsLoaded = false; audioBuffer = null;
             lyricsData = []; currentWordSpans = [];
             currentWordIndex = -1; previousWordIndex = -1;
             startOffset = 0; startTime = 0; isPaused = false; isPlaying = false;
-            if (resetSettings) { 
+            
+            if (resetSettings) {
                 currentSongFilename = null;
-                
             }
-
 
             lyricsOutput.innerHTML = 'Load a .songlyrics file.';
             lyricsOutput.className = 'placeholder';
@@ -1644,75 +1618,70 @@
             progressBar.value = 0; progressBar.max = 1;
             currentTimeDisplay.textContent = '0:00';
             totalDurationDisplay.textContent = '0:00';
-            
 
-            if (resetSettings) { 
+            if (resetSettings) {
                 const defaultVolume = 1;
                 const defaultSpeed = 1.0;
-                 setVolume(defaultVolume);
-                 setPlaybackSpeed(defaultSpeed, false); 
-                 updateTotalDurationDisplay(); 
-            } else { 
-                 loadVolumeSetting();
-                 loadSpeedSetting();
-                 updateTotalDurationDisplay(); 
+                isMuted = false; 
+                previousVolumeBeforeMute = defaultVolume;
+                setVolume(defaultVolume); 
+                setPlaybackSpeed(defaultSpeed, false);
+                updateTotalDurationDisplay();
+            } else {
+                loadVolumeSetting(); 
+                loadSpeedSetting();
+                updateTotalDurationDisplay();
             }
 
-
-            hidePopup(volumePopup); 
+            hidePopup(volumePopup);
             hidePopup(speedPopup);
-            checkEnablePlayer(); 
+            checkEnablePlayer();
         }
 
 
         function renderLyrics() {
-            lyricsOutput.innerHTML = ''; 
+            lyricsOutput.innerHTML = '';
             currentWordSpans = [];
             currentWordIndex = -1;
             previousWordIndex = -1;
-            lyricsContainer.scrollTop = 0; 
+            lyricsContainer.scrollTop = 0;
 
 
             if (lyricsLoaded && lyricsData.length > 0) {
-                lyricsOutput.className = ''; 
-                lyricsContainer.style.justifyContent = 'flex-start'; 
+                lyricsOutput.className = '';
+                lyricsContainer.style.justifyContent = 'flex-start';
                 lyricsContainer.style.alignItems = 'flex-start';
 
 
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
-                    span.textContent = line.word + ' '; 
+                    span.textContent = line.word + ' ';
                     span.id = `word-${index}`;
-                    span.dataset.startTime = line.start; 
+                    span.dataset.startTime = line.start;
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
 
 
-            } else { 
-                     
-
-                if (!lyricsLoaded && jsonLength > 0) { 
+            } else {
+                if (!lyricsLoaded && jsonLength > 0) {
                     lyricsOutput.innerHTML = 'Error parsing lyrics data.';
-                } else { 
-                         
-                         
+                } else {
                     lyricsOutput.innerHTML = 'No lyrics content in file.';
                 }
                 lyricsOutput.className = 'placeholder';
-                lyricsContainer.style.justifyContent = 'center'; 
+                lyricsContainer.style.justifyContent = 'center';
                 lyricsContainer.style.alignItems = 'center';
             }
         }
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
-             
              const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
 
 
             if (!lyricsLoaded || currentWordSpans.length === 0) {
-                 if (currentWordIndex !== -1) { 
-                     highlightWord(-1, false); 
+                 if (currentWordIndex !== -1) {
+                     highlightWord(-1, false);
                      currentWordIndex = -1;
                      previousWordIndex = -1;
                  }
@@ -1721,21 +1690,17 @@
 
 
             let newWordIndex = -1;
-            
-            
-            const lookaheadTime = effectiveTime + 0.05; 
+            const lookaheadTime = effectiveTime + 0.05;
             for (let i = 0; i < lyricsData.length; i++) {
-                
                 if (lyricsData[i].start <= lookaheadTime) {
                     newWordIndex = i;
                 } else {
-                    break; 
+                    break;
                 }
             }
 
 
              if (newWordIndex !== currentWordIndex || forceUpdate) {
-                
                 const shouldScroll = allowScroll && !isSeeking && isPlaying;
                 highlightWord(newWordIndex, shouldScroll);
                 previousWordIndex = currentWordIndex;
@@ -1749,22 +1714,20 @@
 
 
             currentWordSpans.forEach((span, index) => {
-                
                 const isVisible = index <= indexToHighlight;
                 span.classList.toggle('visible', isVisible);
 
 
-                
                 const isHighlighted = index === indexToHighlight;
                 span.classList.toggle('highlighted', isHighlighted);
 
 
-                if(isHighlighted) wordToScroll = span; 
+                if(isHighlighted) wordToScroll = span;
             });
 
 
-             if (indexToHighlight < 0) { 
-                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible')); 
+             if (indexToHighlight < 0) {
+                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
              }
 
 
@@ -1775,7 +1738,6 @@
                 
 
 
-                
                 const zoneTop = containerRect.top + containerRect.height * 0.25;
                 const zoneBottom = containerRect.bottom - containerRect.height * 0.25;
 
@@ -1784,21 +1746,19 @@
                 const isLastWord = indexToHighlight === lyricsData.length - 1;
 
 
-                 if (isLastWord && wordRect.bottom > containerRect.bottom - 20) { 
+                 if (isLastWord && wordRect.bottom > containerRect.bottom - 20) {
                      wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
                  }
-                 
                  else if (isAboveZone || isBelowZone) {
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
              }
-             
-             else if (isSeeking && wordToScroll) { 
+             else if (isSeeking && wordToScroll) {
                   const cRect = lyricsContainer.getBoundingClientRect();
                   const wRect = wordToScroll.getBoundingClientRect();
 
-                  if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) { 
-                      wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' }); 
+                  if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) {
+                      wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' });
                   }
              }
         }
@@ -1807,7 +1767,7 @@
 
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
-            volumeIcon.className = 'fas '; 
+            volumeIcon.className = 'fas ';
             if (volume <= 0) {
                 volumeIcon.classList.add('fa-volume-mute');
             } else if (volume < 0.5) {
@@ -1819,7 +1779,7 @@
 
 
         function resetPopupTimer(popupElement) {
-            clearPopupTimer(popupElement); 
+            clearPopupTimer(popupElement);
 
 
             const timerCallback = () => {
@@ -1827,7 +1787,6 @@
             };
 
 
-            
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === speedPopup) {
@@ -1837,7 +1796,6 @@
 
 
         function clearPopupTimer(popupElement) {
-            
              if (popupElement === volumePopup && volumePopupTimeout) {
                 clearTimeout(volumePopupTimeout);
                 volumePopupTimeout = null;
@@ -1855,7 +1813,7 @@
 
         function hidePopup(el) {
             el.classList.remove('show');
-            clearPopupTimer(el); 
+            clearPopupTimer(el);
         }
 
 
@@ -1874,7 +1832,6 @@
         function handleKeyboardShortcuts(event) {
             const activeElement = document.activeElement;
 
-            
             const isTextInputFocused = (activeElement.tagName === 'INPUT' && /text|search|password|email|number|tel|url/.test(activeElement.type)) ||
                                       activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
 
@@ -1883,7 +1840,6 @@
             const playerReady = isPlayerReady();
             const isRangeInputFocused = activeElement.tagName === 'INPUT' && activeElement.type === 'range';
 
-            
             if (playerReady) {
                 if (volumePopup.classList.contains('show')) {
                     if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
@@ -1896,7 +1852,7 @@
 
                         if (event.code === 'ArrowUp') {
                             newValue = currentValue + step;
-                        } else { 
+                        } else {
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
@@ -1906,9 +1862,9 @@
                         
                         setVolume(newValue);
                         
-                        volumeSlider.value = newValue; 
+                        volumeSlider.value = newValue;
                         resetPopupTimer(volumePopup);
-                        return; 
+                        return;
                     }
                 }
 
@@ -1923,7 +1879,7 @@
 
                         if (event.code === 'ArrowUp') {
                             newValue = currentValue + step;
-                        } else { 
+                        } else {
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
@@ -1935,27 +1891,26 @@
                         
                         speedSlider.value = newValue;
                         resetPopupTimer(speedPopup);
-                        return; 
+                        return;
                     }
                 }
             }
 
-            
-            let currentBufferTime = getCurrentBufferTime(); 
+            let currentBufferTime = getCurrentBufferTime();
 
             switch (event.code) {
                 case 'Space':
-                case 'KeyK': 
+                case 'KeyK':
                     if (playerReady && (activeElement.tagName !== 'BUTTON' || isRangeInputFocused)) {
                         event.preventDefault();
                         togglePlayback();
                     } else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
-                         event.preventDefault(); 
-                         togglePlayback(); 
+                         event.preventDefault();
+                         togglePlayback();
                     }
                     break;
 
-                case 'KeyJ': 
+                case 'KeyJ':
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.max(0, currentBufferTime - 10);
@@ -1963,7 +1918,7 @@
                     }
                     break;
 
-                case 'KeyL': 
+                case 'KeyL':
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.min(audioBuffer.duration, currentBufferTime + 10);
@@ -1988,7 +1943,6 @@
                     break;
 
                 case 'ArrowUp':
-                    
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
@@ -1998,12 +1952,17 @@
                     break;
 
                 case 'ArrowDown':
-                    
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
                         let newVolume = Math.max(0, currentVolume - 0.05);
                         setVolume(newVolume);
+                    }
+                    break;
+                case 'KeyM':
+                    if (playerReady) {
+                        event.preventDefault();
+                        toggleMute();
                     }
                     break;
             }
