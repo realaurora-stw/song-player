@@ -23,22 +23,27 @@
       --card-hover: #121212;
     }
 
+    /* Global resets and font settings */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
-* {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-*::-webkit-scrollbar {
-  display: none;
-}
-* {
-  font-family: 'Poppins', sans-serif !important;
-}
+
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    * {
+      font-family: 'Poppins', sans-serif !important;
+    }
+
     body {
       background-color: var(--bg-primary);
       color: var(--text-primary);
@@ -98,6 +103,7 @@
       color: var(--accent-primary);
     }
 
+    /* GitHub Link: Remove underline and enforce static color */
     .github-link {
       display: flex;
       align-items: center;
@@ -106,6 +112,14 @@
       padding: 8px 16px;
       border-radius: 50px;
       transition: background-color 0.3s ease;
+      text-decoration: none;
+      color: var(--text-secondary);
+    }
+
+    .github-link span,
+    .github-link svg {
+      color: var(--text-secondary);
+      text-decoration: none;
     }
 
     .github-link:hover {
@@ -288,13 +302,24 @@
       margin-bottom: 15px;
     }
 
+    /* Details panel now uses a max-height and opacity transition */
     .step-details {
-      display: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
       background-color: var(--bg-secondary);
-      padding: 15px;
+      padding: 0 15px;
       border-radius: 8px;
-      margin-top: 10px;
+      margin-top: 0;
       font-size: 0.9rem;
+      transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease, padding 0.3s ease;
+    }
+
+    .step-details.active {
+      max-height: 500px;
+      opacity: 1;
+      margin-top: 10px;
+      padding: 15px;
     }
 
     .show-details-btn {
@@ -306,6 +331,14 @@
       display: flex;
       align-items: center;
       gap: 5px;
+    }
+
+    .show-details-btn svg {
+      transition: transform 0.3s ease;
+    }
+
+    .show-details-btn.active svg {
+      transform: rotate(180deg);
     }
 
     .tools-hub {
@@ -468,11 +501,13 @@
       overflow-y: auto;
       position: relative;
       opacity: 0;
+      transform: scale(0.8);
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
+    /* When shown, the modal-content animates in (zoom) */
     .modal.show .modal-content {
-      opacity: 1;
+      animation: modalZoomIn 0.3s ease forwards;
     }
 
     .close-modal {
@@ -512,7 +547,6 @@
         opacity: 0;
         transform: translateY(20px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -523,11 +557,9 @@
       0% {
         transform: scale(1);
       }
-
       50% {
         transform: scale(1.05);
       }
-
       100% {
         transform: scale(1);
       }
@@ -535,6 +567,28 @@
 
     .animate-pulse {
       animation: pulse 2s infinite;
+    }
+
+    @keyframes modalZoomIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes modalZoomOut {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(0.8);
+        opacity: 0;
+      }
     }
 
     @media (max-width: 768px) {
@@ -592,13 +646,13 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path
-            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-          </path>
+            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
         </svg>
         <span>GitHub</span>
       </a>
     </nav>
   </header>
+
   <section class="hero">
     <div class="container">
       <h1>Make music hit different</h1>
@@ -630,6 +684,7 @@
       </div>
     </div>
   </section>
+
   <section class="features" id="features">
     <div class="container">
       <h2 class="section-title">Amazing <span>Features</span></h2>
@@ -637,20 +692,17 @@
         <div class="feature-card">
           <div class="feature-icon">🔤</div>
           <h3>Word-by-Word Sync</h3>
-          <p>Experience precise lyric highlighting that follows along with each word as it's sung, just like Spotify's
-            premium lyric feature.</p>
+          <p>Experience precise lyric highlighting that follows along with each word as it's sung, just like Spotify's premium lyric feature.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">💾</div>
           <h3>Completely Offline</h3>
-          <p>No internet required after creation. Your .songlyrics files work anywhere, anytime without any connection.
-          </p>
+          <p>No internet required after creation. Your .songlyrics files work anywhere, anytime without any connection.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🎛️</div>
           <h3>Audio Effects</h3>
-          <p>Apply nightcore, slow + reverb, and other audio effects to your tracks while maintaining perfect word sync.
-          </p>
+          <p>Apply nightcore, slow + reverb, and other audio effects to your tracks while maintaining perfect word sync.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔓</div>
@@ -670,6 +722,7 @@
       </div>
     </div>
   </section>
+
   <section class="how-it-works" id="how-it-works">
     <div class="container">
       <h2 class="section-title">How It <span>Works</span></h2>
@@ -687,8 +740,7 @@
               </svg>
             </button>
             <div class="step-details">
-              You can use any MP3 file. For best results, try to find a clean version with minimal background noise. The
-              clearer the vocals, the better the transcription will be.
+              You can use any MP3 file. For best results, try to find a clean version with minimal background noise. The clearer the vocals, the better the transcription will be.
             </div>
           </div>
         </div>
@@ -758,6 +810,7 @@
       </div>
     </div>
   </section>
+
   <section class="tools-hub" id="tools">
     <div class="container">
       <h2 class="section-title">Your <span>Toolbox</span></h2>
@@ -789,6 +842,7 @@
       </div>
     </div>
   </section>
+
   <footer>
     <div class="container">
       <div class="footer-content">
@@ -796,6 +850,7 @@
       </div>
     </div>
   </footer>
+
   <div class="modal" id="start-modal">
     <div class="modal-content">
       <button class="close-modal" onclick="closeModal('start-modal')">×</button>
@@ -809,19 +864,15 @@
           </li>
           <li style="margin-bottom: 15px;">
             <strong>Upload to ElevenLabs for transcription</strong>
-            <p>Go to <a href="https://elevenlabs.io/app/speech-to-text" target="_blank"
-                style="color: var(--accent-primary);">https://elevenlabs.io/app/speech-to-text</a> and upload your MP3.
-            </p>
+            <p>Go to <a href="https://elevenlabs.io/app/speech-to-text" target="_blank" style="color: var(--accent-primary);">https://elevenlabs.io/app/speech-to-text</a> and upload your MP3.</p>
           </li>
           <li style="margin-bottom: 15px;">
             <strong>Export as JSON</strong>
-            <p>When the transcription is complete, export it as JSON format. Make sure "include speakers" is NOT
-              checked.</p>
+            <p>When the transcription is complete, export it as JSON format. Make sure "include speakers" is NOT checked.</p>
           </li>
           <li style="margin-bottom: 15px;">
             <strong>Use our Mixer tool</strong>
-            <p>Open our <a href="mixer.html" target="_blank" style="color: var(--accent-primary);">Mixer</a> and upload
-              both your MP3 and the JSON file.</p>
+            <p>Open our <a href="mixer.html" target="_blank" style="color: var(--accent-primary);">Mixer</a> and upload both your MP3 and the JSON file.</p>
           </li>
           <li style="margin-bottom: 15px;">
             <strong>Download your .songlyrics file</strong>
@@ -829,8 +880,7 @@
           </li>
           <li style="margin-bottom: 15px;">
             <strong>Play with synchronized lyrics</strong>
-            <p>Open our <a href="player.html" target="_blank" style="color: var(--accent-primary);">Player</a> and
-              upload your .songlyrics file to enjoy!</p>
+            <p>Open our <a href="player.html" target="_blank" style="color: var(--accent-primary);">Player</a> and upload your .songlyrics file to enjoy!</p>
           </li>
         </ol>
         <div style="background-color: var(--bg-primary); padding: 15px; border-radius: 8px; margin-top: 20px;">
@@ -848,6 +898,7 @@
       </div>
     </div>
   </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const demoWords = document.querySelectorAll('.lyrics-demo .word');
@@ -860,41 +911,50 @@
         }, 800);
       }
 
+      // Toggle the details section with a smooth open/close animation.
       window.toggleDetails = function (button) {
         const details = button.nextElementSibling;
-        const buttonText = button.querySelector('span');
-        const buttonIcon = button.querySelector('svg');
-        if (details.style.display === 'block') {
-          details.style.display = 'none';
-          buttonText.textContent = 'Show Details';
-          buttonIcon.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+        if (details.classList.contains('active')) {
+          details.classList.remove('active');
+          button.classList.remove('active');
+          button.querySelector('span').textContent = 'Show Details';
         } else {
-          details.style.display = 'block';
-          buttonText.textContent = 'Hide Details';
-          buttonIcon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
+          details.classList.add('active');
+          button.classList.add('active');
+          button.querySelector('span').textContent = 'Hide Details';
         }
       };
 
+      // Open Modal with zoom-in animation
       window.openModal = function (modalId) {
-        document.getElementById(modalId).classList.add('show');
+        const modal = document.getElementById(modalId);
+        modal.classList.add('show');
         document.body.style.overflow = 'hidden';
       };
 
+      // Close Modal with a zoom-out animation
       window.closeModal = function (modalId) {
-        document.getElementById(modalId).classList.remove('show');
-        document.body.style.overflow = 'auto';
+        const modal = document.getElementById(modalId);
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.style.animation = 'modalZoomOut 0.3s ease forwards';
+        setTimeout(function() {
+          modal.classList.remove('show');
+          modalContent.style.animation = '';
+          document.body.style.overflow = 'auto';
+        }, 300);
       };
 
+      // Close modal if clicked outside modal content
       window.addEventListener('click', function (event) {
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
           if (event.target === modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
+            closeModal(modal.id);
           }
         });
       });
 
+      // Smooth scrolling for anchors
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
@@ -911,8 +971,6 @@
       });
     });
   </script>
-
-
 </body>
 
 </html>
