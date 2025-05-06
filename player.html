@@ -653,7 +653,7 @@
 
         let volumePopupTimeout = null;
         let speedPopupTimeout = null;
-        const POPUP_CLOSE_DELAY = 6000;
+        const POPUP_CLOSE_DELAY = 3000;
 
 
         function isPlayerReady() {
@@ -825,45 +825,46 @@
 
 
         songLyricsFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            currentSongFilename = file ? file.name : null; // Store filename
-            resetPlayerAndLyrics(false); // Don't reset settings, keep current filename
-            loadStatus.textContent = '';
-            if (!file) {
-                checkEnablePlayer();
+            const files = event.target.files;
+
+            if (files.length === 0) {
                 return;
             }
+            const file = files[0];
 
+            currentSongFilename = file.name;
+            resetPlayerAndLyrics(false);
+            loadStatus.textContent = '';
             if (!file.name.toLowerCase().endsWith('.songlyrics')) {
                 alert('Invalid file type. Please select a .songlyrics file.');
-                songLyricsFileInput.value = ''; // Clear selection
-                currentSongFilename = null; // Clear stored filename
-                resetPlayerAndLyrics(false); // UI reset
+                songLyricsFileInput.value = '';
+                currentSongFilename = null;
+                resetPlayerAndLyrics(false);
                 checkEnablePlayer();
                 return;
             }
 
-            initializeAudioContext(); // Ensure context is ready
+            // Initialize audio context if not already done (should be by now, but good check)
+            initializeAudioContext();
             if (!audioContext) {
                 loadStatus.textContent = 'Error: Audio system not ready.';
-                resetPlayerAndLyrics(true); // Full reset if audio system fails
+                resetPlayerAndLyrics(true); // Full reset if audio system critical error.
                 checkEnablePlayer();
                 return;
             }
 
+            // Proceed to read and parse the file.
             loadStatus.textContent = `Loading ${file.name}...`;
             const reader = new FileReader();
             reader.onload = (e) => parseCombinedFile(e.target.result);
             reader.onerror = () => {
                 alert("Error reading the selected file.");
                 loadStatus.textContent = 'Error reading file.';
-                resetPlayerAndLyrics(true); // Full reset on read error
+                resetPlayerAndLyrics(true); // Full reset on file read error.
                 checkEnablePlayer();
             };
             reader.readAsArrayBuffer(file);
         });
-
-
 
         volumeBtn.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -1879,28 +1880,81 @@
             if (isTextInputFocused) return;
 
             const playerReady = isPlayerReady();
-
-            // Allow arrow keys if a range input (slider) is focused for its native behavior
             const isRangeInputFocused = activeElement.tagName === 'INPUT' && activeElement.type === 'range';
 
-            let currentBufferTime = getCurrentBufferTime(); // Get current time for seeking
+            // Handle Up/Down arrow keys for visible popups
+            if (playerReady) {
+                if (volumePopup.classList.contains('show')) {
+                    if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+                        event.preventDefault();
+                        const currentValue = parseFloat(volumeSlider.value);
+                        const step = parseFloat(volumeSlider.step) || 0.01;
+                        const maxVal = parseFloat(volumeSlider.max);
+                        const minVal = parseFloat(volumeSlider.min);
+                        let newValue;
+
+                        if (event.code === 'ArrowUp') {
+                            newValue = currentValue + step;
+                        } else { // ArrowDown
+                            newValue = currentValue - step;
+                        }
+                        newValue = Math.max(minVal, Math.min(maxVal, newValue));
+                        // Round to avoid floating point precision issues, matching step's precision
+                        const precision = (String(step).split('.')[1] || '').length;
+                        newValue = parseFloat(newValue.toFixed(precision || 2));
+                        
+                        setVolume(newValue);
+                        // setVolume should update volumeSlider.value, but explicitly set here for safety
+                        volumeSlider.value = newValue; 
+                        resetPopupTimer(volumePopup);
+                        return; // Key handled by volume popup
+                    }
+                }
+
+                if (speedPopup.classList.contains('show')) {
+                    if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+                        event.preventDefault();
+                        const currentValue = parseFloat(speedSlider.value);
+                        const step = parseFloat(speedSlider.step) || 0.01;
+                        const maxVal = parseFloat(speedSlider.max);
+                        const minVal = parseFloat(speedSlider.min);
+                        let newValue;
+
+                        if (event.code === 'ArrowUp') {
+                            newValue = currentValue + step;
+                        } else { // ArrowDown
+                            newValue = currentValue - step;
+                        }
+                        newValue = Math.max(minVal, Math.min(maxVal, newValue));
+                        // Round to avoid floating point precision issues
+                        const precision = (String(step).split('.')[1] || '').length;
+                        newValue = parseFloat(newValue.toFixed(precision || 2));
+
+                        setPlaybackSpeed(newValue);
+                        // setPlaybackSpeed should update speedSlider.value, but explicitly set here for safety
+                        speedSlider.value = newValue;
+                        resetPopupTimer(speedPopup);
+                        return; // Key handled by speed popup
+                    }
+                }
+            }
+
+            // Global keyboard shortcuts (if not handled by popups)
+            let currentBufferTime = getCurrentBufferTime(); 
 
             switch (event.code) {
                 case 'Space':
-                case 'KeyK': // Common media key for play/pause
-                    // If player is ready and focus is not on a button (or if it is but it's not a range input)
+                case 'KeyK': 
                     if (playerReady && (activeElement.tagName !== 'BUTTON' || isRangeInputFocused)) {
-                        event.preventDefault(); // Prevent space from scrolling page or triggering focused button
+                        event.preventDefault();
                         togglePlayback();
-                    }
-                    // If player is ready and focus IS on a button (but not a range input)
-                    else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
-                         event.preventDefault(); // Prevent space from re-triggering the focused button if it's not play/pause
-                         togglePlayback(); // Still control global play/pause
+                    } else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
+                         event.preventDefault(); 
+                         togglePlayback(); 
                     }
                     break;
 
-                case 'KeyJ': // Seek backward
+                case 'KeyJ': 
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.max(0, currentBufferTime - 10);
@@ -1908,7 +1962,7 @@
                     }
                     break;
 
-                case 'KeyL': // Seek forward
+                case 'KeyL': 
                     if (playerReady) {
                         event.preventDefault();
                         const newTime = Math.min(audioBuffer.duration, currentBufferTime + 10);
@@ -1917,7 +1971,6 @@
                     break;
 
                 case 'ArrowLeft':
-                    // Seek backward if not focusing on a slider
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         const newTime = Math.max(0, currentBufferTime - 5);
@@ -1926,7 +1979,6 @@
                     break;
 
                 case 'ArrowRight':
-                    // Seek forward if not focusing on a slider
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         const newTime = Math.min(audioBuffer.duration, currentBufferTime + 5);
@@ -1935,7 +1987,7 @@
                     break;
 
                 case 'ArrowUp':
-                    // Increase volume if not focusing on a slider
+                    // Global volume increase (0.05 step), only if not focusing a slider AND popups didn't handle it
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
@@ -1945,7 +1997,7 @@
                     break;
 
                 case 'ArrowDown':
-                    // Decrease volume if not focusing on a slider
+                    // Global volume decrease (0.05 step), only if not focusing a slider AND popups didn't handle it
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
@@ -1955,7 +2007,6 @@
                     break;
             }
         }
-
     </script>
 
 </body>
