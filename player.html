@@ -1757,7 +1757,7 @@
                   const wRect = wordToScroll.getBoundingClientRect();
 
                   if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) {
-                      wordToScroll.scrollIntoView({ behavior: 'auto', block: 'center' });
+                      wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
              }
         }
