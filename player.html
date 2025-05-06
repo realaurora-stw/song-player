@@ -571,7 +571,7 @@
                 </button>
                 <div id="speedPopup" class="popup-control">
                     <div class="slider-wrapper-vertical">
-                        <input type="range" id="speedSlider" class="slider-vertical" min="0.3" max="2" step="0.01" value="1" disabled>
+                        <input type="range" id="speedSlider" class="slider-vertical" min="0.18" max="2" step="0.01" value="1" disabled>
                     </div>
                     <span id="speedRateDisplay" class="popup-text-display">1.00x</span>
                 </div>
@@ -707,7 +707,7 @@
         }
 
         function loadSpeedSetting() {
-            const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.3 && s<=2);
+            const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.18 && s<=2);
              setPlaybackSpeed(speed, false);
              updateTotalDurationDisplay();
         }
@@ -759,7 +759,7 @@
         function setPlaybackSpeed(rate, adjustPlayback = true) {
             if (isNaN(rate)) return;
 
-            const minSpeed = parseFloat(speedSlider?.min ?? 0.3);
+            const minSpeed = parseFloat(speedSlider?.min ?? 0.18);
             const maxSpeed = parseFloat(speedSlider?.max ?? 2);
             const newRate = Math.max(minSpeed, Math.min(maxSpeed, rate));
 
