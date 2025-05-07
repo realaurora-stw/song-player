@@ -1965,6 +1965,16 @@
                     break;
             }
         }
+           document.addEventListener('visibilitychange', function() {
+                 if (document.visibilityState === 'visible') {
+                     if (lyricsContainer) {
+                         lyricsContainer.style.scrollBehavior = 'auto';
+                         requestAnimationFrame(() => {
+                             lyricsContainer.style.scrollBehavior = 'smooth';
+                         });
+                     }
+                 }
+             });
     </script>
 
 </body>
