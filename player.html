@@ -916,15 +916,21 @@
             const currentValue = parseFloat(volumeSlider.value);
             let step = 0.01;
 
-            if (Math.abs(delta) > 50) step = 0.03;
-            if (Math.abs(delta) > 100) step = 0.05;
+            if (event.ctrlKey) step = 0.1;
+            else if (event.shiftKey) step = 0.005;
+            else if (Math.abs(delta) > 100) step = 0.05;
+            else if (Math.abs(delta) > 50) step = 0.03;
+
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(0, Math.min(1, newValue));
+            
+            const precision = (String(step).split('.')[1] || '').length || 2;
+            newValue = parseFloat(newValue.toFixed(precision));
+
             setVolume(newValue);
             resetPopupTimer(volumePopup);
         });
-
         speedBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             if (!speedBtn.disabled) {
@@ -952,18 +958,19 @@
              if (speedSlider.disabled) return;
             event.preventDefault();
             event.stopPropagation();
-
             const delta = event.deltaY;
             const currentValue = parseFloat(speedSlider.value);
             const minSpeed = parseFloat(speedSlider.min);
             const maxSpeed = parseFloat(speedSlider.max);
             let step = 0.01;
+            if (event.ctrlKey) step = 0.1;
+            else if (event.shiftKey) step = 0.005;
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
+            newValue = parseFloat(newValue.toFixed(2));
             setPlaybackSpeed(newValue);
             resetPopupTimer(speedPopup);
         });
-
 
         volumePopup.addEventListener('mousemove', () => {
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
@@ -1932,17 +1939,22 @@
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
-                        let newVolume = Math.min(1, currentVolume + 0.05);
+                        let newVolume = Math.min(1, parseFloat((currentVolume + 0.05).toFixed(2)));
                         setVolume(newVolume);
+                        if (volumePopup.classList.contains('show')) {
+                            resetPopupTimer(volumePopup);
+                        }
                     }
                     break;
-
                 case 'ArrowDown':
                     if (!isRangeInputFocused && playerReady) {
                         event.preventDefault();
                         let currentVolume = parseFloat(volumeSlider.value);
-                        let newVolume = Math.max(0, currentVolume - 0.05);
+                        let newVolume = Math.max(0, parseFloat((currentVolume - 0.05).toFixed(2)));
                         setVolume(newVolume);
+                        if (volumePopup.classList.contains('show')) {
+                            resetPopupTimer(volumePopup);
+                        }
                     }
                     break;
                 case 'KeyM':
