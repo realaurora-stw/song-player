@@ -227,26 +227,19 @@
         }
 
         #status, .file-status {
-            margin-top: 8px; /* You might want to adjust or remove this too if space is critical */
+            margin-top: 8px;
             font-size: 0.85em;
             color: var(--text-secondary);
-            /* min-height: 1.2em; */ /* REMOVED to prevent empty space */
             transition: color 0.2s ease;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
         .file-status.loaded {
-            /* color: var(--success-color); */ /* Color changes might still occur if classes are set */
-            /* font-weight: 600; */
         }
          .file-status.error, #status.error {
-            /* color: var(--error-color); */
-            /* font-weight: 600; */
          }
          #status.success {
-             /* color: var(--success-color); */
-             /* font-weight: 600; */
          }
 
         #downloadLink {
@@ -296,18 +289,13 @@
         const EMPTY_JSON_LYRICS = '{"segments": []}';
 
         function setStatus(element, message, type = 'info') {
-            // Always set textContent to an empty string for the specified elements
             if (element === mp3Status || element === jsonStatus || element === statusDiv) {
                 element.textContent = '';
             } else {
-                // For any other potential status elements (future-proofing, though not used now)
                 element.textContent = message;
             }
-
-            // We can still apply classes if needed for other visual cues, but text is gone.
-            // You might want to remove class manipulation too if you want NO visual change at all.
             element.className = element.id === 'status' ? '' : 'file-status';
-            if (message === '') return; // Don't apply styling classes if message was meant to be empty
+            if (message === '') return;
 
             if (type === 'loaded' && element.id !== 'status') {
                 element.classList.add('loaded');
@@ -327,9 +315,9 @@
              jsonData = null;
              mp3FileName = 'audio';
 
-             setStatus(mp3Status, ''); // MODIFIED
-             setStatus(jsonStatus, ''); // MODIFIED
-             setStatus(statusDiv, '');  // MODIFIED
+             setStatus(mp3Status, '');
+             setStatus(jsonStatus, '');
+             setStatus(statusDiv, '');
 
              jsonFileInput.disabled = false;
              jsonFileLabel.classList.remove('disabled-label');
@@ -345,26 +333,19 @@
              const jsonReady = !!jsonData;
              const noLyricsMode = noLyricsCheckbox.checked;
 
-             // Clear general status before potentially setting it (or not)
-             setStatus(statusDiv, ''); // MODIFIED
+             setStatus(statusDiv, '');
 
              if (noLyricsMode) {
                  if (mp3Ready) {
                      combineBtn.disabled = false;
-                    // setStatus(statusDiv, 'Ready to create lyric-less file!', 'success'); // REMOVED
                  } else {
                      combineBtn.disabled = true;
-                    // setStatus(statusDiv, 'Select MP3 file.'); // REMOVED
                  }
              } else {
                  if (mp3Ready && jsonReady) {
                      combineBtn.disabled = false;
-                    // setStatus(statusDiv, 'Ready to combine!', 'success'); // REMOVED
                  } else {
                      combineBtn.disabled = true;
-                    //   if (!mp3Ready && !jsonReady) setStatus(statusDiv, 'Select both MP3 and JSON files.'); // REMOVED
-                    //   else if (!mp3Ready) setStatus(statusDiv, 'Waiting for MP3 file.'); // REMOVED
-                    //   else setStatus(statusDiv, 'Waiting for JSON file.'); // REMOVED
                  }
              }
         }
@@ -408,18 +389,18 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     mp3Data = e.target.result;
-                    setStatus(mp3Status, ''); // MODIFIED
+                    setStatus(mp3Status, '');
                     checkFiles();
                 };
                  reader.onerror = () => {
-                     setStatus(mp3Status, ''); // MODIFIED
+                     setStatus(mp3Status, '');
                      mp3Data = null;
                      checkFiles();
                  };
                  reader.readAsArrayBuffer(file);
-                 setStatus(mp3Status, ''); // MODIFIED
+                 setStatus(mp3Status, '');
             } else {
-                 setStatus(mp3Status, ''); // MODIFIED
+                 setStatus(mp3Status, '');
                  mp3FileName = 'audio';
                  checkFiles();
             }
@@ -437,27 +418,27 @@
                         const validationResult = validateJsonStructure(parsedData);
 
                         if (!validationResult.valid) {
-                            throw new Error(validationResult.message); // Error still thrown for logic
+                            throw new Error(validationResult.message);
                         }
 
                         jsonData = rawJsonString;
-                        setStatus(jsonStatus, ''); // MODIFIED
+                        setStatus(jsonStatus, '');
                          checkFiles();
                     } catch(error) {
-                         setStatus(jsonStatus, ''); // MODIFIED
+                         setStatus(jsonStatus, '');
                          jsonData = null;
                          checkFiles();
                     }
                 };
                  reader.onerror = () => {
-                     setStatus(jsonStatus, ''); // MODIFIED
+                     setStatus(jsonStatus, '');
                      jsonData = null;
                      checkFiles();
                  };
                 reader.readAsText(file);
-                setStatus(jsonStatus, ''); // MODIFIED
+                setStatus(jsonStatus, '');
             } else {
-                 setStatus(jsonStatus, ''); // MODIFIED
+                 setStatus(jsonStatus, '');
                  checkFiles();
             }
         });
@@ -469,11 +450,11 @@
                 jsonFileLabel.classList.add('disabled-label');
                 jsonFileInput.value = null;
                 jsonData = null;
-                setStatus(jsonStatus, ''); // MODIFIED
+                setStatus(jsonStatus, '');
             } else {
                 jsonFileInput.disabled = false;
                 jsonFileLabel.classList.remove('disabled-label');
-                setStatus(jsonStatus, ''); // MODIFIED
+                setStatus(jsonStatus, '');
             }
             checkFiles();
         });
@@ -482,23 +463,20 @@
         combineBtn.addEventListener('click', () => {
             const noLyricsMode = noLyricsCheckbox.checked;
             let effectiveJsonData = null;
-            setStatus(statusDiv, ''); // MODIFIED
+            setStatus(statusDiv, '');
 
             if (noLyricsMode) {
                 if (!mp3Data) {
-                    // setStatus(statusDiv, 'Error: Missing MP3 file.', 'error'); // REMOVED
                     return;
                 }
                 effectiveJsonData = EMPTY_JSON_LYRICS;
             } else {
                 if (!mp3Data || !jsonData) {
-                    // setStatus(statusDiv, 'Error: Missing required files.', 'error'); // REMOVED
                     return;
                 }
                 effectiveJsonData = jsonData;
             }
 
-            // setStatus(statusDiv, 'Combining...'); // REMOVED
             combineBtn.disabled = true;
             combineBtn.classList.add('processing');
             combineBtn.textContent = 'Processing...';
@@ -537,7 +515,6 @@
                     tempLink.click();
                     document.body.removeChild(tempLink);
 
-                    // setStatus(statusDiv, 'Download initiated! Clearing form...', 'success'); // REMOVED
 
                     setTimeout(() => {
                         URL.revokeObjectURL(url);
@@ -545,7 +522,6 @@
                     }, 1500);
 
                 } catch (error) {
-                    // setStatus(statusDiv, `Error during combination: ${error.message}`, 'error'); // REMOVED
                     console.error("Combination Error:", error);
                      combineBtn.disabled = false;
                      combineBtn.classList.remove('processing');
