@@ -1734,32 +1734,19 @@
             if (shouldAutoScroll && wordToScroll) {
                 const containerRect = lyricsContainer.getBoundingClientRect();
                 const wordRect = wordToScroll.getBoundingClientRect();
-                
-
-
-                const zoneTop = containerRect.top + containerRect.height * 0.25;
-                const zoneBottom = containerRect.bottom - containerRect.height * 0.25;
-
-                const isAboveZone = wordRect.top < zoneTop;
-                const isBelowZone = wordRect.bottom > zoneBottom;
                 const isLastWord = indexToHighlight === lyricsData.length - 1;
 
+                const zoneTop = containerRect.top + containerRect.height * 0.25;
+                const zoneBottom = containerRect.top + containerRect.height * 0.75;
 
-                 if (isLastWord && wordRect.bottom > containerRect.bottom - 20) {
-                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                 }
-                 else if (isAboveZone || isBelowZone) {
+                if (isLastWord && wordRect.bottom > (containerRect.bottom - 30)) {
+                    wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                } else if (wordRect.top < zoneTop || wordRect.bottom > zoneBottom) {
+                    wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-             }
-             else if (isSeeking && wordToScroll) {
-                  const cRect = lyricsContainer.getBoundingClientRect();
-                  const wRect = wordToScroll.getBoundingClientRect();
-
-                  if (wRect.bottom < cRect.top || wRect.top > cRect.bottom) {
-                      wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-             }
+            }
         }
 
 
