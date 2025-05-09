@@ -9,8 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="icon" href="https://raw.githubusercontent.com/realaurora-stw/song-player/refs/heads/main/icons/hammer.png" type="image/png">
     <style>
-        body, button, input, label, select, textarea, a {
+        * {
             font-family: 'Poppins', sans-serif;
+        }
+
+        body, button, input, label, select, textarea, a {
+            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' */
         }
 
         body {
@@ -69,7 +73,7 @@
         }
 
         input[type="file"]::file-selector-button {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' */
             padding: 8px 15px;
             border: 1px solid #171717;
             border-radius: 12px;
@@ -100,7 +104,7 @@
         }
 
         .download-link {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' and 'a' selector */
             display: inline-block;
             margin: 10px 8px 0 8px;
             padding: 12px 22px;
