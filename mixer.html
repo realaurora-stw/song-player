@@ -31,6 +31,17 @@
              100% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); }
         }
 
+        @keyframes fadeInSizeUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         html, body {
             height: 100%;
             margin: 0;
@@ -61,6 +72,7 @@
             width: 100%;
             max-width: 420px;
             border: 1px solid var(--border-color);
+            animation: fadeInSizeUp 0.25s ease-out forwards;
         }
 
         h1 {
