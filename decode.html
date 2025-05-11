@@ -14,7 +14,18 @@
         }
 
         body, button, input, label, select, textarea, a {
-            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' */
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes fadeInSizeUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         body {
@@ -38,6 +49,7 @@
             max-width: 500px;
             width: 100%;
             border: 1px solid #101010;
+            animation: fadeInSizeUp 0.25s ease-out forwards;
         }
 
         h1 {
@@ -73,7 +85,7 @@
         }
 
         input[type="file"]::file-selector-button {
-            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' */
+            font-family: 'Poppins', sans-serif;
             padding: 8px 15px;
             border: 1px solid #171717;
             border-radius: 12px;
@@ -104,7 +116,7 @@
         }
 
         .download-link {
-            font-family: 'Poppins', sans-serif; /* Kept for explicitness, though covered by '*' and 'a' selector */
+            font-family: 'Poppins', sans-serif;
             display: inline-block;
             margin: 10px 8px 0 8px;
             padding: 12px 22px;
@@ -303,6 +315,7 @@
             reader.readAsArrayBuffer(file);
         });
         window.addEventListener('unload', cleanupUrls);
+        resetUI();
     </script>
 </body>
 </html>
