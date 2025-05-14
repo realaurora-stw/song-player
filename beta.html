@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Lyrics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://raw.githubusercontent.com/realaurora-stw/song-player/refs/heads/main/icons/notes.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="manifest" href="manifest.json"> <!-- For PWA capabilities, if you add a manifest.json -->
+
+
+    <style>
+        :root {
+  color-scheme: dark;
+}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background-color: #000000;
+            color: #f0f0f0;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        button, input, select, textarea {
+            font-family: inherit;
+        }
+
+#lyrics-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px 5% 200px 5%;
+            font-size: 2.8em;
+            line-height: 1.6;
+            display: flex;
+            scroll-behavior: smooth;
+            min-height: 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+       #lyrics-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        #lyrics-output {
+            max-width: 900px;
+            width: 100%;
+            text-align: left;
+        }
+
+
+        #lyrics-output span {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px) scale(0.9);
+            transform-origin: center left;
+            color: #f0f0f0;
+            margin: 0 0.1em;
+            cursor: default;
+            transition: opacity 0.45s ease-out,
+                        transform 0.45s ease-out,
+                        color 0.25s ease-in-out,
+                        font-weight 0.25s ease-in-out;
+            will-change: opacity, transform;
+            pointer-events: none;
+        }
+
+        #lyrics-output span.visible {
+            display: inline-block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+ #lyrics-output span.highlighted {
+            color: #50d060;
+            font-weight: 600;
+            transform: translateY(-1px) scale(1.05);
+            transition-property: color, font-weight, transform;
+            transition-duration: 0.25s, 0.25s, 0.15s;
+            transition-timing-function: ease-in-out, ease-in-out, ease-out;
+        }
+
+
+        #lyrics-output.placeholder {
+             display: block;
+             opacity: 1;
+             transform: none;
+             color: #555;
+             font-style: italic;
+             text-align: center;
+             margin: auto;
+             font-weight: normal;
+        }
+
+
+        #controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #000000;
+            padding: 15px 30px;
+            border-top: 1px solid #0c0c0c;
+            z-index: 10;
+            color: #aaa;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .file-inputs {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .file-inputs label {
+            font-size: 0.9em;
+        }
+
+
+        .file-inputs input[type="file"] {
+            font-size: 0.8em;
+            max-width: 250px;
+            color: #767676;
+            font-family: inherit;
+        }
+        .file-inputs input[type="file"]::file-selector-button {
+            padding: 5px 10px;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            background-color: #111;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-right: 10px;
+            transition: background-color 0.2s, border-color 0.2s;
+            font-family: inherit;
+        }
+        .file-inputs input[type="file"]::file-selector-button:hover {
+            background-color: #252525;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        #playPauseBtn {
+            background-color: #040404;
+            color: #767676;
+            border: none;
+            padding: 8px 15px;
+            font-size: 1em;
+            border-radius: 12px;
+            cursor: pointer;
+            min-width: 80px;
+            transition: background-color 0.2s, color 0.2s;
+            font-family: inherit;
+        }
+        #playPauseBtn:hover:enabled {
+             background-color: #1f1f1f;
+        }
+
+        #playPauseBtn:disabled {
+            background-color: #141414;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        #progressBar {
+            flex-grow: 1;
+            max-width: 500px;
+            cursor: pointer;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #0d0d0d;
+            border-radius: 5px;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+
+        #progressBar::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: #2a2a2a;
+          border-radius: 50%;
+          cursor: pointer;
+          transition: background-color 0.2s, transform 0.15s ease-out;
+        }
+         #progressBar:hover::-webkit-slider-thumb {
+              background: #2e2e2e;
+         }
+         #progressBar:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+
+
+        #progressBar::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          background: #757575;
+          border-radius: 50%;
+          cursor: pointer;
+          border: none;
+          transition: background-color 0.2s, transform 0.15s ease-out;
+        }
+         #progressBar:hover::-moz-range-thumb {
+              background: #888;
+         }
+         #progressBar:active::-moz-range-thumb {
+             transform: scale(1.1);
+         }
+
+
+        #progressBar:disabled::-webkit-slider-thumb {
+            background: #333;
+            cursor: not-allowed;
+            transition: none;
+             transform: none;
+        }
+        #progressBar:disabled::-moz-range-thumb {
+            background: #333;
+            cursor: not-allowed;
+             transition: none;
+             transform: none;
+        }
+        #progressBar:disabled {
+            cursor: not-allowed;
+             background: #0a0a0a;
+        }
+
+
+        #currentTime, #totalDuration {
+            font-size: 0.9em;
+            min-width: 45px;
+            text-align: center;
+            color: #4c4c4c;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: color 0.3s ease;
+        }
+
+        #audioPlayer {
+             display: none;
+        }
+
+        #loadStatus {
+             font-size: 0.8em;
+             color: #4c4c4c;
+             margin-left: 15px;
+             min-height: 1.2em;
+             font-family: inherit;
+             transition: color 0.3s ease;
+        }
+
+
+       .control-icon-btn {
+            background: none;
+            border: none;
+            color: #4c4c4c;
+            font-size: 1.2em;
+            padding: 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+            font-family: inherit;
+       }
+       .control-icon-btn:hover:enabled {
+           color: #646464;
+       }
+       .control-icon-btn:disabled {
+           cursor: not-allowed;
+       }
+
+
+        .volume-control-wrapper,
+        .speed-control-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .popup-control {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: #080808;
+            padding: 15px 15px 15px 15px;
+            border-radius: 12px;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            width: 50px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0.25s, background-color 0.3s ease, box-shadow 0.3s ease;
+            will-change: opacity, transform, visibility;
+        }
+
+        .slider-wrapper-vertical {
+            width: 90px;
+            height: 24px;
+            transform: rotate(-90deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .slider-vertical {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 90px;
+            height: 8px;
+            cursor: pointer;
+            background: #171717;
+            border-radius: 10px;
+            outline: none;
+            display: block;
+            margin: 0;
+            margin-right: 56px;
+            transition: background-color 0.2s;
+        }
+
+        .slider-vertical::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; background: #ccc;
+            border-radius: 50%; cursor: pointer; border: none;
+            transition: background-color 0.2s;
+        }
+        .slider-vertical::-moz-range-thumb {
+            width: 16px; height: 16px; background: #ccc;
+            border-radius: 50%; cursor: pointer; border: none;
+            transition: background-color 0.2s;
+        }
+
+
+        .slider-vertical:disabled { cursor: not-allowed; background: #444; }
+        .slider-vertical:disabled::-webkit-slider-thumb { background: #666; cursor: not-allowed; }
+        .slider-vertical:disabled::-moz-range-thumb { background: #666; cursor: not-allowed; }
+
+        .popup-text-display {
+            color: #f0f0f0;
+            font-size: 0.8em;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+            font-family: inherit;
+            transition: color 0.3s ease;
+        }
+
+
+        .popup-control.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0s, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Download Modal Styles */
+        .download-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 1000; /* Ensure it's on top */
+            display: none; /* Initially hidden, changed to 'flex' by JS */
+            align-items: center; justify-content: center;
+            font-family: 'Poppins', sans-serif; /* Ensure font consistency */
+        }
+        .download-modal-content {
+            background-color: #1e1e1e; color: #f0f0f0;
+            padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: center; width: 90%; max-width: 400px;
+        }
+        .download-modal-content p { margin-bottom: 15px; font-size: 1.1em; }
+        .download-modal-content select {
+            width: 100%; padding: 10px; margin-bottom: 20px;
+            background-color: #2b2b2b; color: #f0f0f0;
+            border: 1px solid #444; border-radius: 6px; font-size: 1em;
+        }
+        .download-modal-buttons { display: flex; justify-content: space-between; gap: 10px; }
+        .download-modal-buttons button {
+            flex-grow: 1; padding: 10px 15px; font-size: 1em;
+            border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .download-modal-buttons button .fa-spin { display: none; } /* Spinner initially hidden */
+
+        .download-modal-buttons button#modalConfirmDownloadBtn { background-color: #3a86ff; color: white; }
+        .download-modal-buttons button#modalConfirmDownloadBtn:hover:enabled { background-color: #1e70e5; }
+        .download-modal-buttons button#modalConfirmDownloadBtn:disabled { background-color: #2a5a9a; color: #aaa; cursor: not-allowed;}
+        .download-modal-buttons button#modalCancelBtn { background-color: #555; color: #ccc; }
+        .download-modal-buttons button#modalCancelBtn:hover { background-color: #666; }
+        #modalDownloadStatus { display: block; margin-top: 15px; font-size: 0.9em; color: #aaa; min-height: 1.2em; }
+
+
+        @media (max-width: 768px) {
+             #lyrics-container {
+                 font-size: 2em;
+                 padding: 20px 5% 150px 5%;
+             }
+             .player-controls { gap: 10px; }
+             #playPauseBtn { padding: 6px 10px; font-size: 0.9em; }
+            #currentTime, #totalDuration { font-size: 0.8em; min-width: 40px; }
+            .file-inputs label { font-size: 0.8em; }
+           .control-icon-btn { font-size: 1.1em; }
+
+
+           .popup-control {
+               padding: 12px 10px 12px 10px;
+               height: 140px;
+           }
+           .slider-wrapper-vertical {
+               width: 75px;
+               height: 22px;
+               margin-bottom: 15px;
+           }
+           .slider-vertical {
+               width: 75px;
+               height: 6px;
+           }
+            .slider-vertical::-webkit-slider-thumb { width: 14px; height: 14px; }
+            .slider-vertical::-moz-range-thumb { width: 14px; height: 14px; }
+           .popup-text-display { font-size: 0.75em; }
+
+           .download-modal-content { padding: 20px; max-width: 320px; }
+           .download-modal-content p { font-size: 1em; }
+           .download-modal-content select { padding: 8px; font-size: 0.9em;}
+           .download-modal-buttons button { padding: 8px 12px; font-size: 0.9em;}
+
+        }
+
+        body.light-mode {
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        body.light-mode #lyrics-output span {
+            color: #1a1a1a;
+        }
+
+        body.light-mode #lyrics-output span.highlighted {
+            color: black;
+        }
+
+        body.light-mode #lyrics-output.placeholder {
+            color: #888;
+        }
+
+        body.light-mode #controls-container {
+            background-color: #ffffff;
+            border-top: 1px solid #dddddd;
+            color: #555;
+        }
+
+        body.light-mode .file-inputs input[type="file"] {
+            color: #555;
+        }
+
+        body.light-mode .file-inputs input[type="file"]::file-selector-button {
+            border: 1px solid #ccc;
+            background-color: #eee;
+            color: #333;
+        }
+        body.light-mode .file-inputs input[type="file"]::file-selector-button:hover {
+            background-color: #ddd;
+        }
+
+        body.light-mode #playPauseBtn {
+            background-color: #e0e0e0;
+            color: #222;
+        }
+        body.light-mode #playPauseBtn:hover:enabled {
+             background-color: #d0d0d0;
+        }
+        body.light-mode #playPauseBtn:disabled {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
+
+        body.light-mode #progressBar {
+            background: #dddddd;
+        }
+
+        body.light-mode #progressBar::-webkit-slider-thumb {
+          background: #aaaaaa;
+        }
+         body.light-mode #progressBar:hover::-webkit-slider-thumb {
+              background: #888888;
+         }
+
+        body.light-mode #progressBar::-moz-range-thumb {
+          background: #aaaaaa;
+        }
+         body.light-mode #progressBar:hover::-moz-range-thumb {
+              background: #888888;
+         }
+
+        body.light-mode #progressBar:disabled::-webkit-slider-thumb {
+            background: #cccccc;
+        }
+        body.light-mode #progressBar:disabled::-moz-range-thumb {
+            background: #cccccc;
+        }
+        body.light-mode #progressBar:disabled {
+             background: #eeeeee;
+        }
+
+        body.light-mode #currentTime,
+        body.light-mode #totalDuration {
+            color: #555;
+        }
+
+        body.light-mode #loadStatus {
+             color: #777;
+        }
+
+       body.light-mode .control-icon-btn {
+            color: #444;
+       }
+       body.light-mode .control-icon-btn:hover:enabled {
+           color: #000;
+       }
+       body.light-mode .control-icon-btn:disabled {
+           color: #bbbbbb;
+       }
+
+        body.light-mode .popup-control {
+            background-color: #f8f8f8;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .slider-vertical {
+            background: #cccccc;
+        }
+
+        body.light-mode .slider-vertical::-webkit-slider-thumb {
+            background: #666666;
+        }
+        body.light-mode .slider-vertical::-moz-range-thumb {
+            background: #666666;
+        }
+
+        body.light-mode .slider-vertical:disabled { background: #dddddd; }
+        body.light-mode .slider-vertical:disabled::-webkit-slider-thumb { background: #aaaaaa; }
+        body.light-mode .slider-vertical:disabled::-moz-range-thumb { background: #aaaaaa; }
+
+        body.light-mode .popup-text-display {
+            color: #333333;
+        }
+        
+        /* Light mode for Download Modal */
+        body.light-mode .download-modal-content {
+            background-color: #f8f9fa; color: #212529;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        body.light-mode .download-modal-content select {
+            background-color: #ffffff; color: #212529;
+            border: 1px solid #ced4da;
+        }
+        body.light-mode .download-modal-buttons button#modalConfirmDownloadBtn { background-color: #007bff; color: white; }
+        body.light-mode .download-modal-buttons button#modalConfirmDownloadBtn:hover:enabled { background-color: #0056b3; }
+        body.light-mode .download-modal-buttons button#modalConfirmDownloadBtn:disabled { background-color: #6ca9e4; color: #f0f0f0; }
+        body.light-mode .download-modal-buttons button#modalCancelBtn { background-color: #6c757d; color: white; }
+        body.light-mode .download-modal-buttons button#modalCancelBtn:hover { background-color: #5a6268; }
+        body.light-mode #modalDownloadStatus { color: #6c757d; }
+
+    </style>
+</head>
+<body>
+
+    <div id="lyrics-container">
+        <p id="lyrics-output" class="placeholder">Load a .songlyrics file.</p>
+    </div>
+
+    <div id="controls-container">
+        <div class="file-inputs">
+            <input type="file" id="songLyricsFile" accept=".songlyrics" title="Select .songlyrics file">
+            <span id="loadStatus"></span>
+        </div>
+
+        <audio id="audioPlayer" style="display: none;"></audio>
+        <div class="player-controls">
+            <button id="playPauseBtn" disabled>▶ Play</button>
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progressBar" value="0" step="0.01" disabled>
+            <span id="totalDuration">0:00</span>
+
+            <div class="volume-control-wrapper">
+                <button id="volumeBtn" class="control-icon-btn" disabled title="Volume">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div id="volumePopup" class="popup-control">
+                    <div class="slider-wrapper-vertical">
+                        <input type="range" id="volumeSlider" class="slider-vertical" min="0" max="1" step="0.01" value="1" disabled>
+                    </div>
+                    <span id="volumePercentage" class="popup-text-display">100%</span>
+                </div>
+            </div>
+
+            <div class="speed-control-wrapper">
+                <button id="speedBtn" class="control-icon-btn" disabled title="Playback Speed">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
+                <div id="speedPopup" class="popup-control">
+                    <div class="slider-wrapper-vertical">
+                        <input type="range" id="speedSlider" class="slider-vertical" min="0.18" max="2" step="0.01" value="1" disabled>
+                    </div>
+                    <span id="speedRateDisplay" class="popup-text-display">1.00x</span>
+                </div>
+            </div>
+            
+            <button id="downloadBtn" class="control-icon-btn" disabled title="Download Remix">
+                <i class="fas fa-download"></i>
+                <!-- Original spinner removed as it's now on the modal's button -->
+            </button>
+
+            <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme" disabled>
+                <i id="themeIcon" class="fas fa-sun"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Download Modal HTML -->
+    <div id="downloadModal" class="download-modal-overlay">
+        <div class="download-modal-content">
+            <p>How do you want to download the remix?</p>
+            <select id="downloadFormatSelect">
+                <option value="songlyrics">.songlyrics (Lyrics + Audio)</option>
+                <option value="wav">.wav (Audio only)</option>
+            </select>
+            <div class="download-modal-buttons">
+                <button id="modalConfirmDownloadBtn">
+                    <i class="fas fa-download"></i> <!-- Static icon -->
+                    <i class="fas fa-circle-notch fa-spin"></i> <!-- Spinner icon -->
+                    Download
+                </button>
+                <button id="modalCancelBtn">Cancel</button>
+            </div>
+            <span id="modalDownloadStatus"></span>
+        </div>
+    </div>
+
+
+    <script>
+        const songLyricsFileInput = document.getElementById('songLyricsFile');
+        const lyricsOutput = document.getElementById('lyrics-output');
+        const lyricsContainer = document.getElementById('lyrics-container');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeDisplay = document.getElementById('currentTime');
+        const totalDurationDisplay = document.getElementById('totalDuration');
+        const loadStatus = document.getElementById('loadStatus');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumePopup = document.getElementById('volumePopup');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = volumeBtn.querySelector('i');
+        const volumePercentage = document.getElementById('volumePercentage');
+        const speedBtn = document.getElementById('speedBtn');
+        const speedPopup = document.getElementById('speedPopup');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedRateDisplay = document.getElementById('speedRateDisplay');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Download related UI
+        const downloadBtn = document.getElementById('downloadBtn'); // Main download button in controls
+        const downloadModal = document.getElementById('downloadModal');
+        const downloadFormatSelect = document.getElementById('downloadFormatSelect');
+        const modalConfirmDownloadBtn = document.getElementById('modalConfirmDownloadBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalDownloadStatus = document.getElementById('modalDownloadStatus');
+        const modalDownloadBtnIcon = modalConfirmDownloadBtn.querySelector('.fa-download');
+        const modalDownloadSpinnerIcon = modalConfirmDownloadBtn.querySelector('.fa-spin');
+
+
+        let audioContext;
+        let audioBuffer;
+        let sourceNode;
+        let gainNode;
+        let isPlaying = false;
+        let isPaused = false;
+        let startTime = 0;
+        let startOffset = 0;
+        let currentPlaybackRate = 1.0;
+        let animationFrameId = null;
+
+        let lyricsData = [];
+        let currentWordSpans = [];
+        let currentWordIndex = -1;
+        let previousWordIndex = -1;
+
+        let audioLoaded = false;
+        let lyricsLoaded = false;
+        let isSeeking = false;
+        let currentSongFilename = null;
+        let isMuted = false;
+        let previousVolumeBeforeMute = 1.0;
+
+        const FADE_DURATION = 0.2; // seconds for play/pause fade
+        let pauseFadeTimeoutId = null;
+
+
+        const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
+        const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
+        const THEME_STORAGE_KEY = 'playerTheme';
+        const DOWNLOAD_FORMAT_STORAGE_KEY = 'downloadFormatPreference';
+        const LIGHT_MODE_CLASS = 'light-mode';
+
+        let volumePopupTimeout = null;
+        let speedPopupTimeout = null;
+        const POPUP_CLOSE_DELAY = 6000;
+
+
+        function isPlayerReady() {
+            return audioLoaded && !!audioContext && !!audioBuffer;
+        }
+        function getCurrentBufferTime() {
+             let time = startOffset;
+             if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
+                 const elapsedRealTime = audioContext.currentTime - startTime;
+                 time = startOffset + (elapsedRealTime * currentPlaybackRate);
+                 time = time % audioBuffer.duration;
+             }
+             return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
+        }
+
+
+        function initializeAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    gainNode = audioContext.createGain();
+                    gainNode.connect(audioContext.destination);
+                    loadVolumeSetting(); // This will set initial gainNode value
+                    loadSpeedSetting();
+                } catch (e) {
+                    console.error("Web Audio API is not supported in this browser.", e);
+                    alert("Sorry, your browser doesn't support the required Web Audio API for this player.");
+                    audioContext = null;
+                }
+            }
+        }
+
+
+        function loadSetting(key, defaultValue, validator) {
+             try {
+                const savedValue = localStorage.getItem(key);
+                if (savedValue !== null) {
+                    if (key === THEME_STORAGE_KEY || key === DOWNLOAD_FORMAT_STORAGE_KEY) { // String settings
+                        if (validator(savedValue)) return savedValue;
+                    } else { // Numeric settings
+                        const parsedValue = parseFloat(savedValue);
+                        if (validator(parsedValue)) return parsedValue;
+                    }
+                    localStorage.removeItem(key); // Remove invalid stored value
+                }
+            } catch (e) { console.error("Error loading setting:", key, e); }
+            return defaultValue;
+        }
+
+        function saveSetting(key, value) {
+             try {
+                localStorage.setItem(key, value.toString());
+             } catch (e) {
+                console.error("Error saving setting:", key, value, e);
+            }
+        }
+
+        function loadVolumeSetting() {
+            const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
+            if(gainNode && audioContext) {
+                // Set value directly, fades will handle transitions during play/pause
+                gainNode.gain.setValueAtTime(vol, audioContext.currentTime);
+            }
+            if(volumeSlider) {
+                 volumeSlider.value = vol;
+                 if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
+                 updateVolumeIcon(vol);
+            }
+            isMuted = false; // Ensure not muted on load
+            previousVolumeBeforeMute = vol; // Store for unmute functionality
+        }
+
+        function loadSpeedSetting() {
+            const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
+             setPlaybackSpeed(speed, false); // Don't adjust playback during initial load
+             updateTotalDurationDisplay();
+        }
+
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add(LIGHT_MODE_CLASS);
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                themeToggleBtn.title = 'Dark Mode';
+            } else { // Default to dark
+                document.body.classList.remove(LIGHT_MODE_CLASS);
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.title = 'Light Mode';
+            }
+            saveSetting(THEME_STORAGE_KEY, theme);
+        }
+
+        function loadTheme() {
+            const savedTheme = loadSetting(THEME_STORAGE_KEY, 'dark', t => t === 'light' || t === 'dark');
+            applyTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const isLightMode = document.body.classList.contains(LIGHT_MODE_CLASS);
+            applyTheme(isLightMode ? 'dark' : 'light');
+        }
+
+
+        function setVolume(newVolume) {
+             const clampedVolume = Math.max(0, Math.min(1, newVolume));
+             if (gainNode && audioContext) {
+                // If playing, ramp smoothly. Otherwise, set directly.
+                // This is for user-initiated volume changes, not play/pause fades.
+                if (isPlaying) {
+                    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime); // Start from current gain
+                    gainNode.gain.linearRampToValueAtTime(clampedVolume, audioContext.currentTime + 0.1); // Short ramp
+                } else {
+                    gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
+                }
+             }
+             if (volumeSlider) {
+                 volumeSlider.value = clampedVolume;
+                 updateVolumeIcon(clampedVolume);
+                 volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
+
+                 if (!isMuted) { // Only save if not part of a mute action
+                    saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
+                    previousVolumeBeforeMute = clampedVolume; // Update this as user changes volume
+                 }
+            }
+        }
+
+
+        function setPlaybackSpeed(rate, adjustPlayback = true) {
+            if (isNaN(rate)) return;
+
+            const minSpeed = parseFloat(speedSlider?.min ?? 0.18);
+            const maxSpeed = parseFloat(speedSlider?.max ?? 2);
+            const newRate = Math.max(minSpeed, Math.min(maxSpeed, rate));
+
+            const previousRate = currentPlaybackRate;
+            currentPlaybackRate = newRate;
+
+            if(speedSlider) speedSlider.value = newRate;
+            if(speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
+            saveSetting(SPEED_STORAGE_KEY, newRate);
+            updateTotalDurationDisplay();
+
+            if (adjustPlayback && audioContext && audioBuffer) {
+                if (isPlaying && sourceNode?.playbackRate) {
+                    const elapsedRealTime = audioContext.currentTime - startTime;
+                    const elapsedBufferTime = elapsedRealTime * previousRate;
+
+                    startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
+                    startOffset = Math.max(0, startOffset);
+
+                    sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
+                    startTime = audioContext.currentTime;
+
+                } else if (sourceNode?.playbackRate) { // If paused but source exists
+                    sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
+                }
+                updateCurrentTimeDisplay(getCurrentBufferTime());
+            }
+        }
+
+        function toggleMute() {
+            if (!audioContext || !gainNode) return;
+
+            if (isMuted) { // Unmute
+                isMuted = false;
+                setVolume(previousVolumeBeforeMute); // This will use its own ramp or set directly
+            } else { // Mute
+                isMuted = true;
+                // previousVolumeBeforeMute is already set by setVolume or loadVolumeSetting
+                setVolume(0); // This will use its own ramp or set directly
+            }
+            // The icon is updated by setVolume calling updateVolumeIcon
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+             loadTheme();
+             // initializeAudioContext might not be called yet if no file loaded,
+             // so loadVolumeSetting and loadSpeedSetting are also called within initializeAudioContext
+             // For now, ensure slider values are set from localStorage if possible, even if audio context isn't ready.
+             const initialVolume = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
+             if (volumeSlider) volumeSlider.value = initialVolume;
+             if (volumePercentage) volumePercentage.textContent = `${Math.round(initialVolume * 100)}%`;
+             updateVolumeIcon(initialVolume);
+             previousVolumeBeforeMute = initialVolume;
+
+             const initialSpeed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
+             if (speedSlider) speedSlider.value = initialSpeed;
+             if (speedRateDisplay) speedRateDisplay.textContent = `${initialSpeed.toFixed(2)}x`;
+             currentPlaybackRate = initialSpeed; // Set it directly here
+             
+             const lastDownloadFormat = loadSetting(DOWNLOAD_FORMAT_STORAGE_KEY, 'songlyrics', fmt => fmt === 'songlyrics' || fmt === 'wav');
+             if (downloadFormatSelect) downloadFormatSelect.value = lastDownloadFormat;
+
+             resetPlayerAndLyrics(false); // False to not overwrite loaded settings
+             checkEnablePlayer();
+
+            document.addEventListener('visibilitychange', function() {
+                 if (document.visibilityState === 'visible') {
+                     if (lyricsContainer) {
+                         lyricsContainer.style.scrollBehavior = 'auto';
+                         requestAnimationFrame(() => {
+                             lyricsContainer.style.scrollBehavior = 'smooth';
+                         });
+                     }
+                 }
+             });
+        });
+
+
+        songLyricsFileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+
+            if (files.length === 0) {
+                return;
+            }
+            const file = files[0];
+
+            currentSongFilename = file.name;
+            resetPlayerAndLyrics(false); // Keep user settings
+            loadStatus.textContent = '';
+            if (!file.name.toLowerCase().endsWith('.songlyrics')) {
+                alert('Invalid file type. Please select a .songlyrics file.');
+                songLyricsFileInput.value = '';
+                currentSongFilename = null;
+                resetPlayerAndLyrics(false); // Keep user settings
+                checkEnablePlayer();
+                return;
+            }
+
+            initializeAudioContext(); // Ensures AudioContext and GainNode are ready
+            if (!audioContext) {
+                loadStatus.textContent = 'Error: Audio system not ready.';
+                resetPlayerAndLyrics(true); // Full reset if audio system fails
+                checkEnablePlayer();
+                return;
+            }
+
+            loadStatus.textContent = `Loading ${file.name}...`;
+            const reader = new FileReader();
+            reader.onload = (e) => parseCombinedFile(e.target.result);
+            reader.onerror = () => {
+                alert("Error reading the selected file.");
+                loadStatus.textContent = 'Error reading file.';
+                resetPlayerAndLyrics(true); // Full reset
+                checkEnablePlayer();
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        volumeBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!volumeBtn.disabled) {
+                const wasVisible = volumePopup.classList.contains('show');
+                togglePopup(volumePopup);
+                hidePopup(speedPopup);
+                if (!wasVisible && volumePopup.classList.contains('show')) {
+                    resetPopupTimer(volumePopup);
+                } else if (wasVisible && !volumePopup.classList.contains('show')) {
+                    clearPopupTimer(volumePopup);
+                }
+            }
+        });
+
+        volumeSlider.addEventListener('input', () => {
+            if (!volumeSlider.disabled) {
+                const newVolume = parseFloat(volumeSlider.value);
+                if (isMuted && newVolume > 0) { // If user drags slider while muted, unmute
+                    isMuted = false;
+                } else if (newVolume === 0 && !isMuted) { // If user drags to 0, effectively mute
+                    isMuted = true; 
+                    // previousVolumeBeforeMute remains the last non-zero volume
+                }
+                setVolume(newVolume);
+                resetPopupTimer(volumePopup);
+            }
+        });
+
+
+        volumeSlider.addEventListener('wheel', (event) => {
+            if (volumeSlider.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+
+            const delta = event.deltaY;
+            const currentValue = parseFloat(volumeSlider.value);
+            let step = 0.01;
+
+            if (event.ctrlKey) step = 0.1;
+            else if (event.shiftKey) step = 0.005;
+            else if (Math.abs(delta) > 100) step = 0.05;
+            else if (Math.abs(delta) > 50) step = 0.03;
+
+
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(0, Math.min(1, newValue));
+            
+            const precision = (String(step).split('.')[1] || '').length || 2;
+            newValue = parseFloat(newValue.toFixed(precision));
+
+            setVolume(newValue); // This will also handle mute state if dragged to 0
+            if (isMuted && newValue > 0) isMuted = false;
+            else if (!isMuted && newValue === 0) isMuted = true;
+
+            resetPopupTimer(volumePopup);
+        });
+        speedBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!speedBtn.disabled) {
+                const wasVisible = speedPopup.classList.contains('show');
+                togglePopup(speedPopup);
+                hidePopup(volumePopup);
+                 if (!wasVisible && speedPopup.classList.contains('show')) {
+                    resetPopupTimer(speedPopup);
+                } else if (wasVisible && !speedPopup.classList.contains('show')) {
+                    clearPopupTimer(speedPopup);
+                }
+            }
+        });
+
+        speedSlider.addEventListener('input', () => {
+            if (!speedSlider.disabled) {
+                const rate = parseFloat(speedSlider.value);
+                setPlaybackSpeed(rate);
+                resetPopupTimer(speedPopup);
+            }
+        });
+
+
+        speedSlider.addEventListener('wheel', (event) => {
+             if (speedSlider.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const delta = event.deltaY;
+            const currentValue = parseFloat(speedSlider.value);
+            const minSpeed = parseFloat(speedSlider.min);
+            const maxSpeed = parseFloat(speedSlider.max);
+            let step = 0.01;
+            if (event.ctrlKey) step = 0.1;
+            else if (event.shiftKey) step = 0.005;
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
+            newValue = parseFloat(newValue.toFixed(2));
+            setPlaybackSpeed(newValue);
+            resetPopupTimer(speedPopup);
+        });
+
+        volumePopup.addEventListener('mousemove', () => {
+             if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
+        });
+        speedPopup.addEventListener('mousemove', () => {
+             if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
+        });
+
+
+        document.addEventListener('click', (event) => {
+            if (volumePopup.classList.contains('show') && !volumeBtn.contains(event.target) && !volumePopup.contains(event.target)) {
+                hidePopup(volumePopup);
+            }
+            if (speedPopup.classList.contains('show') && !speedBtn.contains(event.target) && !speedPopup.contains(event.target)) {
+                hidePopup(speedPopup);
+            }
+            // Close download modal if clicked outside
+            if (downloadModal.style.display === 'flex' && !downloadModal.querySelector('.download-modal-content').contains(event.target)) {
+                hideDownloadModal();
+            }
+        });
+
+
+        volumePopup.addEventListener('click', (event) => event.stopPropagation());
+        speedPopup.addEventListener('click', (event) => event.stopPropagation());
+
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (!themeToggleBtn.disabled) {
+                 toggleTheme();
+            }
+        });
+
+
+        playPauseBtn.addEventListener('click', () => {
+            if (!isPlayerReady()) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(togglePlayback).catch(e => console.error("AudioContext resume failed:", e));
+            } else {
+                togglePlayback();
+            }
+        });
+
+
+        progressBar.addEventListener('input', () => {
+            if (!isPlayerReady()) return;
+            isSeeking = true;
+            stopUpdatingTime(); // Stop continuous updates
+            const seekBufferTime = parseFloat(progressBar.value);
+            updateCurrentTimeDisplay(seekBufferTime); // Update display based on slider position
+            updateLyricsHighlight(seekBufferTime, true, false); // Update lyrics based on slider
+        });
+
+
+        progressBar.addEventListener('change', () => {
+            if (!isPlayerReady()) return;
+            const seekBufferTime = parseFloat(progressBar.value);
+            seekAudio(seekBufferTime);
+            isSeeking = false;
+            // If playing, startUpdatingTime will be called by playAudio.
+            // If paused, ensure time and lyrics are correctly set.
+            if (!isPlaying) {
+                updateCurrentTimeDisplay(startOffset);
+                updateLyricsHighlight(startOffset, true, false);
+            }
+        });
+
+
+        volumeBtn.addEventListener('wheel', (event) => {
+            if (!isPlayerReady() || volumeBtn.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+
+            const delta = event.deltaY;
+            const currentValue = parseFloat(volumeSlider.value);
+            let step = 0.01;
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            
+            setVolume(newValue); // This will also handle mute state if dragged to 0
+            if (isMuted && newValue > 0) isMuted = false;
+            else if (!isMuted && newValue === 0) isMuted = true;
+        });
+
+
+        speedBtn.addEventListener('wheel', (event) => {
+            if (!isPlayerReady() || speedBtn.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+
+            const delta = event.deltaY;
+            const currentValue = parseFloat(speedSlider.value);
+            const minSpeed = parseFloat(speedSlider.min);
+            const maxSpeed = parseFloat(speedSlider.max);
+            let step = 0.01;
+
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
+            setPlaybackSpeed(newValue);
+        });
+
+
+        progressBar.addEventListener('wheel', (event) => {
+            if (!isPlayerReady() || progressBar.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+
+            const delta = event.deltaY;
+            const currentBufferTime = getCurrentBufferTime();
+            let seekAmount = 1;
+
+            if (Math.abs(delta) > 50) seekAmount = 3;
+            if (Math.abs(delta) > 100) seekAmount = 5;
+
+            let newTime;
+            if (delta < 0) { // Wheel up or swipe left (natural scroll)
+                newTime = currentBufferTime + seekAmount;
+            } else { // Wheel down or swipe right
+                newTime = currentBufferTime - seekAmount;
+            }
+
+            newTime = Math.max(0, Math.min(audioBuffer.duration, newTime));
+            seekAudio(newTime);
+        });
+
+        // Download functionality
+        downloadBtn.addEventListener('click', () => {
+            if (downloadBtn.disabled) return;
+            showDownloadModal();
+        });
+
+        modalConfirmDownloadBtn.addEventListener('click', async () => {
+            const selectedFormat = downloadFormatSelect.value;
+            saveSetting(DOWNLOAD_FORMAT_STORAGE_KEY, selectedFormat);
+
+            modalDownloadStatus.textContent = 'Processing download...';
+            modalConfirmDownloadBtn.disabled = true;
+            if (modalDownloadBtnIcon) modalDownloadBtnIcon.style.display = 'none';
+            if (modalDownloadSpinnerIcon) modalDownloadSpinnerIcon.style.display = 'inline-block';
+
+            try {
+                if (selectedFormat === 'songlyrics') {
+                    await processAndDownloadSongLyrics();
+                } else if (selectedFormat === 'wav') {
+                    await processAndDownloadWav();
+                }
+                modalDownloadStatus.textContent = 'Download ready!';
+                setTimeout(hideDownloadModal, 1500); // Hide modal after success
+            } catch (error) {
+                console.error("Error during download processing:", error);
+                modalDownloadStatus.textContent = `Error: ${error.message}`;
+                // Don't hide modal on error, let user see message
+            } finally {
+                modalConfirmDownloadBtn.disabled = false;
+                if (modalDownloadBtnIcon) modalDownloadBtnIcon.style.display = 'inline-block';
+                if (modalDownloadSpinnerIcon) modalDownloadSpinnerIcon.style.display = 'none';
+            }
+        });
+
+        modalCancelBtn.addEventListener('click', hideDownloadModal);
+
+        function showDownloadModal() {
+            if (!isPlayerReady()) {
+                alert("Please load a song first to prepare a remix.");
+                return;
+            }
+            downloadModal.style.display = 'flex';
+            modalDownloadStatus.textContent = ''; // Clear previous status
+            // Ensure the correct format is selected from localStorage
+            const lastFormat = loadSetting(DOWNLOAD_FORMAT_STORAGE_KEY, 'songlyrics', fmt => fmt === 'songlyrics' || fmt === 'wav');
+            downloadFormatSelect.value = lastFormat;
+        }
+
+        function hideDownloadModal() {
+            downloadModal.style.display = 'none';
+        }
+        
+        async function processAndDownloadSongLyrics() {
+            if (!audioBuffer) throw new Error("Audio buffer is not available.");
+
+            const adjustedLyricsForFile = lyricsData.map(w => ({
+                text: w.word,
+                start: w.start / currentPlaybackRate // Adjust start times based on playback rate
+            }));
+            const lyricsJson = {
+                segments: [{
+                    words: adjustedLyricsForFile
+                }]
+            };
+            const jsonString = JSON.stringify(lyricsJson);
+            const jsonBytes = new TextEncoder().encode(jsonString);
+
+            const targetDuration = audioBuffer.duration / currentPlaybackRate;
+            if (targetDuration <= 0 || !isFinite(targetDuration)) {
+                throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`);
+            }
+            if (targetDuration > 60 * 45) { // Limit processing time
+                throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins).`);
+            }
+
+            const offlineCtx = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                Math.ceil(targetDuration * audioBuffer.sampleRate), // Total samples
+                audioBuffer.sampleRate
+            );
+            const offlineSource = offlineCtx.createBufferSource();
+            offlineSource.buffer = audioBuffer;
+            offlineSource.playbackRate.value = currentPlaybackRate;
+
+            const offlineGain = offlineCtx.createGain(); // Use full volume for rendering
+            offlineGain.gain.value = 1.0; 
+            offlineSource.connect(offlineGain);
+            offlineGain.connect(offlineCtx.destination);
+            offlineSource.start(0);
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            const audioWavArrayBuffer = audioBufferToWav(renderedBuffer);
+            const audioWavBytes = new Uint8Array(audioWavArrayBuffer);
+
+            const magic = new TextEncoder().encode("LYRX");
+            const jsonLengthBytes = new ArrayBuffer(4);
+            new DataView(jsonLengthBytes).setUint32(0, jsonBytes.length, false); // Big-endian
+
+            const combinedData = new Uint8Array(magic.length + 4 + jsonBytes.length + audioWavBytes.length);
+            combinedData.set(magic, 0);
+            combinedData.set(new Uint8Array(jsonLengthBytes), magic.length);
+            combinedData.set(jsonBytes, magic.length + 4);
+            combinedData.set(audioWavBytes, magic.length + 4 + jsonBytes.length);
+
+            let baseFilename = "remix";
+            if (currentSongFilename) {
+                baseFilename = currentSongFilename.replace(/\.[^/.]+$/, "");
+            }
+            const downloadFilename = `${baseFilename} [auroraverse.shop].songlyrics`;
+
+            triggerFileDownload(combinedData, downloadFilename, 'application/octet-stream');
+        }
+
+        async function processAndDownloadWav() {
+            if (!audioBuffer) throw new Error("Audio buffer is not available.");
+
+            const targetDuration = audioBuffer.duration / currentPlaybackRate;
+             if (targetDuration <= 0 || !isFinite(targetDuration)) {
+                throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`);
+            }
+            if (targetDuration > 60 * 45) {
+                throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins).`);
+            }
+
+            const offlineCtx = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                Math.ceil(targetDuration * audioBuffer.sampleRate),
+                audioBuffer.sampleRate
+            );
+            const offlineSource = offlineCtx.createBufferSource();
+            offlineSource.buffer = audioBuffer;
+            offlineSource.playbackRate.value = currentPlaybackRate;
+            
+            const offlineGain = offlineCtx.createGain();
+            offlineGain.gain.value = 1.0;
+            offlineSource.connect(offlineGain);
+            offlineGain.connect(offlineCtx.destination);
+            offlineSource.start(0);
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            const audioWavArrayBuffer = audioBufferToWav(renderedBuffer);
+            
+            let baseFilename = "remix_audio";
+            if (currentSongFilename) {
+                baseFilename = currentSongFilename.replace(/\.[^/.]+$/, "") + "_audio";
+            }
+            const downloadFilename = `${baseFilename} [auroraverse.shop].wav`;
+
+            triggerFileDownload(new Uint8Array(audioWavArrayBuffer), downloadFilename, 'audio/wav');
+        }
+
+        function triggerFileDownload(dataArray, filename, mimeType) {
+            const blob = new Blob([dataArray], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
+        function audioBufferToWav(buffer) {
+            function writeStringToArray(a, offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    a[offset + i] = str.charCodeAt(i);
+                }
+            }
+
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const numFrames = buffer.length;
+            const bitsPerSample = 16; // Standard for WAV
+
+            const blockAlign = numChannels * (bitsPerSample / 8);
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = numFrames * blockAlign;
+
+            const bufferLength = 44 + dataSize; // 44 bytes for header
+            const wavBuffer = new ArrayBuffer(bufferLength);
+            const view = new DataView(wavBuffer);
+            const bytes = new Uint8Array(wavBuffer); // For string writing
+
+            let offset = 0;
+
+            // RIFF chunk descriptor
+            writeStringToArray(bytes, offset, 'RIFF'); offset += 4;
+            view.setUint32(offset, 36 + dataSize, true); offset += 4; // ChunkSize (little-endian)
+            writeStringToArray(bytes, offset, 'WAVE'); offset += 4;
+
+            // "fmt " sub-chunk
+            writeStringToArray(bytes, offset, 'fmt '); offset += 4;
+            view.setUint32(offset, 16, true); offset += 4; // Subchunk1Size (16 for PCM)
+            view.setUint16(offset, 1, true); offset += 2;  // AudioFormat (1 for PCM)
+            view.setUint16(offset, numChannels, true); offset += 2;
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            view.setUint32(offset, byteRate, true); offset += 4;
+            view.setUint16(offset, blockAlign, true); offset += 2;
+            view.setUint16(offset, bitsPerSample, true); offset += 2;
+
+            // "data" sub-chunk
+            writeStringToArray(bytes, offset, 'data'); offset += 4;
+            view.setUint32(offset, dataSize, true); offset += 4; // Subchunk2Size
+
+            // Write PCM data
+            const pcm = new Int16Array(wavBuffer, offset); // Create Int16 view from current offset
+            let pcmOffset = 0;
+
+            for (let i = 0; i < numFrames; i++) {
+                for (let ch = 0; ch < numChannels; ch++) {
+                    let sample = buffer.getChannelData(ch)[i];
+                    sample = Math.max(-1, Math.min(1, sample)); // Clamp to [-1, 1]
+                    // Convert to 16-bit signed integer
+                    pcm[pcmOffset++] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                }
+            }
+            return wavBuffer;
+        }
+
+
+        function updateTotalDurationDisplay() {
+             if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+                const adjustedDuration = audioBuffer.duration / currentPlaybackRate;
+                totalDurationDisplay.textContent = formatTime(adjustedDuration);
+                progressBar.max = audioBuffer.duration; // Progress bar max remains original duration
+            } else {
+                totalDurationDisplay.textContent = '0:00';
+                progressBar.max = 1;
+            }
+        }
+
+        function updateCurrentTimeDisplay(bufferTime) {
+             const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
+             const duration = audioBuffer?.duration ?? 0;
+             let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
+
+             if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+                const displayTime = clampedBufferTime / currentPlaybackRate; // Display time is adjusted by rate
+                currentTimeDisplay.textContent = formatTime(displayTime);
+
+                if (!isSeeking) {
+                     progressBar.value = clampedBufferTime; // Progress bar reflects buffer time
+                }
+             } else {
+                 currentTimeDisplay.textContent = '0:00';
+                 if (!isSeeking) {
+                     progressBar.value = 0;
+                 }
+             }
+        }
+
+
+        function parseCombinedFile(arrayBuffer) {
+            resetPlayerAndLyrics(false); // Keep user settings
+            loadStatus.textContent = 'Processing file...';
+
+            try {
+                const dataView = new DataView(arrayBuffer);
+                let offset = 0;
+
+                const magicBytes = new Uint8Array(arrayBuffer, offset, 4);
+                const magic = String.fromCharCode(...magicBytes);
+                offset += 4;
+                if (magic !== "LYRX") {
+                    throw new Error("Invalid file signature. Expected 'LYRX'.");
+                }
+
+                if (offset + 4 > arrayBuffer.byteLength) {
+                    throw new Error("File incomplete: Cannot read JSON length.");
+                }
+                const jsonLength = dataView.getUint32(offset, false); // Big-endian
+                offset += 4;
+
+                if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
+                    throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
+                }
+
+                let jsonData = null;
+                let jsonParseSuccess = false;
+                lyricsData = [];
+
+                if (jsonLength > 0) {
+                    const jsonBytes = new Uint8Array(arrayBuffer, offset, jsonLength);
+                    const jsonString = new TextDecoder().decode(jsonBytes);
+                    offset += jsonLength;
+
+                    try {
+                        jsonData = JSON.parse(jsonString);
+                        if (jsonData && typeof jsonData === 'object' && Array.isArray(jsonData.segments)) {
+                            jsonParseSuccess = true;
+                            jsonData.segments.forEach(segment => {
+                                segment.words?.forEach(word => {
+                                    if (word && typeof word === 'object' &&
+                                        typeof word.start === 'number' && isFinite(word.start) && word.start >= 0 &&
+                                        typeof word.text === 'string' && word.text.trim()) {
+                                        lyricsData.push({ word: word.text.trim(), start: word.start });
+                                    }
+                                })
+                            });
+                        } else {
+                             jsonParseSuccess = false; // Invalid structure
+                        }
+                    } catch (jsonError) {
+                        jsonParseSuccess = false;
+                        console.error("JSON Parse Error:", jsonError);
+                        // Don't throw yet, try to load audio. Lyrics will be marked as failed.
+                    }
+                } else { // jsonLength is 0, means no lyrics data
+                    offset += jsonLength; // Should be offset += 0
+                    jsonParseSuccess = true; // Considered success (empty lyrics is valid)
+                }
+                
+                lyricsData.sort((a, b) => a.start - b.start);
+                lyricsLoaded = jsonParseSuccess; // lyricsLoaded true if parsing successful (even if empty)
+                renderLyrics(); // Will show placeholder if lyricsData is empty or !lyricsLoaded
+
+                const audioData = arrayBuffer.slice(offset);
+                if (audioData.byteLength === 0) {
+                    throw new Error("No audio data found after JSON in the file.");
+                }
+
+                if (!audioContext) { // Should have been initialized by file input change
+                    initializeAudioContext();
+                    if (!audioContext) {
+                        throw new Error("AudioContext could not be initialized. Cannot decode audio.");
+                    }
+                }
+
+                loadStatus.textContent = 'Decoding audio...';
+                audioContext.decodeAudioData(audioData)
+                    .then(buffer => {
+                        if (!(buffer?.duration > 0)) {
+                            throw new Error("Decoded audio appears to be empty or invalid (duration 0).");
+                        }
+                        audioBuffer = buffer;
+                        audioLoaded = true;
+                        progressBar.max = buffer.duration;
+                        updateTotalDurationDisplay();
+                        updateCurrentTimeDisplay(0);
+                        updateLyricsHighlight(0, true, false); // Force update with 0 time
+                        loadStatus.textContent = lyricsLoaded ? 'File loaded successfully.' : 'Audio loaded, lyrics error.';
+                        checkEnablePlayer();
+                        // Automatically play after loading (optional, but consistent with previous behavior assumption)
+                        // To avoid auto-play, comment out playAudio()
+                        if (audioContext.state === 'suspended') {
+                            // Inform user they might need to interact for audio to start
+                            loadStatus.textContent += " Click Play to start.";
+                        } else {
+                            playAudio();
+                        }
+                    })
+                    .catch(e => {
+                        audioLoaded = false;
+                        audioBuffer = null;
+                        checkEnablePlayer();
+                        loadStatus.textContent = `Error decoding audio: ${e.message}`;
+                        console.error("Audio Decoding Error:", e);
+                         // If JSON was also bad
+                        if (!lyricsLoaded) loadStatus.textContent = `Error decoding audio & lyrics. ${e.message}`;
+                    });
+
+            } catch (error) {
+                alert(`Error processing file: ${error.message}`);
+                console.error("File Parse/Setup Error:", error);
+                resetPlayerAndLyrics(true); // Full reset
+                checkEnablePlayer();
+                loadStatus.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                pauseAudio();
+            } else {
+                playAudio();
+            }
+        }
+
+        function playAudio() {
+            if (!audioContext || !audioBuffer || isPlaying) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    playAudioInternal();
+                }).catch(e => {
+                    console.error("AudioContext resume failed:", e);
+                    loadStatus.textContent = 'Error: Click page or button to enable audio.';
+                });
+                return;
+            }
+            playAudioInternal();
+        }
+
+        function playAudioInternal() {
+            if (isPlaying || !audioContext || !audioBuffer) return;
+
+            if (pauseFadeTimeoutId) { // If a fade-out was in progress, cancel its stop action
+                clearTimeout(pauseFadeTimeoutId);
+                pauseFadeTimeoutId = null;
+            }
+
+            startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
+            if (startOffset >= audioBuffer.duration) { // Loop if at end
+                startOffset = 0;
+            }
+
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = audioBuffer;
+            sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
+            sourceNode.loop = true; // Loop within the buffer source itself
+            sourceNode.connect(gainNode);
+            sourceNode.onended = handleAudioEnd;
+
+            // Fade In
+            gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime); // Start from 0 volume
+            const targetVolume = isMuted ? 0 : parseFloat(volumeSlider.value); // Fade to user's volume or 0 if muted
+            gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + FADE_DURATION);
+            
+            startTime = audioContext.currentTime;
+            sourceNode.start(0, startOffset); // Start from current offset
+
+            isPlaying = true;
+            isPaused = false;
+            playPauseBtn.textContent = '❚❚ Pause';
+            startUpdatingTime();
+        }
+
+        function pauseAudio() {
+            if (!isPlaying || !sourceNode || !audioContext) return;
+
+            const elapsedRealTime = audioContext.currentTime - startTime;
+            const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
+            startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
+            startOffset = Math.max(0, startOffset);
+
+            playPauseBtn.textContent = '▶ Play'; // Update UI immediately
+            isPlaying = false;
+            isPaused = true;
+
+            // Fade Out
+            gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+            const currentActualGain = gainNode.gain.value;
+            gainNode.gain.setValueAtTime(currentActualGain, audioContext.currentTime); // Start ramp from current gain
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + FADE_DURATION);
+
+            if (pauseFadeTimeoutId) clearTimeout(pauseFadeTimeoutId); // Clear previous timeout if any
+            pauseFadeTimeoutId = setTimeout(() => {
+                if (!isPlaying && isPaused) { // Check state again, in case user hit play during fade
+                    stopAudioInternals(); // This actually stops the sourceNode
+                }
+                pauseFadeTimeoutId = null;
+            }, FADE_DURATION * 1000);
+            
+            // updateCurrentTimeDisplay(startOffset); // No, this will be updated by stopUpdatingTime or seek
+            stopUpdatingTime(); // Stop lyric/time updates
+            updateCurrentTimeDisplay(startOffset); // Set display to paused time
+        }
+
+
+        function stopAudioInternals() { // Stops the source node, cancels animation frame
+             if (sourceNode) {
+                sourceNode.onended = null;
+                sourceNode.loop = false;
+                try {
+                    sourceNode.stop(0);
+                } catch (e) { /* Might throw if already stopped or not started */ }
+                sourceNode.disconnect();
+                sourceNode = null;
+            }
+            stopUpdatingTime(); // Also cancel animation frame
+        }
+
+
+        function stopAudio() { // Called for full stop/reset
+            stopAudioInternals();
+            isPlaying = false;
+            // Ensure gain is at the user-set level if not fading out (e.g. file change)
+            // Or, if pausing, it should be 0.
+            // This function is mostly for resets, so setting to target volume makes sense.
+            if (gainNode && audioContext) {
+                const targetVol = isMuted ? 0 : parseFloat(volumeSlider.value);
+                gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+                gainNode.gain.setValueAtTime(targetVol, audioContext.currentTime);
+            }
+        }
+
+        function seekAudio(bufferTime) {
+            if (!audioBuffer || !audioContext) return;
+
+            const wasPlaying = isPlaying;
+            // If playing, stop source and clear fades before seeking
+            if (isPlaying) {
+                stopAudioInternals(); // Stops current source, cancels time updates
+                isPlaying = false; // Temporarily set to false to avoid race conditions
+            }
+            if (pauseFadeTimeoutId) {
+                clearTimeout(pauseFadeTimeoutId);
+                pauseFadeTimeoutId = null;
+            }
+             // Ensure gain is at target volume before potentially restarting play with fade
+            if (gainNode) {
+                const targetVol = isMuted ? 0 : parseFloat(volumeSlider.value);
+                gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+                gainNode.gain.setValueAtTime(targetVol, audioContext.currentTime);
+            }
+
+
+            startOffset = Math.max(0, bufferTime);
+            startOffset = Math.min(startOffset, audioBuffer.duration);
+
+            progressBar.value = startOffset;
+            updateCurrentTimeDisplay(startOffset);
+            updateLyricsHighlight(startOffset, true, false); // Force update, no scroll
+
+
+            if (wasPlaying) {
+                 playAudio(); // This will re-create source, re-apply fades, and set isPlaying = true
+            } else {
+                // If it was paused, it remains paused at the new location
+                isPaused = true; // Ensure isPaused is true
+                playPauseBtn.textContent = '▶ Play';
+            }
+        }
+
+
+        function handleAudioEnd() { // Called when sourceNode.loop=true and it "ends" (which means it looped)
+             // console.log("Audio source ended (looped internally)");
+             // startOffset is managed by getCurrentBufferTime calculation based on loop property
+             // No specific action needed here due to sourceNode.loop = true
+        }
+
+
+
+        function startUpdatingTime() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            // startTime is set when playAudioInternal is called
+            function updateLoop() {
+                if (!isPlaying || !audioBuffer || !sourceNode || !audioContext) {
+                    animationFrameId = null; return;
+                }
+
+                const currentBufTime = getCurrentBufferTime();
+                updateLyricsHighlight(currentBufTime, false, true); // Allow scroll
+
+                if (!isSeeking) {
+                    updateCurrentTimeDisplay(currentBufTime);
+                }
+                animationFrameId = requestAnimationFrame(updateLoop);
+            }
+            animationFrameId = requestAnimationFrame(updateLoop);
+        }
+
+        function stopUpdatingTime() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+
+        function checkEnablePlayer() {
+            const audioReady = isPlayerReady();
+            playPauseBtn.disabled = !audioReady;
+            progressBar.disabled = !audioReady;
+            volumeBtn.disabled = !audioReady;
+            volumeSlider.disabled = !audioReady;
+            speedBtn.disabled = !audioReady;
+            speedSlider.disabled = !audioReady;
+            themeToggleBtn.disabled = false; // Theme toggle should always be enabled
+            downloadBtn.disabled = !audioReady; // Enable if audio is ready, lyrics not strictly required for WAV
+
+            if (!audioReady) {
+                hidePopup(volumePopup);
+                hidePopup(speedPopup);
+                hideDownloadModal();
+            }
+
+            // Update UI elements based on current state even if audioContext isn't fully ready
+            const currentVolume = parseFloat(volumeSlider.value); // Use slider value as source of truth
+            updateVolumeIcon(currentVolume);
+            if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
+            
+            if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
+            
+            if (audioReady) {
+                updateTotalDurationDisplay();
+                updateCurrentTimeDisplay(startOffset); // Update with current startOffset
+            } else {
+                 totalDurationDisplay.textContent = '0:00';
+                 currentTimeDisplay.textContent = '0:00';
+                 progressBar.value = 0;
+                 progressBar.max = 1;
+            }
+        }
+
+        function resetPlayerAndLyrics(resetSettings = false) {
+            stopAudio(); // Full stop, including gainNode reset to targetVolume
+
+            audioLoaded = false; lyricsLoaded = false; audioBuffer = null;
+            lyricsData = []; currentWordSpans = [];
+            currentWordIndex = -1; previousWordIndex = -1;
+            startOffset = 0; startTime = 0; isPaused = false; // isPlaying already false from stopAudio
+            
+            if (resetSettings) { // Only if explicitly asked, e.g. major error
+                currentSongFilename = null;
+                // Reset volume and speed settings to default and save them
+                const defaultVolume = 1;
+                const defaultSpeed = 1.0;
+                
+                isMuted = false; 
+                previousVolumeBeforeMute = defaultVolume;
+                if(volumeSlider) volumeSlider.value = defaultVolume;
+                if(volumePercentage) volumePercentage.textContent = `${Math.round(defaultVolume * 100)}%`;
+                updateVolumeIcon(defaultVolume);
+                if(gainNode && audioContext) gainNode.gain.setValueAtTime(defaultVolume, audioContext.currentTime);
+                saveSetting(VOLUME_STORAGE_KEY, defaultVolume);
+
+                if(speedSlider) speedSlider.value = defaultSpeed;
+                if(speedRateDisplay) speedRateDisplay.textContent = `${defaultSpeed.toFixed(2)}x`;
+                currentPlaybackRate = defaultSpeed;
+                if(sourceNode?.playbackRate && audioContext) sourceNode.playbackRate.setValueAtTime(defaultSpeed, audioContext.currentTime);
+                saveSetting(SPEED_STORAGE_KEY, defaultSpeed);
+            } else {
+                // Ensure current settings are reflected if not resetting them
+                loadVolumeSetting(); // Re-applies from slider/storage to gainNode
+                loadSpeedSetting();  // Re-applies from slider/storage
+            }
+
+            lyricsOutput.innerHTML = 'Load a .songlyrics file.';
+            lyricsOutput.className = 'placeholder';
+            lyricsContainer.style.justifyContent = 'center';
+            lyricsContainer.style.alignItems = 'center';
+            lyricsContainer.scrollTop = 0;
+
+            playPauseBtn.textContent = '▶ Play';
+            progressBar.value = 0; progressBar.max = 1;
+            currentTimeDisplay.textContent = '0:00';
+            totalDurationDisplay.textContent = '0:00';
+
+            hidePopup(volumePopup);
+            hidePopup(speedPopup);
+            hideDownloadModal();
+            checkEnablePlayer(); // Update enabled/disabled states
+        }
+
+
+        function renderLyrics() {
+            lyricsOutput.innerHTML = '';
+            currentWordSpans = [];
+            currentWordIndex = -1;
+            previousWordIndex = -1;
+            lyricsContainer.scrollTop = 0;
+
+            if (lyricsLoaded && lyricsData.length > 0) {
+                lyricsOutput.className = ''; // Remove placeholder class
+                lyricsContainer.style.justifyContent = 'flex-start'; // Align to top-left
+                lyricsContainer.style.alignItems = 'flex-start';
+
+                lyricsData.forEach((line, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = line.word + ' '; // Add space after each word
+                    span.id = `word-${index}`;
+                    span.dataset.startTime = line.start;
+                    lyricsOutput.appendChild(span);
+                    currentWordSpans.push(span);
+                });
+            } else {
+                if (!lyricsLoaded && lyricsData.length === 0 && songLyricsFileInput.value) { // Check if a file was attempted
+                    lyricsOutput.innerHTML = 'Error parsing lyrics or no lyrics in file.';
+                } else {
+                     lyricsOutput.innerHTML = 'No lyrics content in file, or load a .songlyrics file.';
+                }
+                lyricsOutput.className = 'placeholder';
+                lyricsContainer.style.justifyContent = 'center';
+                lyricsContainer.style.alignItems = 'center';
+            }
+        }
+
+        function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
+             const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
+
+            if (!lyricsLoaded || currentWordSpans.length === 0) {
+                 if (currentWordIndex !== -1) { // If previously highlighting, clear it
+                     highlightWord(-1, false); // Clear all highlights
+                     currentWordIndex = -1;
+                     previousWordIndex = -1;
+                 }
+                return;
+            }
+
+            let newWordIndex = -1;
+            // A small lookahead helps ensure the word highlights as it's spoken
+            const lookaheadTime = effectiveTime + 0.05; // 50ms lookahead for word start
+            for (let i = 0; i < lyricsData.length; i++) {
+                if (lyricsData[i].start <= lookaheadTime) {
+                    newWordIndex = i;
+                } else {
+                    break; // Lyrics are sorted, so no need to check further
+                }
+            }
+
+             if (newWordIndex !== currentWordIndex || forceUpdate) {
+                const shouldScroll = allowScroll && !isSeeking && isPlaying;
+                highlightWord(newWordIndex, shouldScroll);
+                previousWordIndex = currentWordIndex;
+                currentWordIndex = newWordIndex;
+             }
+        }
+
+
+        function highlightWord(indexToHighlight, shouldAutoScroll = false) {
+            let wordToScroll = null;
+
+            currentWordSpans.forEach((span, index) => {
+                const isVisible = index <= indexToHighlight; // Show this word and all previous
+                span.classList.toggle('visible', isVisible);
+
+                const isHighlighted = index === indexToHighlight;
+                span.classList.toggle('highlighted', isHighlighted);
+
+                if(isHighlighted) wordToScroll = span;
+            });
+
+             if (indexToHighlight < 0) { // Clear all if index is -1
+                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
+             }
+
+            if (shouldAutoScroll && wordToScroll) {
+                const containerRect = lyricsContainer.getBoundingClientRect();
+                const wordRect = wordToScroll.getBoundingClientRect();
+                const isLastWord = indexToHighlight === lyricsData.length - 1;
+
+                // Define a "neutral zone" in the middle of the viewport
+                const zoneTop = containerRect.top + containerRect.height * 0.25; // Upper 25%
+                const zoneBottom = containerRect.top + containerRect.height * 0.75; // Lower 75%
+
+                if (isLastWord && wordRect.bottom > (containerRect.bottom - 30)) { // If last word and near bottom
+                    wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                } else if (wordRect.top < zoneTop || wordRect.bottom > zoneBottom) { // If word is outside neutral zone
+                    wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // If inside the neutral zone, no explicit scroll, natural flow should be fine.
+                // However, the 'center' behavior is generally good.
+                // To make it less jumpy if word is already somewhat centered:
+                // else if (Math.abs(wordRect.top - containerRect.top - containerRect.height / 2) > containerRect.height * 0.1) {
+                //    wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // }
+            }
+        }
+
+
+        function updateVolumeIcon(volume) {
+            if (!volumeIcon) return;
+            volumeIcon.className = 'fas '; // Clear existing fa classes
+            if (isMuted || volume <= 0) { // Check isMuted flag as well
+                volumeIcon.classList.add('fa-volume-mute');
+            } else if (volume < 0.5) {
+                volumeIcon.classList.add('fa-volume-down');
+            } else {
+                volumeIcon.classList.add('fa-volume-up');
+            }
+        }
+
+
+        function resetPopupTimer(popupElement) {
+            clearPopupTimer(popupElement);
+            const timerCallback = () => { hidePopup(popupElement); };
+            if (popupElement === volumePopup) {
+                volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
+            } else if (popupElement === speedPopup) {
+                speedPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
+            }
+        }
+
+
+        function clearPopupTimer(popupElement) {
+             if (popupElement === volumePopup && volumePopupTimeout) {
+                clearTimeout(volumePopupTimeout);
+                volumePopupTimeout = null;
+            } else if (popupElement === speedPopup && speedPopupTimeout) {
+                clearTimeout(speedPopupTimeout);
+                speedPopupTimeout = null;
+            }
+        }
+
+
+        function togglePopup(el) {
+            el.classList.toggle('show');
+        }
+
+
+        function hidePopup(el) {
+            el.classList.remove('show');
+            clearPopupTimer(el); // Ensure timer is cleared when manually hidden
+        }
+
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '0:00';
+            const totalSeconds = Math.floor(seconds);
+            const minutes = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+
+        document.addEventListener('keydown', handleKeyboardShortcuts);
+
+        function handleKeyboardShortcuts(event) {
+            const activeElement = document.activeElement;
+            const isTextInputFocused = (activeElement.tagName === 'INPUT' && /text|search|password|email|number|tel|url/.test(activeElement.type)) ||
+                                      activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable ||
+                                      activeElement.tagName === 'SELECT'; // Ignore if select is focused (for download modal)
+
+            if (isTextInputFocused) return;
+
+            // Handle Esc for popups/modal
+            if (event.key === 'Escape') {
+                if (volumePopup.classList.contains('show')) {
+                    hidePopup(volumePopup); event.preventDefault(); return;
+                }
+                if (speedPopup.classList.contains('show')) {
+                    hidePopup(speedPopup); event.preventDefault(); return;
+                }
+                if (downloadModal.style.display === 'flex') {
+                    hideDownloadModal(); event.preventDefault(); return;
+                }
+            }
+
+
+            const playerReady = isPlayerReady();
+            const isRangeInputFocused = activeElement.tagName === 'INPUT' && activeElement.type === 'range';
+
+            if (playerReady) {
+                // Volume/Speed popup slider keyboard control
+                if (volumePopup.classList.contains('show') && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
+                    event.preventDefault();
+                    const currentValue = parseFloat(volumeSlider.value); const step = 0.01;
+                    let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
+                    newValue = parseFloat(Math.max(0, Math.min(1, newValue)).toFixed(2));
+                    setVolume(newValue); resetPopupTimer(volumePopup); return;
+                }
+                if (speedPopup.classList.contains('show') && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
+                    event.preventDefault();
+                    const currentValue = parseFloat(speedSlider.value); const step = 0.01;
+                    const min = parseFloat(speedSlider.min); const max = parseFloat(speedSlider.max);
+                    let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
+                    newValue = parseFloat(Math.max(min, Math.min(max, newValue)).toFixed(2));
+                    setPlaybackSpeed(newValue); resetPopupTimer(speedPopup); return;
+                }
+            }
+
+            // General player shortcuts
+            let currentBufferTime = playerReady ? getCurrentBufferTime() : 0;
+
+            switch (event.code) {
+                case 'Space':
+                case 'KeyK':
+                    if (playerReady && (activeElement.tagName !== 'BUTTON' || isRangeInputFocused)) {
+                        event.preventDefault(); togglePlayback();
+                    } else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
+                         event.preventDefault(); togglePlayback();
+                    }
+                    break;
+
+                case 'KeyJ': if (playerReady) { event.preventDefault(); seekAudio(Math.max(0, currentBufferTime - 10)); } break;
+                case 'KeyL': if (playerReady) { event.preventDefault(); seekAudio(Math.min(audioBuffer.duration, currentBufferTime + 10)); } break;
+                
+                case 'ArrowLeft':
+                    if (!isRangeInputFocused && playerReady) { event.preventDefault(); seekAudio(Math.max(0, currentBufferTime - 5)); }
+                    break;
+                case 'ArrowRight':
+                    if (!isRangeInputFocused && playerReady) { event.preventDefault(); seekAudio(Math.min(audioBuffer.duration, currentBufferTime + 5)); }
+                    break;
+
+                case 'ArrowUp':
+                    if (!isRangeInputFocused && playerReady) {
+                        event.preventDefault();
+                        let currentVolume = parseFloat(volumeSlider.value);
+                        setVolume(Math.min(1, parseFloat((currentVolume + 0.05).toFixed(2))));
+                        if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (!isRangeInputFocused && playerReady) {
+                        event.preventDefault();
+                        let currentVolume = parseFloat(volumeSlider.value);
+                        setVolume(Math.max(0, parseFloat((currentVolume - 0.05).toFixed(2))));
+                        if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
+                    }
+                    break;
+                case 'KeyM': if (playerReady) { event.preventDefault(); toggleMute(); } break;
+            }
+        }
+
+        // --- Service Worker ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                // Increment this version to force update the cache.
+                const CACHE_VERSION = '1.0.1';
+                const CACHE_NAME = 'live-lyrics-cache-v' + CACHE_VERSION;
+                
+                // Determine the correct path for the main HTML file.
+                // For a file like 'index.html' or 'player.html' at the root or a subfolder.
+                // self.registration.scope gives the scope of the SW, usually ending in '/'.
+                // This assumes the HTML file is 'index.html' within that scope or the scope URL itself.
+                const HTML_FILE_PATH = new URL(self.registration.scope).pathname;
+
+                const CORE_ASSETS = [
+                    HTML_FILE_PATH, // The main HTML file itself
+                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+                    'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap',
+                    'https://raw.githubusercontent.com/realaurora-stw/song-player/refs/heads/main/icons/notes.png'
+                    // Font files from fonts.gstatic.com will be cached on demand by the fetch handler
+                ];
+
+                self.addEventListener('install', (event) => {
+                    console.log('Service Worker: Install event');
+                    event.waitUntil(
+                        caches.open(CACHE_NAME).then((cache) => {
+                            console.log('Service Worker: Caching core assets:', CORE_ASSETS);
+                            return Promise.all(CORE_ASSETS.map(url => {
+                                return cache.add(new Request(url, {cache: 'reload'})) // Force network request for fresh assets during install
+                                    .catch(err => console.warn('SW: Failed to cache on install - ', url, err));
+                            }));
+                        }).then(() => self.skipWaiting()) // Activate new SW immediately
+                    );
+                });
+
+                self.addEventListener('activate', (event) => {
+                    console.log('Service Worker: Activate event');
+                    event.waitUntil(
+                        caches.keys().then((cacheNames) => {
+                            return Promise.all(
+                                cacheNames.map((cacheName) => {
+                                    if (cacheName !== CACHE_NAME) {
+                                        console.log('Service Worker: Deleting old cache', cacheName);
+                                        return caches.delete(cacheName);
+                                    }
+                                })
+                            );
+                        }).then(() => self.clients.claim()) // Take control of open clients
+                    );
+                });
+
+                self.addEventListener('fetch', (event) => {
+                    const requestUrl = new URL(event.request.url);
+
+                    // Strategy: Cache first, then network, then update cache for CDN/font assets
+                    if (requestUrl.hostname === 'cdnjs.cloudflare.com' ||
+                        requestUrl.hostname === 'fonts.googleapis.com' ||
+                        requestUrl.hostname === 'fonts.gstatic.com' ||
+                        requestUrl.hostname === 'raw.githubusercontent.com') {
+                        event.respondWith(
+                            caches.open(CACHE_NAME).then((cache) => {
+                                return cache.match(event.request).then((cachedResponse) => {
+                                    const fetchPromise = fetch(event.request).then((networkResponse) => {
+                                        if (networkResponse.ok) {
+                                            cache.put(event.request, networkResponse.clone());
+                                        }
+                                        return networkResponse;
+                                    }).catch(fetchError => {
+                                        console.warn('SW: Network fetch failed for CDN asset:', event.request.url, fetchError);
+                                        // If fetch fails and not in cache, this will lead to error.
+                                        // If in cache, cachedResponse is already returned.
+                                        if (!cachedResponse) throw fetchError; // Re-throw if not in cache
+                                    });
+                                    return cachedResponse || fetchPromise;
+                                });
+                            })
+                        );
+                        return;
+                    }
+                    
+                    // Strategy: Cache first, then network for app's own assets (e.g., the HTML itself)
+                    // This is important for the main HTML file to load offline.
+                    event.respondWith(
+                        caches.match(event.request).then((cachedResponse) => {
+                            if (cachedResponse) {
+                                return cachedResponse;
+                            }
+                            return fetch(event.request).then(networkResponse => {
+                                // Optionally cache other same-origin resources if needed,
+                                // but CORE_ASSETS should cover the essentials.
+                                return networkResponse;
+                            }).catch(error => {
+                                console.error('SW: Fetch failed for app resource:', event.request.url, error);
+                                // Could return a custom offline page here for navigation requests if one exists
+                                // For non-navigation (e.g. an API call that fails), just let it fail.
+                            });
+                        })
+                    );
+                });
+            `;
+            
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+
+            window.addEventListener('load', () => {
+                // The scope determines which pages the service worker controls.
+                // './' means it controls pages in the same directory and subdirectories.
+                // For a single HTML file, this is usually fine.
+                // If your HTML file is `domain.com/app/player.html`, scope could be `/app/`.
+                let scope = location.pathname;
+                // Ensure scope ends with a slash and refers to the directory
+                if (!scope.endsWith('/')) {
+                    scope = scope.substring(0, scope.lastIndexOf('/') + 1);
+                }
+                if (scope === '') scope = '/'; // Root case
+
+                navigator.serviceWorker.register(swUrl, { scope: scope })
+                    .then(registration => {
+                        console.log('Service Worker registered successfully with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+    </script>
+
+</body>
+</html>
