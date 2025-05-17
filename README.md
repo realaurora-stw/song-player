@@ -29,3 +29,5 @@
 - Download finished "Remixes" of songs (e.g. nightcore or slowed down songs)
 - Light/Dark mode (Dark mode by default)
 - Keyboard shortcuts (left arrow = go back 5 seconds, right arrow = go foward 5 seconds, space/k = pause, up/down = adjust volume, m = mute/unmute)
+## 🩷 To add
+- Karaoke mode (via .songlyrics)
