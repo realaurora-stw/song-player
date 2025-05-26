@@ -390,8 +390,10 @@
                     if (typeof firstWord.text !== 'string') {
                          return { valid: false, message: "Word missing 'text' (string)." };
                     }
-                    if (typeof firstWord.start !== 'number') {
-                        return { valid: false, message: "Word missing 'start' (number)." };
+                    // UPDATED LINE: Check for 'start_time' instead of 'start'
+                    if (typeof firstWord.start_time !== 'number') {
+                        // UPDATED MESSAGE to reflect 'start_time'
+                        return { valid: false, message: "Word missing 'start_time' (number)." };
                     }
                  }
             }
