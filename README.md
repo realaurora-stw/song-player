@@ -31,3 +31,5 @@
 - Keyboard shortcuts (left arrow = go back 5 seconds, right arrow = go foward 5 seconds, space/k = pause, up/down = adjust volume, m = mute/unmute)
 ## 🩷 To add
 - Karaoke mode (via .songlyrics)
+- Bass Booster
+- If you would like to help, feel free to contribute to the source code! :)
