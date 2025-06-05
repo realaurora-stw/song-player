@@ -297,7 +297,8 @@
 
 
         .volume-control-wrapper,
-        .speed-control-wrapper {
+        .speed-control-wrapper,
+        .bass-boost-control-wrapper {
             position: relative;
             display: flex;
             align-items: center;
@@ -585,6 +586,18 @@
                 </div>
             </div>
             
+            <div class="bass-boost-control-wrapper">
+                <button id="bassBoosterBtn" class="control-icon-btn" disabled title="Bass Boost">
+                    <i class="fas fa-drum"></i>
+                </button>
+                <div id="bassBoosterPopup" class="popup-control">
+                    <div class="slider-wrapper-vertical">
+                        <input type="range" id="bassBoosterSlider" class="slider-vertical" min="0" max="30" step="1" value="0" disabled>
+                    </div>
+                    <span id="bassBoostDisplay" class="popup-text-display">0 dB</span>
+                </div>
+            </div>
+
             <button id="downloadBtn" class="control-icon-btn" disabled title="Download Remix">
                 <i class="fas fa-download"></i>
                 <i class="fas fa-circle-notch fa-spin" style="display: none;"></i>
@@ -622,12 +635,17 @@
         const downloadSpinnerIcon = downloadBtn.querySelector('.fa-circle-notch');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
+        const bassBoosterBtn = document.getElementById('bassBoosterBtn');
+        const bassBoosterPopup = document.getElementById('bassBoosterPopup');
+        const bassBoosterSlider = document.getElementById('bassBoosterSlider');
+        const bassBoostDisplay = document.getElementById('bassBoostDisplay');
 
 
         let audioContext;
         let audioBuffer;
         let sourceNode;
         let gainNode;
+        let bassBoosterNode; // For bass boost
         let isPlaying = false;
         let isPaused = false;
         let startTime = 0;
@@ -651,10 +669,18 @@
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
         const THEME_STORAGE_KEY = 'playerTheme';
-        const LIGHT_MODE_CLASS = 'light-mode';
+        const BASS_BOOST_STORAGE_KEY = 'playerBassBoostSetting_v1';
+
+        const BASS_BOOST_FREQUENCY = 200; // Hz for lowshelf filter
+        const BASS_BOOST_MIN_DB = 0;
+        const BASS_BOOST_MAX_DB = 30; // Max 30dB gain
+        const BASS_BOOST_DEFAULT_DB = 0;
+        const BASS_BOOST_STEP_DB = 1;
+
 
         let volumePopupTimeout = null;
         let speedPopupTimeout = null;
+        let bassBoosterPopupTimeout = null;
         const POPUP_CLOSE_DELAY = 6000;
 
 
@@ -676,10 +702,21 @@
             if (!audioContext) {
                 try {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
                     gainNode = audioContext.createGain();
+
+                    bassBoosterNode = audioContext.createBiquadFilter();
+                    bassBoosterNode.type = 'lowshelf';
+                    bassBoosterNode.frequency.setValueAtTime(BASS_BOOST_FREQUENCY, audioContext.currentTime);
+                    // Initial gain will be set by loadBassBoostSetting -> setBassBoost
+
+                    bassBoosterNode.connect(gainNode);
                     gainNode.connect(audioContext.destination);
+                    
                     loadVolumeSetting();
                     loadSpeedSetting();
+                    loadBassBoostSetting();
+
                 } catch (e) {
                     console.error("Web Audio API is not supported in this browser.", e);
                     alert("Sorry, your browser doesn't support the required Web Audio API for this player.");
@@ -716,22 +753,21 @@
 
         function loadVolumeSetting() {
             const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
-            if(gainNode && audioContext) {
-                gainNode.gain.value = vol;
-            }
-            if(volumeSlider) {
-                 volumeSlider.value = vol;
-                 if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
-                 updateVolumeIcon(vol);
-            }
-            isMuted = false;
-            previousVolumeBeforeMute = vol;
+            setVolume(vol); // Use setVolume to apply and update UI
+            isMuted = false; // Reset mute state based on loaded volume
+            previousVolumeBeforeMute = vol > 0 ? vol : 1.0; // Sensible previous volume
+             if (vol === 0) isMuted = true;
         }
 
         function loadSpeedSetting() {
             const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
              setPlaybackSpeed(speed, false);
              updateTotalDurationDisplay();
+        }
+
+        function loadBassBoostSetting() {
+            const db = loadSetting(BASS_BOOST_STORAGE_KEY, BASS_BOOST_DEFAULT_DB, val => !isNaN(val) && val >= BASS_BOOST_MIN_DB && val <= BASS_BOOST_MAX_DB);
+            setBassBoost(db);
         }
 
 
@@ -771,11 +807,13 @@
              if (volumeSlider) {
                  volumeSlider.value = clampedVolume;
                  updateVolumeIcon(clampedVolume);
-                 volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
+                 if (volumePercentage) volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
 
-                 if (!isMuted) {
+                 if (!isMuted || clampedVolume > 0) { // Save if not muted or if unmuting
                     saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
                  }
+                 if (clampedVolume > 0 && isMuted) isMuted = false;
+                 else if (clampedVolume === 0 && !isMuted) isMuted = true; // This case might be handled by toggleMute
             }
         }
 
@@ -815,13 +853,29 @@
             }
         }
 
+        function setBassBoost(dbValue) {
+            if (isNaN(dbValue)) return;
+
+            const clampedDbValue = Math.max(BASS_BOOST_MIN_DB, Math.min(BASS_BOOST_MAX_DB, dbValue));
+
+            if (audioContext && bassBoosterNode) {
+                bassBoosterNode.gain.setValueAtTime(clampedDbValue, audioContext.currentTime);
+            }
+
+            if (bassBoosterSlider) bassBoosterSlider.value = clampedDbValue;
+            if (bassBoostDisplay) bassBoostDisplay.textContent = `${Math.round(clampedDbValue)} dB`;
+            
+            saveSetting(BASS_BOOST_STORAGE_KEY, clampedDbValue);
+        }
+
+
         function toggleMute() {
             if (!audioContext || !gainNode) return;
 
-            if (isMuted) {
+            if (isMuted) { // Unmute
                 isMuted = false;
-                setVolume(previousVolumeBeforeMute);
-            } else {
+                setVolume(previousVolumeBeforeMute > 0 ? previousVolumeBeforeMute : 0.01); // Ensure unmuting to a non-zero value
+            } else { // Mute
                 isMuted = true;
                 previousVolumeBeforeMute = gainNode.gain.value;
                 setVolume(0);
@@ -831,9 +885,16 @@
 
         document.addEventListener('DOMContentLoaded', () => {
              loadTheme();
-             loadVolumeSetting();
-             loadSpeedSetting();
-             resetPlayerAndLyrics(false);
+             // Audio related settings are loaded after audioContext is initialized or if already available
+             // initializeAudioContext(); // This might be too early or redundant if called by file load
+             // For now, settings that depend on audioContext (like volume affecting gainNode)
+             // are best handled within/after initializeAudioContext or by ensuring setX functions are robust.
+             // Let's ensure setX functions update UI even if audioContext is not ready.
+             loadVolumeSetting(); // Will update slider, local storage
+             loadSpeedSetting();  // Will update slider, local storage
+             loadBassBoostSetting(); // Will update slider, local storage
+
+             resetPlayerAndLyrics(false); // This also calls load settings
              checkEnablePlayer();
             document.addEventListener('visibilitychange', function() {
                  if (document.visibilityState === 'visible') {
@@ -868,7 +929,7 @@
                 return;
             }
 
-            initializeAudioContext();
+            initializeAudioContext(); // Crucial: ensure audio context and nodes are ready
             if (!audioContext) {
                 loadStatus.textContent = 'Error: Audio system not ready.';
                 resetPlayerAndLyrics(true);
@@ -894,6 +955,7 @@
                 const wasVisible = volumePopup.classList.contains('show');
                 togglePopup(volumePopup);
                 hidePopup(speedPopup);
+                hidePopup(bassBoosterPopup);
                 if (!wasVisible && volumePopup.classList.contains('show')) {
                     resetPopupTimer(volumePopup);
                 } else if (wasVisible && !volumePopup.classList.contains('show')) {
@@ -905,13 +967,7 @@
         volumeSlider.addEventListener('input', () => {
             if (!volumeSlider.disabled) {
                 const newVolume = parseFloat(volumeSlider.value);
-                
-                if (isMuted && newVolume > 0) {
-                    isMuted = false;
-                } else if (isMuted && newVolume === 0) {
-                }
-                
-                setVolume(newVolume);
+                setVolume(newVolume); // This will also handle isMuted state if volume becomes 0 or >0
                 resetPopupTimer(volumePopup);
             }
         });
@@ -941,12 +997,14 @@
             setVolume(newValue);
             resetPopupTimer(volumePopup);
         });
+
         speedBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             if (!speedBtn.disabled) {
                 const wasVisible = speedPopup.classList.contains('show');
                 togglePopup(speedPopup);
                 hidePopup(volumePopup);
+                hidePopup(bassBoosterPopup);
                  if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
@@ -982,11 +1040,61 @@
             resetPopupTimer(speedPopup);
         });
 
+        bassBoosterBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!bassBoosterBtn.disabled) {
+                const wasVisible = bassBoosterPopup.classList.contains('show');
+                togglePopup(bassBoosterPopup);
+                hidePopup(volumePopup);
+                hidePopup(speedPopup);
+                if (!wasVisible && bassBoosterPopup.classList.contains('show')) {
+                    resetPopupTimer(bassBoosterPopup);
+                } else if (wasVisible && !bassBoosterPopup.classList.contains('show')) {
+                    clearPopupTimer(bassBoosterPopup);
+                }
+            }
+        });
+
+        bassBoosterSlider.addEventListener('input', () => {
+            if (!bassBoosterSlider.disabled) {
+                const db = parseFloat(bassBoosterSlider.value);
+                setBassBoost(db);
+                resetPopupTimer(bassBoosterPopup);
+            }
+        });
+
+        bassBoosterSlider.addEventListener('wheel', (event) => {
+            if (bassBoosterSlider.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const delta = event.deltaY;
+            const currentValue = parseFloat(bassBoosterSlider.value);
+            const minDb = parseFloat(bassBoosterSlider.min);
+            const maxDb = parseFloat(bassBoosterSlider.max);
+            let step = BASS_BOOST_STEP_DB; // Default step is 1 dB
+
+            if (event.ctrlKey) step = 5; // Larger step with Ctrl
+            else if (event.shiftKey) step = 0.5; // Finer step with Shift (if slider allowed floats)
+                                                // For integer steps, Shift might not be as useful unless step becomes < 1.
+                                                // Let's keep step integer based on slider's step attribute.
+
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minDb, Math.min(maxDb, newValue));
+            newValue = Math.round(newValue); // Ensure integer dB value if step is integer
+
+            setBassBoost(newValue);
+            resetPopupTimer(bassBoosterPopup);
+        });
+
+
         volumePopup.addEventListener('mousemove', () => {
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
         });
         speedPopup.addEventListener('mousemove', () => {
              if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
+        });
+        bassBoosterPopup.addEventListener('mousemove', () => {
+            if (bassBoosterPopup.classList.contains('show')) resetPopupTimer(bassBoosterPopup);
         });
 
 
@@ -997,11 +1105,15 @@
             if (speedPopup.classList.contains('show') && !speedBtn.contains(event.target) && !speedPopup.contains(event.target)) {
                 hidePopup(speedPopup);
             }
+            if (bassBoosterPopup.classList.contains('show') && !bassBoosterBtn.contains(event.target) && !bassBoosterPopup.contains(event.target)) {
+                hidePopup(bassBoosterPopup);
+            }
         });
 
 
         volumePopup.addEventListener('click', (event) => event.stopPropagation());
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
+        bassBoosterPopup.addEventListener('click', (event) => event.stopPropagation());
 
 
         themeToggleBtn.addEventListener('click', () => {
@@ -1073,6 +1185,22 @@
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
             setPlaybackSpeed(newValue);
+        });
+
+        bassBoosterBtn.addEventListener('wheel', (event) => {
+            if (!isPlayerReady() || bassBoosterBtn.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+
+            const delta = event.deltaY;
+            const currentValue = parseFloat(bassBoosterSlider.value);
+            const minDb = parseFloat(bassBoosterSlider.min);
+            const maxDb = parseFloat(bassBoosterSlider.max);
+            let step = BASS_BOOST_STEP_DB;
+
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minDb, Math.min(maxDb, newValue));
+            setBassBoost(Math.round(newValue));
         });
 
 
@@ -1147,10 +1275,16 @@
                 offlineSource.buffer = audioBuffer;
                 offlineSource.playbackRate.value = currentPlaybackRate;
 
-                const offlineGain = offlineCtx.createGain();
-                offlineGain.gain.value = 1.0;
+                const offlineBassBoosterNode = offlineCtx.createBiquadFilter();
+                offlineBassBoosterNode.type = 'lowshelf';
+                offlineBassBoosterNode.frequency.value = BASS_BOOST_FREQUENCY;
+                offlineBassBoosterNode.gain.value = parseFloat(bassBoosterSlider.value);
 
-                offlineSource.connect(offlineGain);
+                const offlineGain = offlineCtx.createGain();
+                offlineGain.gain.value = gainNode.gain.value; // Use current master volume for download
+
+                offlineSource.connect(offlineBassBoosterNode);
+                offlineBassBoosterNode.connect(offlineGain);
                 offlineGain.connect(offlineCtx.destination);
                 offlineSource.start(0);
 
@@ -1286,7 +1420,7 @@
 
 
         function parseCombinedFile(arrayBuffer) {
-            resetPlayerAndLyrics(false);
+            resetPlayerAndLyrics(false); // Keep settings, but reset state
             loadStatus.textContent = 'Processing file...';
 
             try {
@@ -1346,18 +1480,18 @@
                         throw new Error(`Invalid JSON format: ${jsonError.message}`);
                     }
                 } else {
-                    offset += jsonLength;
-                    jsonParseSuccess = true;
+                    offset += jsonLength; // Skip zero-length JSON data
+                    jsonParseSuccess = true; // No JSON is valid for lyrics-optional files
                 }
 
 
-                if (!jsonParseSuccess && jsonLength > 0) {
-                     lyricsData = [];
+                if (!jsonParseSuccess && jsonLength > 0) { // If parsing failed but there was data
+                     lyricsData = []; // Ensure lyrics are cleared
                 }
 
 
                 lyricsData.sort((a, b) => a.start - b.start);
-                                lyricsLoaded = jsonParseSuccess;
+                lyricsLoaded = jsonParseSuccess; // Or true if jsonLength is 0
                 renderLyrics();
 
 
@@ -1367,9 +1501,9 @@
                 }
 
 
-                if (!audioContext) {
-                    initializeAudioContext();
-                    if (!audioContext) {
+                if (!audioContext) { // Should have been initialized by now by songLyricsFileInput change handler
+                    initializeAudioContext(); 
+                    if (!audioContext) { // If still fails
                         throw new Error("AudioContext could not be initialized. Cannot decode audio.");
                     }
                 }
@@ -1403,7 +1537,7 @@
             } catch (error) {
                 alert(`Error processing file: ${error.message}`);
                 console.error("File Parse/Setup Error:", error);
-                resetPlayerAndLyrics(true);
+                resetPlayerAndLyrics(true); // Full reset on critical error
                 checkEnablePlayer();
                 loadStatus.textContent = `Error: ${error.message}`;
             }
@@ -1450,7 +1584,7 @@
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
             sourceNode.loop = true;
-            sourceNode.connect(gainNode);
+            sourceNode.connect(bassBoosterNode); // Connect to bassBoosterNode
             sourceNode.onended = handleAudioEnd;
 
 
@@ -1585,22 +1719,42 @@
             volumeSlider.disabled = !audioReady;
             speedBtn.disabled = !audioReady;
             speedSlider.disabled = !audioReady;
-            themeToggleBtn.disabled = !audioReady;
+            bassBoosterBtn.disabled = !audioReady;
+            bassBoosterSlider.disabled = !audioReady;
+            themeToggleBtn.disabled = !audioReady; // Theme can be toggled even without audio
             downloadBtn.disabled = !(audioReady && lyricsLoaded);
 
 
             if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
+                hidePopup(bassBoosterPopup);
             }
 
 
-            if (audioContext) {
-                const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
+            // Update UI elements based on current state even if audio not fully ready
+            // (e.g., sliders should reflect loaded settings)
+            if (volumeSlider && volumePercentage && gainNode) { // Check gainNode for volume
+                const currentVolume = gainNode.gain.value;
                 updateVolumeIcon(currentVolume);
-                if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
-                if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
+                volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
+            } else if (volumeSlider && volumePercentage) { // Fallback if gainNode not ready
+                 const vol = parseFloat(volumeSlider.value);
+                 updateVolumeIcon(vol);
+                 volumePercentage.textContent = `${Math.round(vol * 100)}%`;
             }
+
+            if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
+            
+            if (bassBoosterSlider && bassBoostDisplay && bassBoosterNode) { // Check bassBoosterNode
+                const currentDb = bassBoosterNode.gain.value;
+                bassBoostDisplay.textContent = `${Math.round(currentDb)} dB`;
+            } else if (bassBoosterSlider && bassBoostDisplay) { // Fallback
+                const db = parseFloat(bassBoosterSlider.value);
+                bassBoostDisplay.textContent = `${Math.round(db)} dB`;
+            }
+
+
             if (audioReady) {
                 updateTotalDurationDisplay();
                 updateCurrentTimeDisplay(startOffset);
@@ -1610,12 +1764,14 @@
                  progressBar.value = 0;
                  progressBar.max = 1;
             }
+            themeToggleBtn.disabled = false; // Theme toggle should always be enabled
         }
 
         function resetPlayerAndLyrics(resetSettings = false) {
             stopAudio();
 
             audioLoaded = false; lyricsLoaded = false; audioBuffer = null;
+            // Do not nullify audioContext, gainNode, bassBoosterNode here as they are persistent
             lyricsData = []; currentWordSpans = [];
             currentWordIndex = -1; previousWordIndex = -1;
             startOffset = 0; startTime = 0; isPaused = false; isPlaying = false;
@@ -1636,21 +1792,23 @@
             totalDurationDisplay.textContent = '0:00';
 
             if (resetSettings) {
-                const defaultVolume = 1;
-                const defaultSpeed = 1.0;
                 isMuted = false; 
-                previousVolumeBeforeMute = defaultVolume;
-                setVolume(defaultVolume); 
-                setPlaybackSpeed(defaultSpeed, false);
-                updateTotalDurationDisplay();
+                previousVolumeBeforeMute = 1.0;
+                setVolume(1.0); 
+                setPlaybackSpeed(1.0, false);
+                setBassBoost(BASS_BOOST_DEFAULT_DB);
             } else {
+                // Ensure settings are loaded or re-applied.
+                // These functions update UI and potentially audio nodes if context exists.
                 loadVolumeSetting(); 
                 loadSpeedSetting();
-                updateTotalDurationDisplay();
+                loadBassBoostSetting();
             }
+            updateTotalDurationDisplay(); // Recalculate based on current speed
 
             hidePopup(volumePopup);
             hidePopup(speedPopup);
+            hidePopup(bassBoosterPopup);
             checkEnablePlayer();
         }
 
@@ -1680,10 +1838,12 @@
 
 
             } else {
-                if (!lyricsLoaded && jsonLength > 0) {
-                    lyricsOutput.innerHTML = 'Error parsing lyrics data.';
+                // Removed jsonLength check as it's not directly available here
+                // Logic relies on lyricsLoaded and lyricsData.length
+                if (!lyricsLoaded && lyricsData.length === 0 && songLyricsFileInput.files.length > 0) { // Check if a file was attempted
+                    lyricsOutput.innerHTML = 'Error parsing lyrics data or no lyrics content.';
                 } else {
-                    lyricsOutput.innerHTML = 'No lyrics content in file.';
+                     lyricsOutput.innerHTML = 'Load a .songlyrics file.'; // Default placeholder
                 }
                 lyricsOutput.className = 'placeholder';
                 lyricsContainer.style.justifyContent = 'center';
@@ -1761,6 +1921,9 @@
                 } else if (wordRect.top < zoneTop || wordRect.bottom > zoneBottom) {
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
+                    // If already in a good central position, minor scroll to center might be okay
+                    // or avoid scrolling if it's "close enough".
+                    // For now, always center if it's the highlighted word.
                     wordToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
@@ -1770,8 +1933,8 @@
 
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
-            volumeIcon.className = 'fas ';
-            if (volume <= 0) {
+            volumeIcon.className = 'fas '; // Clear existing fa classes
+            if (isMuted || volume <= 0) { // Check isMuted explicitly
                 volumeIcon.classList.add('fa-volume-mute');
             } else if (volume < 0.5) {
                 volumeIcon.classList.add('fa-volume-down');
@@ -1784,16 +1947,16 @@
         function resetPopupTimer(popupElement) {
             clearPopupTimer(popupElement);
 
-
             const timerCallback = () => {
                 hidePopup(popupElement);
             };
-
 
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === speedPopup) {
                 speedPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
+            } else if (popupElement === bassBoosterPopup) {
+                bassBoosterPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             }
         }
 
@@ -1805,6 +1968,9 @@
             } else if (popupElement === speedPopup && speedPopupTimeout) {
                 clearTimeout(speedPopupTimeout);
                 speedPopupTimeout = null;
+            } else if (popupElement === bassBoosterPopup && bassBoosterPopupTimeout) {
+                clearTimeout(bassBoosterPopupTimeout);
+                bassBoosterPopupTimeout = null;
             }
         }
 
@@ -1815,8 +1981,10 @@
 
 
         function hidePopup(el) {
-            el.classList.remove('show');
-            clearPopupTimer(el);
+            if (el) { // Add null check for safety
+                el.classList.remove('show');
+                clearPopupTimer(el);
+            }
         }
 
 
@@ -1864,8 +2032,6 @@
                         newValue = parseFloat(newValue.toFixed(precision || 2));
                         
                         setVolume(newValue);
-                        
-                        volumeSlider.value = newValue;
                         resetPopupTimer(volumePopup);
                         return;
                     }
@@ -1891,15 +2057,35 @@
                         newValue = parseFloat(newValue.toFixed(precision || 2));
 
                         setPlaybackSpeed(newValue);
-                        
-                        speedSlider.value = newValue;
                         resetPopupTimer(speedPopup);
+                        return;
+                    }
+                }
+                if (bassBoosterPopup.classList.contains('show')) {
+                    if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+                        event.preventDefault();
+                        const currentValue = parseFloat(bassBoosterSlider.value);
+                        const step = parseFloat(bassBoosterSlider.step) || BASS_BOOST_STEP_DB;
+                        const maxVal = parseFloat(bassBoosterSlider.max);
+                        const minVal = parseFloat(bassBoosterSlider.min);
+                        let newValue;
+
+                        if (event.code === 'ArrowUp') {
+                            newValue = currentValue + step;
+                        } else { // ArrowDown
+                            newValue = currentValue - step;
+                        }
+                        newValue = Math.max(minVal, Math.min(maxVal, newValue));
+                        newValue = Math.round(newValue); // Ensure integer for dB
+                        
+                        setBassBoost(newValue); 
+                        resetPopupTimer(bassBoosterPopup);
                         return;
                     }
                 }
             }
 
-            let currentBufferTime = getCurrentBufferTime();
+            let currentBufferTime = playerReady ? getCurrentBufferTime() : 0; // Ensure currentBufferTime is valid
 
             switch (event.code) {
                 case 'Space':
