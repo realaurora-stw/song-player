@@ -12,8 +12,8 @@
 
     <style>
         :root {
-            color-scheme: dark;
-        }
+  color-scheme: dark;
+}
         * {
             box-sizing: border-box;
             margin: 0;
@@ -39,7 +39,7 @@
             font-family: inherit;
         }
 
-        #lyrics-container {
+#lyrics-container {
             flex-grow: 1;
             overflow-y: auto;
             padding: 40px 5% 200px 5%;
@@ -52,7 +52,7 @@
             -ms-overflow-style: none;
         }
 
-        #lyrics-container::-webkit-scrollbar {
+       #lyrics-container::-webkit-scrollbar {
             display: none;
         }
 
@@ -86,7 +86,7 @@
             pointer-events: auto;
         }
 
-        #lyrics-output span.highlighted {
+ #lyrics-output span.highlighted {
             color: #50d060;
             font-weight: 600;
             transform: translateY(-1px) scale(1.05);
@@ -95,16 +95,18 @@
             transition-timing-function: ease-in-out, ease-in-out, ease-out;
         }
 
+
         #lyrics-output.placeholder {
-            display: block;
-            opacity: 1;
-            transform: none;
-            color: #555;
-            font-style: italic;
-            text-align: center;
-            margin: auto;
-            font-weight: normal;
+             display: block;
+             opacity: 1;
+             transform: none;
+             color: #555;
+             font-style: italic;
+             text-align: center;
+             margin: auto;
+             font-weight: normal;
         }
+
 
         #controls-container {
             position: fixed;
@@ -131,6 +133,7 @@
         .file-inputs label {
             font-size: 0.9em;
         }
+
 
         .file-inputs input[type="file"] {
             font-size: 0.8em;
@@ -175,7 +178,7 @@
             font-family: inherit;
         }
         #playPauseBtn:hover:enabled {
-            background-color: #1f1f1f;
+             background-color: #1f1f1f;
         }
 
         #playPauseBtn:disabled {
@@ -198,54 +201,57 @@
         }
 
         #progressBar::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #2a2a2a;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.15s ease-out;
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: #2a2a2a;
+          border-radius: 50%;
+          cursor: pointer;
+          transition: background-color 0.2s, transform 0.15s ease-out;
         }
-        #progressBar:hover::-webkit-slider-thumb {
-            background: #2e2e2e;
-        }
-        #progressBar:active::-webkit-slider-thumb {
-            transform: scale(1.1);
-        }
+         #progressBar:hover::-webkit-slider-thumb {
+              background: #2e2e2e;
+         }
+         #progressBar:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+
 
         #progressBar::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #757575;
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s, transform 0.15s ease-out;
+          width: 16px;
+          height: 16px;
+          background: #757575;
+          border-radius: 50%;
+          cursor: pointer;
+          border: none;
+          transition: background-color 0.2s, transform 0.15s ease-out;
         }
-        #progressBar:hover::-moz-range-thumb {
-            background: #888;
-        }
-        #progressBar:active::-moz-range-thumb {
-            transform: scale(1.1);
-        }
+         #progressBar:hover::-moz-range-thumb {
+              background: #888;
+         }
+         #progressBar:active::-moz-range-thumb {
+             transform: scale(1.1);
+         }
+
 
         #progressBar:disabled::-webkit-slider-thumb {
             background: #333;
             cursor: not-allowed;
             transition: none;
-            transform: none;
+             transform: none;
         }
         #progressBar:disabled::-moz-range-thumb {
             background: #333;
             cursor: not-allowed;
-            transition: none;
-            transform: none;
+             transition: none;
+             transform: none;
         }
         #progressBar:disabled {
             cursor: not-allowed;
-            background: #0a0a0a;
+             background: #0a0a0a;
         }
+
 
         #currentTime, #totalDuration {
             font-size: 0.9em;
@@ -258,19 +264,20 @@
         }
 
         #audioPlayer {
-            display: none;
+             display: none;
         }
 
         #loadStatus {
-            font-size: 0.8em;
-            color: #4c4c4c;
-            margin-left: 15px;
-            min-height: 1.2em;
-            font-family: inherit;
-            transition: color 0.3s ease;
+             font-size: 0.8em;
+             color: #4c4c4c;
+             margin-left: 15px;
+             min-height: 1.2em;
+             font-family: inherit;
+             transition: color 0.3s ease;
         }
 
-        .control-icon-btn {
+
+       .control-icon-btn {
             background: none;
             border: none;
             color: #4c4c4c;
@@ -280,13 +287,14 @@
             transition: color 0.2s;
             line-height: 1;
             font-family: inherit;
-        }
-        .control-icon-btn:hover:enabled {
-            color: #646464;
-        }
-        .control-icon-btn:disabled {
-            cursor: not-allowed;
-        }
+       }
+       .control-icon-btn:hover:enabled {
+           color: #646464;
+       }
+       .control-icon-btn:disabled {
+           cursor: not-allowed;
+       }
+
 
         .volume-control-wrapper,
         .speed-control-wrapper,
@@ -312,6 +320,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0.25s, background-color 0.3s ease, box-shadow 0.3s ease;
@@ -355,6 +364,7 @@
             transition: background-color 0.2s;
         }
 
+
         .slider-vertical:disabled { cursor: not-allowed; background: #444; }
         .slider-vertical:disabled::-webkit-slider-thumb { background: #666; cursor: not-allowed; }
         .slider-vertical:disabled::-moz-range-thumb { background: #666; cursor: not-allowed; }
@@ -369,6 +379,7 @@
             transition: color 0.3s ease;
         }
 
+
         .popup-control.show {
             visibility: visible;
             opacity: 1;
@@ -376,33 +387,36 @@
             transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0s, background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
+
+
         @media (max-width: 768px) {
-            #lyrics-container {
-                font-size: 2em;
-                padding: 20px 5% 150px 5%;
-            }
-            .player-controls { gap: 10px; }
-            #playPauseBtn { padding: 6px 10px; font-size: 0.9em; }
+             #lyrics-container {
+                 font-size: 2em;
+                 padding: 20px 5% 150px 5%;
+             }
+             .player-controls { gap: 10px; }
+             #playPauseBtn { padding: 6px 10px; font-size: 0.9em; }
             #currentTime, #totalDuration { font-size: 0.8em; min-width: 40px; }
             .file-inputs label { font-size: 0.8em; }
-            .control-icon-btn { font-size: 1.1em; }
+           .control-icon-btn { font-size: 1.1em; }
 
-            .popup-control {
-                padding: 12px 10px 12px 10px;
-                height: 140px;
-            }
-            .slider-wrapper-vertical {
-                width: 75px;
-                height: 22px;
-                margin-bottom: 15px;
-            }
-            .slider-vertical {
-                width: 75px;
-                height: 6px;
-            }
+
+           .popup-control {
+               padding: 12px 10px 12px 10px;
+               height: 140px;
+           }
+           .slider-wrapper-vertical {
+               width: 75px;
+               height: 22px;
+               margin-bottom: 15px;
+           }
+           .slider-vertical {
+               width: 75px;
+               height: 6px;
+           }
             .slider-vertical::-webkit-slider-thumb { width: 14px; height: 14px; }
             .slider-vertical::-moz-range-thumb { width: 14px; height: 14px; }
-            .popup-text-display { font-size: 0.75em; }
+           .popup-text-display { font-size: 0.75em; }
         }
 
         body.light-mode {
@@ -446,7 +460,7 @@
             color: #222;
         }
         body.light-mode #playPauseBtn:hover:enabled {
-            background-color: #d0d0d0;
+             background-color: #d0d0d0;
         }
         body.light-mode #playPauseBtn:disabled {
             background-color: #f0f0f0;
@@ -458,18 +472,18 @@
         }
 
         body.light-mode #progressBar::-webkit-slider-thumb {
-            background: #aaaaaa;
+          background: #aaaaaa;
         }
-        body.light-mode #progressBar:hover::-webkit-slider-thumb {
-            background: #888888;
-        }
+         body.light-mode #progressBar:hover::-webkit-slider-thumb {
+              background: #888888;
+         }
 
         body.light-mode #progressBar::-moz-range-thumb {
-            background: #aaaaaa;
+          background: #aaaaaa;
         }
-        body.light-mode #progressBar:hover::-moz-range-thumb {
-            background: #888888;
-        }
+         body.light-mode #progressBar:hover::-moz-range-thumb {
+              background: #888888;
+         }
 
         body.light-mode #progressBar:disabled::-webkit-slider-thumb {
             background: #cccccc;
@@ -478,7 +492,7 @@
             background: #cccccc;
         }
         body.light-mode #progressBar:disabled {
-            background: #eeeeee;
+             background: #eeeeee;
         }
 
         body.light-mode #currentTime,
@@ -487,18 +501,18 @@
         }
 
         body.light-mode #loadStatus {
-            color: #777;
+             color: #777;
         }
 
-        body.light-mode .control-icon-btn {
+       body.light-mode .control-icon-btn {
             color: #444;
-        }
-        body.light-mode .control-icon-btn:hover:enabled {
-            color: #000;
-        }
-        body.light-mode .control-icon-btn:disabled {
-            color: #bbbbbb;
-        }
+       }
+       body.light-mode .control-icon-btn:hover:enabled {
+           color: #000;
+       }
+       body.light-mode .control-icon-btn:disabled {
+           color: #bbbbbb;
+       }
 
         body.light-mode .popup-control {
             background-color: #f8f8f8;
@@ -517,12 +531,13 @@
         }
 
         body.light-mode .slider-vertical:disabled { background: #dddddd; }
-        body.light-mode .slider-vertical::-webkit-slider-thumb { background: #aaaaaa; }
-        body.light-mode .slider-vertical::-moz-range-thumb { background: #aaaaaa; }
+        body.light-mode .slider-vertical:disabled::-webkit-slider-thumb { background: #aaaaaa; }
+        body.light-mode .slider-vertical:disabled::-moz-range-thumb { background: #aaaaaa; }
 
         body.light-mode .popup-text-display {
             color: #333333;
         }
+
     </style>
 </head>
 <body>
@@ -533,8 +548,9 @@
 
     <div id="controls-container">
         <div class="file-inputs">
+
             <input type="file" id="songLyricsFile" accept=".songlyrics" title="Select .songlyrics file">
-            <span id="loadStatus"></span>
+             <span id="loadStatus"></span>
         </div>
 
         <audio id="audioPlayer" style="display: none;"></audio>
@@ -543,6 +559,7 @@
             <span id="currentTime">0:00</span>
             <input type="range" id="progressBar" value="0" step="0.01" disabled>
             <span id="totalDuration">0:00</span>
+
 
             <div class="volume-control-wrapper">
                 <button id="volumeBtn" class="control-icon-btn" disabled title="Volume">
@@ -555,6 +572,7 @@
                     <span id="volumePercentage" class="popup-text-display">100%</span>
                 </div>
             </div>
+
 
             <div class="speed-control-wrapper">
                 <button id="speedBtn" class="control-icon-btn" disabled title="Playback Speed">
@@ -579,15 +597,18 @@
                     <span id="bassBoostLevelDisplay" class="popup-text-display">0 dB</span>
                 </div>
             </div>
-
+            
             <button id="downloadBtn" class="control-icon-btn" disabled title="Download Remix">
                 <i class="fas fa-download"></i>
                 <i class="fas fa-circle-notch fa-spin" style="display: none;"></i>
             </button>
 
+
             <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme" disabled>
                 <i id="themeIcon" class="fas fa-sun"></i>
             </button>
+
+
         </div>
     </div>
 
@@ -619,11 +640,12 @@
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
 
+
         let audioContext;
         let audioBuffer;
         let sourceNode;
         let gainNode;
-        let bassFilterNode; // Peaking filter around 100 Hz for real bass boost
+        let bassFilterNode; // For Bass Booster
         let isPlaying = false;
         let isPaused = false;
         let startTime = 0;
@@ -643,6 +665,7 @@
         let isMuted = false;
         let previousVolumeBeforeMute = 1.0;
 
+
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
         const BASS_BOOST_STORAGE_KEY = 'playerBassBoostSetting';
@@ -654,39 +677,40 @@
         let bassBoostPopupTimeout = null;
         const POPUP_CLOSE_DELAY = 6000;
 
+
         function isPlayerReady() {
             return audioLoaded && !!audioContext && !!audioBuffer;
         }
         function getCurrentBufferTime() {
-            let time = startOffset;
-            if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
-                const elapsedRealTime = audioContext.currentTime - startTime;
-                time = startOffset + (elapsedRealTime * currentPlaybackRate);
-                time = time % audioBuffer.duration;
-            }
-            return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
+             let time = startOffset;
+             if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
+                 const elapsedRealTime = audioContext.currentTime - startTime;
+                 time = startOffset + (elapsedRealTime * currentPlaybackRate);
+                 time = time % audioBuffer.duration;
+             }
+             return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
         }
+
 
         function initializeAudioContext() {
             if (!audioContext) {
                 try {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-                    // --- REPLACE: Use a peaking filter around 100 Hz for a more pronounced bass boost ---
+                    
                     bassFilterNode = audioContext.createBiquadFilter();
-                    bassFilterNode.type = 'peaking';
-                    bassFilterNode.frequency.value = 100; // Center frequency at 100 Hz
-                    bassFilterNode.Q.value = 1;           // Reasonable bandwidth
-                    bassFilterNode.gain.value = 0;        // Start at 0 dB
+                    bassFilterNode.type = 'lowshelf';
+                    bassFilterNode.frequency.value = 250; // Bass frequencies below 250 Hz
+                    bassFilterNode.gain.value = 0; // Initial gain in dB (no boost)
 
                     gainNode = audioContext.createGain();
-
+                    
                     bassFilterNode.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-
+                    
                     loadVolumeSetting();
                     loadSpeedSetting();
                     loadBassBoostSetting();
+
                 } catch (e) {
                     console.error("Web Audio API is not supported in this browser.", e);
                     alert("Sorry, your browser doesn't support the required Web Audio API for this player.");
@@ -695,8 +719,10 @@
             }
         }
 
+
+
         function loadSetting(key, defaultValue, validator) {
-            try {
+             try {
                 const savedValue = localStorage.getItem(key);
                 if (savedValue !== null) {
                     if (key === THEME_STORAGE_KEY) {
@@ -712,37 +738,38 @@
         }
 
         function saveSetting(key, value) {
-            try {
+             try {
                 localStorage.setItem(key, value.toString());
-            } catch (e) {
+             } catch (e) {
                 console.error("Error saving setting:", key, value, e);
             }
         }
 
         function loadVolumeSetting() {
-            const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v >= 0 && v <= 1);
-            if (gainNode && audioContext) {
+            const vol = loadSetting(VOLUME_STORAGE_KEY, 1, v => !isNaN(v) && v>=0 && v<=1);
+            if(gainNode && audioContext) {
                 gainNode.gain.value = vol;
             }
-            if (volumeSlider) {
-                volumeSlider.value = vol;
-                if (volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
-                updateVolumeIcon(vol);
+            if(volumeSlider) {
+                 volumeSlider.value = vol;
+                 if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
+                 updateVolumeIcon(vol);
             }
             isMuted = false;
             previousVolumeBeforeMute = vol;
         }
 
         function loadSpeedSetting() {
-            const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s >= 0.01 && s <= 2);
-            setPlaybackSpeed(speed, false);
-            updateTotalDurationDisplay();
+            const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
+             setPlaybackSpeed(speed, false);
+             updateTotalDurationDisplay();
         }
 
         function loadBassBoostSetting() {
             const bassLevel = loadSetting(BASS_BOOST_STORAGE_KEY, 0, b => !isNaN(b) && b >= 0 && b <= 30);
             setBassBoost(bassLevel);
         }
+
 
         function applyTheme(theme) {
             if (theme === 'light') {
@@ -770,21 +797,25 @@
             applyTheme(isLightMode ? 'dark' : 'light');
         }
 
-        function setVolume(newVolume) {
-            const clampedVolume = Math.max(0, Math.min(1, newVolume));
-            if (gainNode && audioContext) {
-                gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
-            }
-            if (volumeSlider) {
-                volumeSlider.value = clampedVolume;
-                updateVolumeIcon(clampedVolume);
-                volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
 
-                if (!isMuted) {
+
+        function setVolume(newVolume) {
+             const clampedVolume = Math.max(0, Math.min(1, newVolume));
+             if (gainNode && audioContext) {
+                gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
+             }
+             if (volumeSlider) {
+                 volumeSlider.value = clampedVolume;
+                 updateVolumeIcon(clampedVolume);
+                 volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
+
+                 if (!isMuted) {
                     saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
-                }
+                 }
             }
         }
+
+
 
         function setPlaybackSpeed(rate, adjustPlayback = true) {
             if (isNaN(rate)) return;
@@ -796,8 +827,8 @@
             const previousRate = currentPlaybackRate;
             currentPlaybackRate = newRate;
 
-            if (speedSlider) speedSlider.value = newRate;
-            if (speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
+            if(speedSlider) speedSlider.value = newRate;
+            if(speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
             saveSetting(SPEED_STORAGE_KEY, newRate);
             updateTotalDurationDisplay();
 
@@ -812,6 +843,7 @@
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
 
                     startTime = audioContext.currentTime;
+
                 } else if (sourceNode?.playbackRate) {
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
                 }
@@ -827,13 +859,14 @@
             const newLevel = Math.max(minBoost, Math.min(maxBoost, levelInDb));
 
             bassFilterNode.gain.setValueAtTime(newLevel, audioContext.currentTime);
-
+            
             if (bassBoostSlider) bassBoostSlider.value = newLevel;
             if (bassBoostLevelDisplay) {
                 bassBoostLevelDisplay.textContent = `${newLevel > 0 ? '+' : ''}${Math.round(newLevel)} dB`;
             }
             saveSetting(BASS_BOOST_STORAGE_KEY, newLevel);
         }
+
 
         function toggleMute() {
             if (!audioContext || !gainNode) return;
@@ -848,29 +881,33 @@
             }
         }
 
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
-            // Audio context dependent settings are loaded in initializeAudioContext or after
-            resetPlayerAndLyrics(false);
-            checkEnablePlayer();
+             loadTheme();
+             // Audio context dependent settings are loaded in initializeAudioContext or after
+             resetPlayerAndLyrics(false); // This will call initializeAudioContext if needed for settings
+             checkEnablePlayer();
             document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible') {
-                    if (lyricsContainer) {
-                        lyricsContainer.style.scrollBehavior = 'auto';
-                        requestAnimationFrame(() => {
-                            lyricsContainer.style.scrollBehavior = 'smooth';
-                        });
-                    }
-                }
-            });
+                 if (document.visibilityState === 'visible') {
+                     if (lyricsContainer) {
+                         lyricsContainer.style.scrollBehavior = 'auto';
+                         requestAnimationFrame(() => {
+                             lyricsContainer.style.scrollBehavior = 'smooth';
+                         });
+                     }
+                 }
+             });
         });
+
 
         songLyricsFileInput.addEventListener('change', (event) => {
             const files = event.target.files;
+
             if (files.length === 0) {
                 return;
             }
             const file = files[0];
+
             currentSongFilename = file.name;
             resetPlayerAndLyrics(false);
             loadStatus.textContent = '';
@@ -921,13 +958,17 @@
         volumeSlider.addEventListener('input', () => {
             if (!volumeSlider.disabled) {
                 const newVolume = parseFloat(volumeSlider.value);
+                
                 if (isMuted && newVolume > 0) {
                     isMuted = false;
+                } else if (isMuted && newVolume === 0) {
                 }
+                
                 setVolume(newVolume);
                 resetPopupTimer(volumePopup);
             }
         });
+
 
         volumeSlider.addEventListener('wheel', (event) => {
             if (volumeSlider.disabled) return;
@@ -943,9 +984,10 @@
             else if (Math.abs(delta) > 100) step = 0.05;
             else if (Math.abs(delta) > 50) step = 0.03;
 
+
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(0, Math.min(1, newValue));
-
+            
             const precision = (String(step).split('.')[1] || '').length || 2;
             newValue = parseFloat(newValue.toFixed(precision));
 
@@ -960,7 +1002,7 @@
                 togglePopup(speedPopup);
                 hidePopup(volumePopup);
                 hidePopup(bassBoostPopup);
-                if (!wasVisible && speedPopup.classList.contains('show')) {
+                 if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
                     clearPopupTimer(speedPopup);
@@ -976,8 +1018,9 @@
             }
         });
 
+
         speedSlider.addEventListener('wheel', (event) => {
-            if (speedSlider.disabled) return;
+             if (speedSlider.disabled) return;
             event.preventDefault();
             event.stopPropagation();
             const delta = event.deltaY;
@@ -1026,22 +1069,24 @@
             const minBoost = parseFloat(bassBoostSlider.min);
             const maxBoost = parseFloat(bassBoostSlider.max);
             let step = 1; // 1 dB step
-
+            
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minBoost, Math.min(maxBoost, newValue));
             setBassBoost(newValue);
             resetPopupTimer(bassBoostPopup);
         });
 
+
         volumePopup.addEventListener('mousemove', () => {
-            if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
+             if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
         });
         speedPopup.addEventListener('mousemove', () => {
-            if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
+             if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
         });
         bassBoostPopup.addEventListener('mousemove', () => {
             if (bassBoostPopup.classList.contains('show')) resetPopupTimer(bassBoostPopup);
         });
+
 
         document.addEventListener('click', (event) => {
             if (volumePopup.classList.contains('show') && !volumeBtn.contains(event.target) && !volumePopup.contains(event.target)) {
@@ -1055,15 +1100,18 @@
             }
         });
 
+
         volumePopup.addEventListener('click', (event) => event.stopPropagation());
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
         bassBoostPopup.addEventListener('click', (event) => event.stopPropagation());
 
+
         themeToggleBtn.addEventListener('click', () => {
             if (!themeToggleBtn.disabled) {
-                toggleTheme();
+                 toggleTheme();
             }
         });
+
 
         playPauseBtn.addEventListener('click', () => {
             if (!isPlayerReady()) return;
@@ -1075,6 +1123,7 @@
             }
         });
 
+
         progressBar.addEventListener('input', () => {
             if (!isPlayerReady()) return;
             isSeeking = true;
@@ -1083,6 +1132,7 @@
             updateCurrentTimeDisplay(seekBufferTime);
             updateLyricsHighlight(seekBufferTime, true, false);
         });
+
 
         progressBar.addEventListener('change', () => {
             if (!isPlayerReady()) return;
@@ -1096,6 +1146,8 @@
             }
         });
 
+
+
         volumeBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || volumeBtn.disabled) return;
             event.preventDefault();
@@ -1107,6 +1159,7 @@
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             setVolume(newValue);
         });
+
 
         speedBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || speedBtn.disabled) return;
@@ -1123,6 +1176,7 @@
             newValue = Math.max(minSpeed, Math.min(maxSpeed, newValue));
             setPlaybackSpeed(newValue);
         });
+
 
         progressBar.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || progressBar.disabled) return;
@@ -1147,7 +1201,9 @@
             seekAudio(newTime);
         });
 
+
         downloadBtn.addEventListener('click', handleDownload);
+
 
         async function handleDownload() {
             if (!isPlayerReady() || !lyricsLoaded) {
@@ -1179,9 +1235,10 @@
                 if (targetDuration <= 0 || !isFinite(targetDuration)) {
                     throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`)
                 }
-                if (targetDuration > 60 * 45) {
-                    throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
+                 if (targetDuration > 60 * 45) {
+                     throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
                 }
+
 
                 const offlineCtx = new OfflineAudioContext(
                     audioBuffer.numberOfChannels,
@@ -1192,11 +1249,9 @@
                 offlineSource.buffer = audioBuffer;
                 offlineSource.playbackRate.value = currentPlaybackRate;
 
-                // --- REPLACE: offline peaking filter around 100 Hz to match live playback ---
                 const offlineBassFilter = offlineCtx.createBiquadFilter();
-                offlineBassFilter.type = 'peaking';
+                offlineBassFilter.type = 'lowshelf';
                 offlineBassFilter.frequency.value = bassFilterNode.frequency.value;
-                offlineBassFilter.Q.value = bassFilterNode.Q.value;
                 offlineBassFilter.gain.value = bassFilterNode.gain.value;
 
                 const offlineGain = offlineCtx.createGain();
@@ -1237,8 +1292,9 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-
+                
                 loadStatus.textContent = 'Download ready!';
+
             } catch (error) {
                 console.error("Error during download processing:", error);
                 alert(`Failed to process download: ${error.message}`);
@@ -1302,8 +1358,9 @@
             return wavBuffer;
         }
 
+
         function updateTotalDurationDisplay() {
-            if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+             if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const adjustedDuration = audioBuffer.duration / currentPlaybackRate;
                 totalDurationDisplay.textContent = formatTime(adjustedDuration);
                 progressBar.max = audioBuffer.duration;
@@ -1314,25 +1371,27 @@
         }
 
         function updateCurrentTimeDisplay(bufferTime) {
-            const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
-            const duration = audioBuffer?.duration ?? 0;
+             const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
+             const duration = audioBuffer?.duration ?? 0;
 
-            let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
+             let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
 
-            if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+
+             if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const displayTime = clampedBufferTime / currentPlaybackRate;
                 currentTimeDisplay.textContent = formatTime(displayTime);
 
                 if (!isSeeking) {
-                    progressBar.value = clampedBufferTime;
+                     progressBar.value = clampedBufferTime;
                 }
-            } else {
-                currentTimeDisplay.textContent = '0:00';
-                if (!isSeeking) {
-                    progressBar.value = 0;
-                }
-            }
+             } else {
+                 currentTimeDisplay.textContent = '0:00';
+                 if (!isSeeking) {
+                     progressBar.value = 0;
+                 }
+             }
         }
+
 
         function parseCombinedFile(arrayBuffer) {
             resetPlayerAndLyrics(false);
@@ -1342,6 +1401,7 @@
                 const dataView = new DataView(arrayBuffer);
                 let offset = 0;
 
+
                 const magicBytes = new Uint8Array(arrayBuffer, offset, 4);
                 const magic = String.fromCharCode(...magicBytes);
                 offset += 4;
@@ -1349,11 +1409,13 @@
                     throw new Error("Invalid file signature. Expected 'LYRX'.");
                 }
 
+
                 if (offset + 4 > arrayBuffer.byteLength) {
                     throw new Error("File incomplete: Cannot read JSON length.");
                 }
                 const jsonLength = dataView.getUint32(offset, false);
                 offset += 4;
+
 
                 if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
                     throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
@@ -1362,6 +1424,7 @@
                 let jsonData = null;
                 let jsonParseSuccess = false;
                 lyricsData = [];
+
 
                 if (jsonLength > 0) {
                     const jsonBytes = new Uint8Array(arrayBuffer, offset, jsonLength);
@@ -1381,10 +1444,10 @@
                                         typeof word.text === 'string' && word.text.trim()) {
                                         lyricsData.push({ word: word.text.trim(), start: word.start });
                                     }
-                                });
+                                })
                             });
                         } else {
-                            jsonParseSuccess = false;
+                             jsonParseSuccess = false;
                         }
                     } catch (jsonError) {
                         jsonParseSuccess = false;
@@ -1395,18 +1458,22 @@
                     jsonParseSuccess = true;
                 }
 
+
                 if (!jsonParseSuccess && jsonLength > 0) {
-                    lyricsData = [];
+                     lyricsData = [];
                 }
 
+
                 lyricsData.sort((a, b) => a.start - b.start);
-                lyricsLoaded = jsonParseSuccess;
+                                lyricsLoaded = jsonParseSuccess;
                 renderLyrics();
+
 
                 const audioData = arrayBuffer.slice(offset);
                 if (audioData.byteLength === 0) {
                     throw new Error("No audio data found after JSON in the file.");
                 }
+
 
                 if (!audioContext) {
                     initializeAudioContext();
@@ -1416,6 +1483,7 @@
                 }
 
                 loadStatus.textContent = 'Decoding audio...';
+
 
                 audioContext.decodeAudioData(audioData)
                     .then(buffer => {
@@ -1460,6 +1528,7 @@
         function playAudio() {
             if (!audioContext || !audioBuffer || isPlaying) return;
 
+
             if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
                     playAudioInternal();
@@ -1476,21 +1545,25 @@
         function playAudioInternal() {
             if (isPlaying || !audioContext || !audioBuffer) return;
 
+
             startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
+
 
             if (startOffset >= audioBuffer.duration) {
                 startOffset = 0;
             }
 
+
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
             sourceNode.loop = true;
-            sourceNode.connect(bassFilterNode); // Now runs through peaking filter at 100 Hz
+            sourceNode.connect(bassFilterNode); // Connect source to bass filter
             sourceNode.onended = handleAudioEnd;
 
-            startTime = audioContext.currentTime;
 
+            startTime = audioContext.currentTime;
+            
             sourceNode.start(0, startOffset);
 
             isPlaying = true;
@@ -1502,8 +1575,10 @@
         function pauseAudio() {
             if (!isPlaying || !sourceNode || !audioContext) return;
 
+
             const elapsedRealTime = audioContext.currentTime - startTime;
             const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
+
 
             startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
             startOffset = Math.max(0, startOffset);
@@ -1514,21 +1589,25 @@
             isPaused = true;
             playPauseBtn.textContent = '▶ Play';
 
+
             updateCurrentTimeDisplay(startOffset);
         }
 
+
         function stopAudioInternals() {
-            if (sourceNode) {
+             if (sourceNode) {
                 sourceNode.onended = null;
                 sourceNode.loop = false;
                 try {
                     sourceNode.stop(0);
-                } catch (e) {}
-                sourceNode.disconnect();
+                } catch (e) {
+                }
+                sourceNode.disconnect(); // Disconnects from bassFilterNode
                 sourceNode = null;
             }
             stopUpdatingTime();
         }
+
 
         function stopAudio() {
             stopAudioInternals();
@@ -1541,24 +1620,30 @@
             const wasPlaying = isPlaying;
             stopAudio();
 
+
             startOffset = Math.max(0, bufferTime);
             startOffset = Math.min(startOffset, audioBuffer.duration);
+
 
             progressBar.value = startOffset;
             updateCurrentTimeDisplay(startOffset);
             updateLyricsHighlight(startOffset, true, false);
 
+
             if (wasPlaying) {
-                playAudio();
+                 playAudio();
             } else {
                 isPaused = true;
                 playPauseBtn.textContent = '▶ Play';
             }
         }
 
+
         function handleAudioEnd() {
-            sourceNode = null;
+             sourceNode = null;
         }
+
+
 
         function startUpdatingTime() {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -1572,14 +1657,18 @@
                     animationFrameId = null; return;
                 }
 
+
                 const elapsedRealTime = audioContext.currentTime - startTime;
                 let currentBufferTime = startOffset + (elapsedRealTime * currentPlaybackRate);
 
+
                 updateLyricsHighlight(getCurrentBufferTime(), false, true);
+
 
                 if (!isSeeking) {
                     updateCurrentTimeDisplay(getCurrentBufferTime());
                 }
+
 
                 animationFrameId = requestAnimationFrame(updateLoop);
             }
@@ -1594,6 +1683,8 @@
             }
         }
 
+
+
         function checkEnablePlayer() {
             const audioReady = isPlayerReady();
             playPauseBtn.disabled = !audioReady;
@@ -1607,11 +1698,13 @@
             themeToggleBtn.disabled = !audioReady;
             downloadBtn.disabled = !(audioReady && lyricsLoaded);
 
+
             if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
             }
+
 
             if (audioContext) {
                 const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
@@ -1619,18 +1712,18 @@
                 if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
                 if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
                 if (bassFilterNode && bassBoostLevelDisplay) {
-                    const currentBoost = bassFilterNode.gain.value;
-                    bassBoostLevelDisplay.textContent = `${currentBoost > 0 ? '+' : ''}${Math.round(currentBoost)} dB`;
+                     const currentBoost = bassFilterNode.gain.value;
+                     bassBoostLevelDisplay.textContent = `${currentBoost > 0 ? '+' : ''}${Math.round(currentBoost)} dB`;
                 }
             }
             if (audioReady) {
                 updateTotalDurationDisplay();
                 updateCurrentTimeDisplay(startOffset);
             } else {
-                totalDurationDisplay.textContent = '0:00';
-                currentTimeDisplay.textContent = '0:00';
-                progressBar.value = 0;
-                progressBar.max = 1;
+                 totalDurationDisplay.textContent = '0:00';
+                 currentTimeDisplay.textContent = '0:00';
+                 progressBar.value = 0;
+                 progressBar.max = 1;
             }
         }
 
@@ -1641,7 +1734,7 @@
             lyricsData = []; currentWordSpans = [];
             currentWordIndex = -1; previousWordIndex = -1;
             startOffset = 0; startTime = 0; isPaused = false; isPlaying = false;
-
+            
             if (resetSettings) {
                 currentSongFilename = null;
             }
@@ -1661,17 +1754,17 @@
                 const defaultVolume = 1;
                 const defaultSpeed = 1.0;
                 const defaultBassBoost = 0;
-                isMuted = false;
+                isMuted = false; 
                 previousVolumeBeforeMute = defaultVolume;
-                if (audioContext) {
-                    setVolume(defaultVolume);
+                if (audioContext) { // Ensure audioContext exists before setting
+                    setVolume(defaultVolume); 
                     setPlaybackSpeed(defaultSpeed, false);
                     setBassBoost(defaultBassBoost);
                 }
                 updateTotalDurationDisplay();
             } else {
-                if (audioContext) {
-                    loadVolumeSetting();
+                if (audioContext) { // Ensure audioContext exists before loading
+                    loadVolumeSetting(); 
                     loadSpeedSetting();
                     loadBassBoostSetting();
                 }
@@ -1684,6 +1777,7 @@
             checkEnablePlayer();
         }
 
+
         function renderLyrics() {
             lyricsOutput.innerHTML = '';
             currentWordSpans = [];
@@ -1691,10 +1785,12 @@
             previousWordIndex = -1;
             lyricsContainer.scrollTop = 0;
 
+
             if (lyricsLoaded && lyricsData.length > 0) {
                 lyricsOutput.className = '';
                 lyricsContainer.style.justifyContent = 'flex-start';
                 lyricsContainer.style.alignItems = 'flex-start';
+
 
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
@@ -1704,8 +1800,10 @@
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
+
+
             } else {
-                if (!lyricsLoaded && typeof jsonLength !== 'undefined' && jsonLength > 0) {
+                if (!lyricsLoaded && typeof jsonLength !== 'undefined' && jsonLength > 0) { // jsonLength might not be defined globally
                     lyricsOutput.innerHTML = 'Error parsing lyrics data.';
                 } else {
                     lyricsOutput.innerHTML = 'No lyrics content in file.';
@@ -1717,16 +1815,18 @@
         }
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
-            const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
+             const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
+
 
             if (!lyricsLoaded || currentWordSpans.length === 0) {
-                if (currentWordIndex !== -1) {
-                    highlightWord(-1, false);
-                    currentWordIndex = -1;
-                    previousWordIndex = -1;
-                }
+                 if (currentWordIndex !== -1) {
+                     highlightWord(-1, false);
+                     currentWordIndex = -1;
+                     previousWordIndex = -1;
+                 }
                 return;
             }
+
 
             let newWordIndex = -1;
             const lookaheadTime = effectiveTime + 0.05;
@@ -1738,30 +1838,38 @@
                 }
             }
 
-            if (newWordIndex !== currentWordIndex || forceUpdate) {
+
+             if (newWordIndex !== currentWordIndex || forceUpdate) {
                 const shouldScroll = allowScroll && !isSeeking && isPlaying;
                 highlightWord(newWordIndex, shouldScroll);
                 previousWordIndex = currentWordIndex;
                 currentWordIndex = newWordIndex;
-            }
+             }
         }
+
 
         function highlightWord(indexToHighlight, shouldAutoScroll = false) {
             let wordToScroll = null;
+
 
             currentWordSpans.forEach((span, index) => {
                 const isVisible = index <= indexToHighlight;
                 span.classList.toggle('visible', isVisible);
 
+
                 const isHighlighted = index === indexToHighlight;
                 span.classList.toggle('highlighted', isHighlighted);
 
-                if (isHighlighted) wordToScroll = span;
+
+                if(isHighlighted) wordToScroll = span;
             });
 
-            if (indexToHighlight < 0) {
-                currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
-            }
+
+             if (indexToHighlight < 0) {
+                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
+             }
+
+
 
             if (shouldAutoScroll && wordToScroll) {
                 const containerRect = lyricsContainer.getBoundingClientRect();
@@ -1781,6 +1889,8 @@
             }
         }
 
+
+
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
             volumeIcon.className = 'fas ';
@@ -1793,12 +1903,15 @@
             }
         }
 
+
         function resetPopupTimer(popupElement) {
             clearPopupTimer(popupElement);
+
 
             const timerCallback = () => {
                 hidePopup(popupElement);
             };
+
 
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
@@ -1809,8 +1922,9 @@
             }
         }
 
+
         function clearPopupTimer(popupElement) {
-            if (popupElement === volumePopup && volumePopupTimeout) {
+             if (popupElement === volumePopup && volumePopupTimeout) {
                 clearTimeout(volumePopupTimeout);
                 volumePopupTimeout = null;
             } else if (popupElement === speedPopup && speedPopupTimeout) {
@@ -1822,14 +1936,17 @@
             }
         }
 
+
         function togglePopup(el) {
             el.classList.toggle('show');
         }
+
 
         function hidePopup(el) {
             el.classList.remove('show');
             clearPopupTimer(el);
         }
+
 
         function formatTime(seconds) {
             if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '0:00';
@@ -1838,6 +1955,8 @@
             const secs = totalSeconds % 60;
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
+
+
 
         document.addEventListener('keydown', handleKeyboardShortcuts);
 
@@ -1868,12 +1987,12 @@
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-
+                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
-
+                        
                         setVolume(newValue);
-
+                        
                         volumeSlider.value = newValue;
                         resetPopupTimer(volumePopup);
                         return;
@@ -1895,12 +2014,12 @@
                             newValue = currentValue - step;
                         }
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-
+                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
 
                         setPlaybackSpeed(newValue);
-
+                        
                         speedSlider.value = newValue;
                         resetPopupTimer(speedPopup);
                         return;
@@ -1938,8 +2057,8 @@
                         event.preventDefault();
                         togglePlayback();
                     } else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
-                        event.preventDefault();
-                        togglePlayback();
+                         event.preventDefault();
+                         togglePlayback();
                     }
                     break;
 
