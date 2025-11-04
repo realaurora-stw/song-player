@@ -298,7 +298,8 @@
 
         .volume-control-wrapper,
         .speed-control-wrapper,
-        .bass-control-wrapper {
+        .bass-control-wrapper,
+        .underwater-control-wrapper {
             position: relative;
             display: flex;
             align-items: center;
@@ -598,6 +599,18 @@
                 </div>
             </div>
             
+            <div class="underwater-control-wrapper">
+                <button id="underwaterBtn" class="control-icon-btn" disabled title="Underwater">
+                    <i class="fas fa-tint"></i>
+                </button>
+                <div id="underwaterPopup" class="popup-control">
+                    <div class="slider-wrapper-vertical">
+                        <input type="range" id="underwaterSlider" class="slider-vertical" min="0" max="100" step="1" value="0" disabled>
+                    </div>
+                    <span id="underwaterLevelDisplay" class="popup-text-display">0%</span>
+                </div>
+            </div>
+
             <button id="downloadBtn" class="control-icon-btn" disabled title="Download Remix">
                 <i class="fas fa-download"></i>
                 <i class="fas fa-circle-notch fa-spin" style="display: none;"></i>
@@ -634,6 +647,10 @@
         const bassBoostPopup = document.getElementById('bassBoostPopup');
         const bassBoostSlider = document.getElementById('bassBoostSlider');
         const bassBoostLevelDisplay = document.getElementById('bassBoostLevelDisplay');
+        const underwaterBtn = document.getElementById('underwaterBtn');
+        const underwaterPopup = document.getElementById('underwaterPopup');
+        const underwaterSlider = document.getElementById('underwaterSlider');
+        const underwaterLevelDisplay = document.getElementById('underwaterLevelDisplay');
         const downloadBtn = document.getElementById('downloadBtn');
         const downloadIcon = downloadBtn.querySelector('.fa-download');
         const downloadSpinnerIcon = downloadBtn.querySelector('.fa-circle-notch');
@@ -645,7 +662,8 @@
         let audioBuffer;
         let sourceNode;
         let gainNode;
-        let bassFilterNode; // For Bass Booster
+        let bassFilterNode;
+        let underwaterFilterNode;
         let isPlaying = false;
         let isPaused = false;
         let startTime = 0;
@@ -669,12 +687,14 @@
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
         const BASS_BOOST_STORAGE_KEY = 'playerBassBoostSetting';
+        const UNDERWATER_STORAGE_KEY = 'playerUnderwaterSetting';
         const THEME_STORAGE_KEY = 'playerTheme';
         const LIGHT_MODE_CLASS = 'light-mode';
 
         let volumePopupTimeout = null;
         let speedPopupTimeout = null;
         let bassBoostPopupTimeout = null;
+        let underwaterPopupTimeout = null;
         const POPUP_CLOSE_DELAY = 6000;
 
 
@@ -699,17 +719,24 @@
                     
                     bassFilterNode = audioContext.createBiquadFilter();
                     bassFilterNode.type = 'lowshelf';
-                    bassFilterNode.frequency.value = 250; // Bass frequencies below 250 Hz
-                    bassFilterNode.gain.value = 0; // Initial gain in dB (no boost)
+                    bassFilterNode.frequency.value = 250;
+                    bassFilterNode.gain.value = 0;
+
+                    underwaterFilterNode = audioContext.createBiquadFilter();
+                    underwaterFilterNode.type = 'lowpass';
+                    underwaterFilterNode.frequency.value = 22050; // Max frequency, no effect
+                    underwaterFilterNode.Q.value = 1; // Default Q
 
                     gainNode = audioContext.createGain();
                     
-                    bassFilterNode.connect(gainNode);
+                    bassFilterNode.connect(underwaterFilterNode);
+                    underwaterFilterNode.connect(gainNode);
                     gainNode.connect(audioContext.destination);
                     
                     loadVolumeSetting();
                     loadSpeedSetting();
                     loadBassBoostSetting();
+                    loadUnderwaterSetting();
 
                 } catch (e) {
                     console.error("Web Audio API is not supported in this browser.", e);
@@ -768,6 +795,11 @@
         function loadBassBoostSetting() {
             const bassLevel = loadSetting(BASS_BOOST_STORAGE_KEY, 0, b => !isNaN(b) && b >= 0 && b <= 30);
             setBassBoost(bassLevel);
+        }
+
+        function loadUnderwaterSetting() {
+            const underwaterLevel = loadSetting(UNDERWATER_STORAGE_KEY, 0, u => !isNaN(u) && u >= 0 && u <= 100);
+            setUnderwaterEffect(underwaterLevel);
         }
 
 
@@ -867,6 +899,34 @@
             saveSetting(BASS_BOOST_STORAGE_KEY, newLevel);
         }
 
+        function setUnderwaterEffect(level) {
+            if (isNaN(level) || !underwaterFilterNode || !audioContext) return;
+            
+            const minLevel = parseFloat(underwaterSlider?.min ?? 0);
+            const maxLevel = parseFloat(underwaterSlider?.max ?? 100);
+            const newLevel = Math.max(minLevel, Math.min(maxLevel, level));
+
+            const normalizedValue = newLevel / maxLevel;
+
+            // Logarithmic mapping for frequency cutoff
+            const minFreq = 400; // Heavily muffled
+            const maxFreq = 22050; // No audible effect
+            const logMin = Math.log(minFreq);
+            const logMax = Math.log(maxFreq);
+            const scale = logMax - logMin;
+            const targetFreq = Math.exp(logMax - (normalizedValue * scale));
+            
+            // Linear mapping for Q (resonance), increases with the effect
+            const targetQ = 1 + (normalizedValue * 4);
+
+            underwaterFilterNode.frequency.setValueAtTime(targetFreq, audioContext.currentTime);
+            underwaterFilterNode.Q.setValueAtTime(targetQ, audioContext.currentTime);
+            
+            if (underwaterSlider) underwaterSlider.value = newLevel;
+            if (underwaterLevelDisplay) underwaterLevelDisplay.textContent = `${Math.round(newLevel)}%`;
+            saveSetting(UNDERWATER_STORAGE_KEY, newLevel);
+        }
+
 
         function toggleMute() {
             if (!audioContext || !gainNode) return;
@@ -884,8 +944,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
              loadTheme();
-             // Audio context dependent settings are loaded in initializeAudioContext or after
-             resetPlayerAndLyrics(false); // This will call initializeAudioContext if needed for settings
+             resetPlayerAndLyrics(false);
              checkEnablePlayer();
             document.addEventListener('visibilitychange', function() {
                  if (document.visibilityState === 'visible') {
@@ -947,6 +1006,7 @@
                 togglePopup(volumePopup);
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
+                hidePopup(underwaterPopup);
                 if (!wasVisible && volumePopup.classList.contains('show')) {
                     resetPopupTimer(volumePopup);
                 } else if (wasVisible && !volumePopup.classList.contains('show')) {
@@ -1002,6 +1062,7 @@
                 togglePopup(speedPopup);
                 hidePopup(volumePopup);
                 hidePopup(bassBoostPopup);
+                hidePopup(underwaterPopup);
                  if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
@@ -1044,6 +1105,7 @@
                 togglePopup(bassBoostPopup);
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
+                hidePopup(underwaterPopup);
                 if (!wasVisible && bassBoostPopup.classList.contains('show')) {
                     resetPopupTimer(bassBoostPopup);
                 } else if (wasVisible && !bassBoostPopup.classList.contains('show')) {
@@ -1076,6 +1138,46 @@
             resetPopupTimer(bassBoostPopup);
         });
 
+        underwaterBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (!underwaterBtn.disabled) {
+                const wasVisible = underwaterPopup.classList.contains('show');
+                togglePopup(underwaterPopup);
+                hidePopup(volumePopup);
+                hidePopup(speedPopup);
+                hidePopup(bassBoostPopup);
+                if (!wasVisible && underwaterPopup.classList.contains('show')) {
+                    resetPopupTimer(underwaterPopup);
+                } else if (wasVisible && !underwaterPopup.classList.contains('show')) {
+                    clearPopupTimer(underwaterPopup);
+                }
+            }
+        });
+
+        underwaterSlider.addEventListener('input', () => {
+            if (!underwaterSlider.disabled) {
+                const level = parseFloat(underwaterSlider.value);
+                setUnderwaterEffect(level);
+                resetPopupTimer(underwaterPopup);
+            }
+        });
+
+        underwaterSlider.addEventListener('wheel', (event) => {
+            if (underwaterSlider.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const delta = event.deltaY;
+            const currentValue = parseFloat(underwaterSlider.value);
+            const minLevel = parseFloat(underwaterSlider.min);
+            const maxLevel = parseFloat(underwaterSlider.max);
+            let step = 1;
+            
+            let newValue = delta < 0 ? currentValue + step : currentValue - step;
+            newValue = Math.max(minLevel, Math.min(maxLevel, newValue));
+            setUnderwaterEffect(newValue);
+            resetPopupTimer(underwaterPopup);
+        });
+
 
         volumePopup.addEventListener('mousemove', () => {
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
@@ -1085,6 +1187,9 @@
         });
         bassBoostPopup.addEventListener('mousemove', () => {
             if (bassBoostPopup.classList.contains('show')) resetPopupTimer(bassBoostPopup);
+        });
+        underwaterPopup.addEventListener('mousemove', () => {
+            if (underwaterPopup.classList.contains('show')) resetPopupTimer(underwaterPopup);
         });
 
 
@@ -1098,12 +1203,16 @@
             if (bassBoostPopup.classList.contains('show') && !bassBoostBtn.contains(event.target) && !bassBoostPopup.contains(event.target)) {
                 hidePopup(bassBoostPopup);
             }
+            if (underwaterPopup.classList.contains('show') && !underwaterBtn.contains(event.target) && !underwaterPopup.contains(event.target)) {
+                hidePopup(underwaterPopup);
+            }
         });
 
 
         volumePopup.addEventListener('click', (event) => event.stopPropagation());
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
         bassBoostPopup.addEventListener('click', (event) => event.stopPropagation());
+        underwaterPopup.addEventListener('click', (event) => event.stopPropagation());
 
 
         themeToggleBtn.addEventListener('click', () => {
@@ -1250,15 +1359,21 @@
                 offlineSource.playbackRate.value = currentPlaybackRate;
 
                 const offlineBassFilter = offlineCtx.createBiquadFilter();
-                offlineBassFilter.type = 'lowshelf';
+                offlineBassFilter.type = bassFilterNode.type;
                 offlineBassFilter.frequency.value = bassFilterNode.frequency.value;
                 offlineBassFilter.gain.value = bassFilterNode.gain.value;
+
+                const offlineUnderwaterFilter = offlineCtx.createBiquadFilter();
+                offlineUnderwaterFilter.type = underwaterFilterNode.type;
+                offlineUnderwaterFilter.frequency.value = underwaterFilterNode.frequency.value;
+                offlineUnderwaterFilter.Q.value = underwaterFilterNode.Q.value;
 
                 const offlineGain = offlineCtx.createGain();
                 offlineGain.gain.value = 1.0; // Keep overall gain normalized for download
 
                 offlineSource.connect(offlineBassFilter);
-                offlineBassFilter.connect(offlineGain);
+                offlineBassFilter.connect(offlineUnderwaterFilter);
+                offlineUnderwaterFilter.connect(offlineGain);
                 offlineGain.connect(offlineCtx.destination);
                 offlineSource.start(0);
 
@@ -1558,7 +1673,7 @@
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
             sourceNode.loop = true;
-            sourceNode.connect(bassFilterNode); // Connect source to bass filter
+            sourceNode.connect(bassFilterNode);
             sourceNode.onended = handleAudioEnd;
 
 
@@ -1602,7 +1717,7 @@
                     sourceNode.stop(0);
                 } catch (e) {
                 }
-                sourceNode.disconnect(); // Disconnects from bassFilterNode
+                sourceNode.disconnect();
                 sourceNode = null;
             }
             stopUpdatingTime();
@@ -1695,6 +1810,8 @@
             speedSlider.disabled = !audioReady;
             bassBoostBtn.disabled = !audioReady;
             bassBoostSlider.disabled = !audioReady;
+            underwaterBtn.disabled = !audioReady;
+            underwaterSlider.disabled = !audioReady;
             themeToggleBtn.disabled = !audioReady;
             downloadBtn.disabled = !(audioReady && lyricsLoaded);
 
@@ -1703,6 +1820,7 @@
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
+                hidePopup(underwaterPopup);
             }
 
 
@@ -1714,6 +1832,10 @@
                 if (bassFilterNode && bassBoostLevelDisplay) {
                      const currentBoost = bassFilterNode.gain.value;
                      bassBoostLevelDisplay.textContent = `${currentBoost > 0 ? '+' : ''}${Math.round(currentBoost)} dB`;
+                }
+                if (underwaterFilterNode && underwaterLevelDisplay) {
+                    const currentLevel = parseFloat(underwaterSlider.value);
+                    underwaterLevelDisplay.textContent = `${Math.round(currentLevel)}%`;
                 }
             }
             if (audioReady) {
@@ -1754,19 +1876,22 @@
                 const defaultVolume = 1;
                 const defaultSpeed = 1.0;
                 const defaultBassBoost = 0;
+                const defaultUnderwater = 0;
                 isMuted = false; 
                 previousVolumeBeforeMute = defaultVolume;
-                if (audioContext) { // Ensure audioContext exists before setting
+                if (audioContext) {
                     setVolume(defaultVolume); 
                     setPlaybackSpeed(defaultSpeed, false);
                     setBassBoost(defaultBassBoost);
+                    setUnderwaterEffect(defaultUnderwater);
                 }
                 updateTotalDurationDisplay();
             } else {
-                if (audioContext) { // Ensure audioContext exists before loading
+                if (audioContext) {
                     loadVolumeSetting(); 
                     loadSpeedSetting();
                     loadBassBoostSetting();
+                    loadUnderwaterSetting();
                 }
                 updateTotalDurationDisplay();
             }
@@ -1774,6 +1899,7 @@
             hidePopup(volumePopup);
             hidePopup(speedPopup);
             hidePopup(bassBoostPopup);
+            hidePopup(underwaterPopup);
             checkEnablePlayer();
         }
 
@@ -1919,6 +2045,8 @@
                 speedPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === bassBoostPopup) {
                 bassBoostPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
+            } else if (popupElement === underwaterPopup) {
+                underwaterPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             }
         }
 
@@ -1933,6 +2061,9 @@
             } else if (popupElement === bassBoostPopup && bassBoostPopupTimeout) {
                 clearTimeout(bassBoostPopupTimeout);
                 bassBoostPopupTimeout = null;
+            } else if (popupElement === underwaterPopup && underwaterPopupTimeout) {
+                clearTimeout(underwaterPopupTimeout);
+                underwaterPopupTimeout = null;
             }
         }
 
@@ -1979,20 +2110,11 @@
                         const step = parseFloat(volumeSlider.step) || 0.01;
                         const maxVal = parseFloat(volumeSlider.max);
                         const minVal = parseFloat(volumeSlider.min);
-                        let newValue;
-
-                        if (event.code === 'ArrowUp') {
-                            newValue = currentValue + step;
-                        } else {
-                            newValue = currentValue - step;
-                        }
+                        let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
-                        
                         setVolume(newValue);
-                        
                         volumeSlider.value = newValue;
                         resetPopupTimer(volumePopup);
                         return;
@@ -2006,20 +2128,11 @@
                         const step = parseFloat(speedSlider.step) || 0.01;
                         const maxVal = parseFloat(speedSlider.max);
                         const minVal = parseFloat(speedSlider.min);
-                        let newValue;
-
-                        if (event.code === 'ArrowUp') {
-                            newValue = currentValue + step;
-                        } else {
-                            newValue = currentValue - step;
-                        }
+                        let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
-                        
                         const precision = (String(step).split('.')[1] || '').length;
                         newValue = parseFloat(newValue.toFixed(precision || 2));
-
                         setPlaybackSpeed(newValue);
-                        
                         speedSlider.value = newValue;
                         resetPopupTimer(speedPopup);
                         return;
@@ -2032,17 +2145,26 @@
                         const step = parseFloat(bassBoostSlider.step) || 1;
                         const maxVal = parseFloat(bassBoostSlider.max);
                         const minVal = parseFloat(bassBoostSlider.min);
-                        let newValue;
-
-                        if (event.code === 'ArrowUp') {
-                            newValue = currentValue + step;
-                        } else {
-                            newValue = currentValue - step;
-                        }
+                        let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
                         newValue = Math.max(minVal, Math.min(maxVal, newValue));
                         setBassBoost(newValue);
                         bassBoostSlider.value = newValue;
                         resetPopupTimer(bassBoostPopup);
+                        return;
+                    }
+                }
+                 if (underwaterPopup.classList.contains('show')) {
+                    if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+                        event.preventDefault();
+                        const currentValue = parseFloat(underwaterSlider.value);
+                        const step = parseFloat(underwaterSlider.step) || 1;
+                        const maxVal = parseFloat(underwaterSlider.max);
+                        const minVal = parseFloat(underwaterSlider.min);
+                        let newValue = event.code === 'ArrowUp' ? currentValue + step : currentValue - step;
+                        newValue = Math.max(minVal, Math.min(maxVal, newValue));
+                        setUnderwaterEffect(newValue);
+                        underwaterSlider.value = newValue;
+                        resetPopupTimer(underwaterPopup);
                         return;
                     }
                 }
