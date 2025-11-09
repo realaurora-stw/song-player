@@ -300,7 +300,7 @@
         .speed-control-wrapper,
         .bass-control-wrapper,
         .underwater-control-wrapper,
-        .muffled-control-wrapper { /* UPDATE: Added new wrapper */
+        .muffled-control-wrapper {
             position: relative;
             display: flex;
             align-items: center;
@@ -612,7 +612,6 @@
                 </div>
             </div>
 
-            <!-- UPDATE: Added Muffled Effect Control -->
             <div class="muffled-control-wrapper">
                 <button id="muffledBtn" class="control-icon-btn" disabled title="Muffled">
                     <i class="fas fa-door-closed"></i>
@@ -624,7 +623,6 @@
                     <span id="muffledLevelDisplay" class="popup-text-display">0%</span>
                 </div>
             </div>
-            <!-- END UPDATE -->
 
             <button id="downloadBtn" class="control-icon-btn" disabled title="Download Remix">
                 <i class="fas fa-download"></i>
@@ -666,14 +664,10 @@
         const underwaterPopup = document.getElementById('underwaterPopup');
         const underwaterSlider = document.getElementById('underwaterSlider');
         const underwaterLevelDisplay = document.getElementById('underwaterLevelDisplay');
-        
-        // UPDATE: Added Muffled Effect DOM elements
         const muffledBtn = document.getElementById('muffledBtn');
         const muffledPopup = document.getElementById('muffledPopup');
         const muffledSlider = document.getElementById('muffledSlider');
         const muffledLevelDisplay = document.getElementById('muffledLevelDisplay');
-        // END UPDATE
-
         const downloadBtn = document.getElementById('downloadBtn');
         const downloadIcon = downloadBtn.querySelector('.fa-download');
         const downloadSpinnerIcon = downloadBtn.querySelector('.fa-circle-notch');
@@ -687,7 +681,7 @@
         let gainNode;
         let bassFilterNode;
         let underwaterFilterNode;
-        let muffledFilterNode; // UPDATE: Added Muffled filter node variable
+        let muffledFilterNode;
         let isPlaying = false;
         let isPaused = false;
         let startTime = 0;
@@ -712,7 +706,7 @@
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
         const BASS_BOOST_STORAGE_KEY = 'playerBassBoostSetting';
         const UNDERWATER_STORAGE_KEY = 'playerUnderwaterSetting';
-        const MUFFLED_STORAGE_KEY = 'playerMuffledSetting'; // UPDATE: Added storage key for Muffled effect
+        const MUFFLED_STORAGE_KEY = 'playerMuffledSetting';
         const THEME_STORAGE_KEY = 'playerTheme';
         const LIGHT_MODE_CLASS = 'light-mode';
 
@@ -720,7 +714,7 @@
         let speedPopupTimeout = null;
         let bassBoostPopupTimeout = null;
         let underwaterPopupTimeout = null;
-        let muffledPopupTimeout = null; // UPDATE: Added timeout variable for Muffled popup
+        let muffledPopupTimeout = null;
         const POPUP_CLOSE_DELAY = 6000;
 
 
@@ -750,30 +744,26 @@
 
                     underwaterFilterNode = audioContext.createBiquadFilter();
                     underwaterFilterNode.type = 'lowpass';
-                    underwaterFilterNode.frequency.value = 22050; // Max frequency, no effect
-                    underwaterFilterNode.Q.value = 1; // Default Q
+                    underwaterFilterNode.frequency.value = 22050;
+                    underwaterFilterNode.Q.value = 1;
 
-                    // UPDATE: Initialize the Muffled filter node
                     muffledFilterNode = audioContext.createBiquadFilter();
                     muffledFilterNode.type = 'lowpass';
-                    muffledFilterNode.frequency.value = 22050; // Max frequency, no effect
+                    muffledFilterNode.frequency.value = 22050;
                     muffledFilterNode.Q.value = 1; 
-                    // END UPDATE
 
                     gainNode = audioContext.createGain();
                     
-                    // UPDATE: Update audio node connection chain
                     bassFilterNode.connect(underwaterFilterNode);
                     underwaterFilterNode.connect(muffledFilterNode);
                     muffledFilterNode.connect(gainNode);
-                    // END UPDATE
                     gainNode.connect(audioContext.destination);
                     
                     loadVolumeSetting();
                     loadSpeedSetting();
                     loadBassBoostSetting();
                     loadUnderwaterSetting();
-                    loadMuffledSetting(); // UPDATE: Load the Muffled setting
+                    loadMuffledSetting();
 
                 } catch (e) {
                     console.error("Web Audio API is not supported in this browser.", e);
@@ -839,12 +829,10 @@
             setUnderwaterEffect(underwaterLevel);
         }
 
-        // UPDATE: Added function to load Muffled setting
         function loadMuffledSetting() {
             const muffledLevel = loadSetting(MUFFLED_STORAGE_KEY, 0, m => !isNaN(m) && m >= 0 && m <= 100);
             setMuffledEffect(muffledLevel);
         }
-        // END UPDATE
 
         function applyTheme(theme) {
             if (theme === 'light') {
@@ -891,7 +879,9 @@
         }
 
 
-
+        // =========================================================================
+        // START OF BUG FIX: REPLACED setPlaybackSpeed FUNCTION
+        // =========================================================================
         function setPlaybackSpeed(rate, adjustPlayback = true) {
             if (isNaN(rate)) return;
 
@@ -902,13 +892,26 @@
             const previousRate = currentPlaybackRate;
             currentPlaybackRate = newRate;
 
-            if(speedSlider) speedSlider.value = newRate;
-            if(speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
+            if (speedSlider) speedSlider.value = newRate;
+            if (speedRateDisplay) speedRateDisplay.textContent = `${newRate.toFixed(2)}x`;
             saveSetting(SPEED_STORAGE_KEY, newRate);
             updateTotalDurationDisplay();
 
             if (adjustPlayback && audioContext && audioBuffer) {
-                if (isPlaying && sourceNode?.playbackRate) {
+                const isFirefox = navigator.userAgent.includes("Firefox");
+                const wasPlaying = isPlaying;
+
+                // BUG FIX FOR FIREFOX: If playing in Firefox, changing playbackRate on an existing
+                // source node connected to a BiquadFilter can cause catastrophic noise.
+                // The workaround is to recreate the source node entirely.
+                if (wasPlaying && isFirefox) {
+                    const currentTime = getCurrentBufferTime();
+                    // seekAudio conveniently stops, sets the offset, and starts a new source node,
+                    // which will automatically pick up the new `currentPlaybackRate`.
+                    seekAudio(currentTime); 
+                } 
+                // For other browsers (or if paused), the smooth, non-destructive method is safe.
+                else if (wasPlaying && sourceNode?.playbackRate) {
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
 
@@ -916,15 +919,16 @@
                     startOffset = Math.max(0, startOffset);
 
                     sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
-
                     startTime = audioContext.currentTime;
-
-                } else if (sourceNode?.playbackRate) {
-                    sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
                 }
+                
                 updateCurrentTimeDisplay(getCurrentBufferTime());
             }
         }
+        // =========================================================================
+        // END OF BUG FIX
+        // =========================================================================
+
 
         function setBassBoost(levelInDb) {
             if (isNaN(levelInDb) || !bassFilterNode || !audioContext) return;
@@ -951,15 +955,13 @@
 
             const normalizedValue = newLevel / maxLevel;
 
-            // Logarithmic mapping for frequency cutoff
-            const minFreq = 400; // Heavily muffled
-            const maxFreq = 22050; // No audible effect
+            const minFreq = 400;
+            const maxFreq = 22050;
             const logMin = Math.log(minFreq);
             const logMax = Math.log(maxFreq);
             const scale = logMax - logMin;
             const targetFreq = Math.exp(logMax - (normalizedValue * scale));
             
-            // Linear mapping for Q (resonance), increases with the effect
             const targetQ = 1 + (normalizedValue * 4);
 
             underwaterFilterNode.frequency.setValueAtTime(targetFreq, audioContext.currentTime);
@@ -970,7 +972,6 @@
             saveSetting(UNDERWATER_STORAGE_KEY, newLevel);
         }
 
-        // UPDATE: Added function to control Muffled effect
         function setMuffledEffect(level) {
             if (isNaN(level) || !muffledFilterNode || !audioContext) return;
             
@@ -980,15 +981,13 @@
 
             const normalizedValue = newLevel / maxLevel;
 
-            // Logarithmic mapping for frequency cutoff, less extreme than "underwater"
-            const minFreq = 700; // Muffled, like through a wall
-            const maxFreq = 22050; // No audible effect
+            const minFreq = 700;
+            const maxFreq = 22050;
             const logMin = Math.log(minFreq);
             const logMax = Math.log(maxFreq);
             const scale = logMax - logMin;
             const targetFreq = Math.exp(logMax - (normalizedValue * scale));
             
-            // Subtle resonance increase
             const targetQ = 1 + (normalizedValue * 1.5);
 
             muffledFilterNode.frequency.setValueAtTime(targetFreq, audioContext.currentTime);
@@ -998,8 +997,6 @@
             if (muffledLevelDisplay) muffledLevelDisplay.textContent = `${Math.round(newLevel)}%`;
             saveSetting(MUFFLED_STORAGE_KEY, newLevel);
         }
-        // END UPDATE
-
 
         function toggleMute() {
             if (!audioContext || !gainNode) return;
@@ -1080,7 +1077,7 @@
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
                 hidePopup(underwaterPopup);
-                hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+                hidePopup(muffledPopup);
                 if (!wasVisible && volumePopup.classList.contains('show')) {
                     resetPopupTimer(volumePopup);
                 } else if (wasVisible && !volumePopup.classList.contains('show')) {
@@ -1137,7 +1134,7 @@
                 hidePopup(volumePopup);
                 hidePopup(bassBoostPopup);
                 hidePopup(underwaterPopup);
-                hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+                hidePopup(muffledPopup);
                  if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
@@ -1181,7 +1178,7 @@
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
                 hidePopup(underwaterPopup);
-                hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+                hidePopup(muffledPopup);
                 if (!wasVisible && bassBoostPopup.classList.contains('show')) {
                     resetPopupTimer(bassBoostPopup);
                 } else if (wasVisible && !bassBoostPopup.classList.contains('show')) {
@@ -1206,7 +1203,7 @@
             const currentValue = parseFloat(bassBoostSlider.value);
             const minBoost = parseFloat(bassBoostSlider.min);
             const maxBoost = parseFloat(bassBoostSlider.max);
-            let step = 1; // 1 dB step
+            let step = 1;
             
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(minBoost, Math.min(maxBoost, newValue));
@@ -1222,7 +1219,7 @@
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
-                hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+                hidePopup(muffledPopup);
                 if (!wasVisible && underwaterPopup.classList.contains('show')) {
                     resetPopupTimer(underwaterPopup);
                 } else if (wasVisible && !underwaterPopup.classList.contains('show')) {
@@ -1255,7 +1252,6 @@
             resetPopupTimer(underwaterPopup);
         });
         
-        // UPDATE: Added all event listeners for the new Muffled effect control
         muffledBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             if (!muffledBtn.disabled) {
@@ -1296,7 +1292,6 @@
             setMuffledEffect(newValue);
             resetPopupTimer(muffledPopup);
         });
-        // END UPDATE
 
         volumePopup.addEventListener('mousemove', () => {
              if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
@@ -1310,11 +1305,9 @@
         underwaterPopup.addEventListener('mousemove', () => {
             if (underwaterPopup.classList.contains('show')) resetPopupTimer(underwaterPopup);
         });
-        // UPDATE: Added mousemove listener for Muffled popup
         muffledPopup.addEventListener('mousemove', () => {
             if (muffledPopup.classList.contains('show')) resetPopupTimer(muffledPopup);
         });
-        // END UPDATE
 
 
         document.addEventListener('click', (event) => {
@@ -1330,11 +1323,9 @@
             if (underwaterPopup.classList.contains('show') && !underwaterBtn.contains(event.target) && !underwaterPopup.contains(event.target)) {
                 hidePopup(underwaterPopup);
             }
-            // UPDATE: Added logic to hide Muffled popup on outside click
             if (muffledPopup.classList.contains('show') && !muffledBtn.contains(event.target) && !muffledPopup.contains(event.target)) {
                 hidePopup(muffledPopup);
             }
-            // END UPDATE
         });
 
 
@@ -1342,7 +1333,7 @@
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
         bassBoostPopup.addEventListener('click', (event) => event.stopPropagation());
         underwaterPopup.addEventListener('click', (event) => event.stopPropagation());
-        muffledPopup.addEventListener('click', (event) => event.stopPropagation()); // UPDATE: Stop propagation on Muffled popup
+        muffledPopup.addEventListener('click', (event) => event.stopPropagation());
 
 
         themeToggleBtn.addEventListener('click', () => {
@@ -1385,9 +1376,6 @@
             }
         });
 
-
-        // --- BUG FIX AND ENHANCEMENT: ADD SCROLL-ON-ICON FOR ALL CONTROLS ---
-
         volumeBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || volumeBtn.disabled) return;
             event.preventDefault();
@@ -1413,7 +1401,6 @@
             setPlaybackSpeed(newValue);
         });
 
-        // BUG FIX: Added missing wheel listener for Bass Boost icon
         bassBoostBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || bassBoostBtn.disabled) return;
             event.preventDefault();
@@ -1428,7 +1415,6 @@
             setBassBoost(newValue);
         });
 
-        // BUG FIX: Added missing wheel listener for Underwater icon
         underwaterBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || underwaterBtn.disabled) return;
             event.preventDefault();
@@ -1443,7 +1429,6 @@
             setUnderwaterEffect(newValue);
         });
 
-        // UPDATE: Added wheel listener for new Muffled icon
         muffledBtn.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || muffledBtn.disabled) return;
             event.preventDefault();
@@ -1457,8 +1442,6 @@
             newValue = Math.max(minVal, Math.min(maxVal, newValue));
             setMuffledEffect(newValue);
         });
-        // --- END BUG FIX AND ENHANCEMENT ---
-
 
         progressBar.addEventListener('wheel', (event) => {
             if (!isPlayerReady() || progressBar.disabled) return;
@@ -1541,22 +1524,18 @@
                 offlineUnderwaterFilter.frequency.value = underwaterFilterNode.frequency.value;
                 offlineUnderwaterFilter.Q.value = underwaterFilterNode.Q.value;
 
-                // UPDATE: Added Muffled filter to offline context
                 const offlineMuffledFilter = offlineCtx.createBiquadFilter();
                 offlineMuffledFilter.type = muffledFilterNode.type;
                 offlineMuffledFilter.frequency.value = muffledFilterNode.frequency.value;
                 offlineMuffledFilter.Q.value = muffledFilterNode.Q.value;
-                // END UPDATE
 
                 const offlineGain = offlineCtx.createGain();
-                offlineGain.gain.value = 1.0; // Keep overall gain normalized for download
+                offlineGain.gain.value = 1.0;
 
-                // UPDATE: Update offline audio chain
                 offlineSource.connect(offlineBassFilter);
                 offlineBassFilter.connect(offlineUnderwaterFilter);
                 offlineUnderwaterFilter.connect(offlineMuffledFilter);
                 offlineMuffledFilter.connect(offlineGain);
-                // END UPDATE
                 offlineGain.connect(offlineCtx.destination);
                 offlineSource.start(0);
 
@@ -1955,13 +1934,7 @@
                     animationFrameId = null; return;
                 }
 
-
-                const elapsedRealTime = audioContext.currentTime - startTime;
-                let currentBufferTime = startOffset + (elapsedRealTime * currentPlaybackRate);
-
-
                 updateLyricsHighlight(getCurrentBufferTime(), false, true);
-
 
                 if (!isSeeking) {
                     updateCurrentTimeDisplay(getCurrentBufferTime());
@@ -1995,8 +1968,8 @@
             bassBoostSlider.disabled = !audioReady;
             underwaterBtn.disabled = !audioReady;
             underwaterSlider.disabled = !audioReady;
-            muffledBtn.disabled = !audioReady; // UPDATE: Enable/disable muffled control
-            muffledSlider.disabled = !audioReady; // UPDATE: Enable/disable muffled control
+            muffledBtn.disabled = !audioReady;
+            muffledSlider.disabled = !audioReady;
             themeToggleBtn.disabled = !audioReady;
             downloadBtn.disabled = !(audioReady && lyricsLoaded);
 
@@ -2006,7 +1979,7 @@
                 hidePopup(speedPopup);
                 hidePopup(bassBoostPopup);
                 hidePopup(underwaterPopup);
-                hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+                hidePopup(muffledPopup);
             }
 
 
@@ -2023,7 +1996,6 @@
                     const currentLevel = parseFloat(underwaterSlider.value);
                     underwaterLevelDisplay.textContent = `${Math.round(currentLevel)}%`;
                 }
-                // UPDATE: Update muffled display text
                 if (muffledFilterNode && muffledLevelDisplay) {
                     const currentLevel = parseFloat(muffledSlider.value);
                     muffledLevelDisplay.textContent = `${Math.round(currentLevel)}%`;
@@ -2068,7 +2040,7 @@
                 const defaultSpeed = 1.0;
                 const defaultBassBoost = 0;
                 const defaultUnderwater = 0;
-                const defaultMuffled = 0; // UPDATE: Add default for muffled
+                const defaultMuffled = 0;
                 isMuted = false; 
                 previousVolumeBeforeMute = defaultVolume;
                 if (audioContext) {
@@ -2076,7 +2048,7 @@
                     setPlaybackSpeed(defaultSpeed, false);
                     setBassBoost(defaultBassBoost);
                     setUnderwaterEffect(defaultUnderwater);
-                    setMuffledEffect(defaultMuffled); // UPDATE: Reset muffled effect
+                    setMuffledEffect(defaultMuffled);
                 }
                 updateTotalDurationDisplay();
             } else {
@@ -2085,7 +2057,7 @@
                     loadSpeedSetting();
                     loadBassBoostSetting();
                     loadUnderwaterSetting();
-                    loadMuffledSetting(); // UPDATE: Load muffled setting on reset
+                    loadMuffledSetting();
                 }
                 updateTotalDurationDisplay();
             }
@@ -2094,7 +2066,7 @@
             hidePopup(speedPopup);
             hidePopup(bassBoostPopup);
             hidePopup(underwaterPopup);
-            hidePopup(muffledPopup); // UPDATE: Hide muffled popup
+            hidePopup(muffledPopup);
             checkEnablePlayer();
         }
 
@@ -2124,7 +2096,7 @@
 
 
             } else {
-                if (!lyricsLoaded && typeof jsonLength !== 'undefined' && jsonLength > 0) { // jsonLength might not be defined globally
+                if (!lyricsLoaded && typeof jsonLength !== 'undefined' && jsonLength > 0) {
                     lyricsOutput.innerHTML = 'Error parsing lyrics data.';
                 } else {
                     lyricsOutput.innerHTML = 'No lyrics content in file.';
@@ -2242,7 +2214,7 @@
                 bassBoostPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             } else if (popupElement === underwaterPopup) {
                 underwaterPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
-            } else if (popupElement === muffledPopup) { // UPDATE: Handle muffled popup timer
+            } else if (popupElement === muffledPopup) {
                 muffledPopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
             }
         }
@@ -2261,7 +2233,7 @@
             } else if (popupElement === underwaterPopup && underwaterPopupTimeout) {
                 clearTimeout(underwaterPopupTimeout);
                 underwaterPopupTimeout = null;
-            } else if (popupElement === muffledPopup && muffledPopupTimeout) { // UPDATE: Handle muffled popup timer
+            } else if (popupElement === muffledPopup && muffledPopupTimeout) {
                 clearTimeout(muffledPopupTimeout);
                 muffledPopupTimeout = null;
             }
@@ -2368,7 +2340,6 @@
                         return;
                     }
                 }
-                // UPDATE: Added keyboard shortcut handling for Muffled popup
                  if (muffledPopup.classList.contains('show')) {
                     if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
                         event.preventDefault();
@@ -2384,7 +2355,6 @@
                         return;
                     }
                 }
-                // END UPDATE
             }
 
             let currentBufferTime = getCurrentBufferTime();
