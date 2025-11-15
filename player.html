@@ -880,7 +880,7 @@
 
 
         // =========================================================================
-        // START OF BUG FIX: REPLACED setPlaybackSpeed FUNCTION
+        // START OF BUG FIX
         // =========================================================================
         function setPlaybackSpeed(rate, adjustPlayback = true) {
             if (isNaN(rate)) return;
@@ -900,18 +900,20 @@
             if (adjustPlayback && audioContext && audioBuffer) {
                 const isFirefox = navigator.userAgent.includes("Firefox");
                 const wasPlaying = isPlaying;
-
-                // BUG FIX FOR FIREFOX: If playing in Firefox, changing playbackRate on an existing
-                // source node connected to a BiquadFilter can cause catastrophic noise.
-                // The workaround is to recreate the source node entirely.
+                
                 if (wasPlaying && isFirefox) {
-                    const currentTime = getCurrentBufferTime();
-                    // seekAudio conveniently stops, sets the offset, and starts a new source node,
-                    // which will automatically pick up the new `currentPlaybackRate`.
-                    seekAudio(currentTime); 
-                } 
-                // For other browsers (or if paused), the smooth, non-destructive method is safe.
-                else if (wasPlaying && sourceNode?.playbackRate) {
+                    // BUG FIX: The "rewind" issue was caused by calling getCurrentBufferTime()
+                    // AFTER currentPlaybackRate was already updated. This caused a miscalculation.
+                    // The fix is to manually calculate the current time here using the *previousRate*.
+                    const elapsedRealTime = audioContext.currentTime - startTime;
+                    const elapsedBufferTime = elapsedRealTime * previousRate;
+                    const correctCurrentBufferTime = (startOffset + elapsedBufferTime) % audioBuffer.duration;
+                    
+                    // Now seek using the correctly calculated time.
+                    seekAudio(correctCurrentBufferTime);
+
+                } else if (wasPlaying && sourceNode?.playbackRate) {
+                    // This is the standard path for non-Firefox browsers or when paused. It works correctly.
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
 
@@ -1482,10 +1484,15 @@
 
 
         async function handleDownload() {
-            if (!isPlayerReady() || !lyricsLoaded) {
-                alert("Please load a song and lyrics first.");
+            if (!isPlayerReady()) {
+                alert("Please load a song first.");
                 return;
             }
+
+            // A file without lyrics is still valid for download, so the lyricsLoaded check is adjusted.
+            // If there are no lyrics, an empty lyrics block will be created.
+            if (!lyricsLoaded) lyricsData = [];
+
 
             downloadIcon.style.display = 'none';
             downloadSpinnerIcon.style.display = 'inline-block';
@@ -1590,7 +1597,7 @@
             } finally {
                 downloadIcon.style.display = 'inline-block';
                 downloadSpinnerIcon.style.display = 'none';
-                downloadBtn.disabled = !(isPlayerReady() && lyricsLoaded);
+                downloadBtn.disabled = !isPlayerReady();
             }
         }
 
@@ -1687,7 +1694,7 @@
             try {
                 // Step 1: Handle lyrics part (i.e., no lyrics)
                 lyricsData = [];
-                lyricsLoaded = true; // Mark as processed
+                lyricsLoaded = true; // Mark as processed, even though there are no lyrics. This enables download.
                 renderLyrics(); // This will display "No lyrics content in file."
 
                 // Step 2: Handle audio part
@@ -2038,7 +2045,7 @@
             muffledBtn.disabled = !audioReady;
             muffledSlider.disabled = !audioReady;
             themeToggleBtn.disabled = !audioReady;
-            downloadBtn.disabled = !(audioReady && lyricsLoaded);
+            downloadBtn.disabled = !audioReady;
 
 
             if (!audioReady) {
@@ -2163,11 +2170,7 @@
 
 
             } else {
-                if (!lyricsLoaded && typeof jsonLength !== 'undefined' && jsonLength > 0) {
-                    lyricsOutput.innerHTML = 'Error parsing lyrics data.';
-                } else {
-                    lyricsOutput.innerHTML = 'No lyrics content in file.';
-                }
+                lyricsOutput.innerHTML = 'No lyrics content in file.';
                 lyricsOutput.className = 'placeholder';
                 lyricsContainer.style.justifyContent = 'center';
                 lyricsContainer.style.alignItems = 'center';
