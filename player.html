@@ -551,7 +551,7 @@
     <div id="controls-container">
         <div class="file-inputs">
 
-            <input type="file" id="songLyricsFile" accept=".songlyrics" title="Select .songlyrics file">
+            <input type="file" id="songLyricsFile" accept=".songlyrics, .mp3" title="Select .songlyrics file">
              <span id="loadStatus"></span>
         </div>
 
@@ -1036,12 +1036,14 @@
                 return;
             }
             const file = files[0];
+            const fileNameLower = file.name.toLowerCase();
 
             currentSongFilename = file.name;
             resetPlayerAndLyrics(false);
             loadStatus.textContent = '';
-            if (!file.name.toLowerCase().endsWith('.songlyrics')) {
-                alert('Invalid file type. Please select a .songlyrics file.');
+            
+            if (!fileNameLower.endsWith('.songlyrics') && !fileNameLower.endsWith('.mp3')) {
+                alert('Invalid file type. Please select a .songlyrics or .mp3 file.');
                 songLyricsFileInput.value = '';
                 currentSongFilename = null;
                 resetPlayerAndLyrics(false);
@@ -1059,7 +1061,16 @@
 
             loadStatus.textContent = `Loading ${file.name}...`;
             const reader = new FileReader();
-            reader.onload = (e) => parseCombinedFile(e.target.result);
+
+            reader.onload = (e) => {
+                const arrayBuffer = e.target.result;
+                if (fileNameLower.endsWith('.songlyrics')) {
+                    parseCombinedFile(arrayBuffer);
+                } else if (fileNameLower.endsWith('.mp3')) {
+                    handleMp3File(arrayBuffer);
+                }
+            };
+
             reader.onerror = () => {
                 alert("Error reading the selected file.");
                 loadStatus.textContent = 'Error reading file.';
@@ -1667,6 +1678,62 @@
                      progressBar.value = 0;
                  }
              }
+        }
+
+        function handleMp3File(arrayBuffer) {
+            resetPlayerAndLyrics(false);
+            loadStatus.textContent = 'Processing MP3 file...';
+
+            try {
+                // Step 1: Handle lyrics part (i.e., no lyrics)
+                lyricsData = [];
+                lyricsLoaded = true; // Mark as processed
+                renderLyrics(); // This will display "No lyrics content in file."
+
+                // Step 2: Handle audio part
+                if (arrayBuffer.byteLength === 0) {
+                    throw new Error("MP3 file is empty.");
+                }
+
+                if (!audioContext) {
+                    initializeAudioContext();
+                    if (!audioContext) {
+                        throw new Error("AudioContext could not be initialized. Cannot decode audio.");
+                    }
+                }
+
+                loadStatus.textContent = 'Decoding audio...';
+
+                audioContext.decodeAudioData(arrayBuffer)
+                    .then(buffer => {
+                        if (!(buffer?.duration > 0)) {
+                            throw new Error("Decoded audio appears to be empty or invalid (duration 0).");
+                        }
+                        audioBuffer = buffer;
+                        audioLoaded = true;
+                        progressBar.max = buffer.duration;
+                        updateTotalDurationDisplay();
+                        updateCurrentTimeDisplay(0);
+                        updateLyricsHighlight(0, true, false);
+                        loadStatus.textContent = 'File loaded successfully.';
+                        checkEnablePlayer();
+                        playAudio();
+                    })
+                    .catch(e => {
+                        audioLoaded = false;
+                        audioBuffer = null;
+                        checkEnablePlayer();
+                        loadStatus.textContent = `Error decoding audio: ${e.message}`;
+                        console.error("Audio Decoding Error:", e);
+                    });
+
+            } catch (error) {
+                alert(`Error processing file: ${error.message}`);
+                console.error("MP3 File Setup Error:", error);
+                resetPlayerAndLyrics(true);
+                checkEnablePlayer();
+                loadStatus.textContent = `Error: ${error.message}`;
+            }
         }
 
 
