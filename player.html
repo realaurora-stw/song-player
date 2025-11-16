@@ -616,7 +616,7 @@
 <body>
     <div id="main-content">
         <div id="lyrics-container">
-            <p id="lyrics-output" class="placeholder">Load a .songlyrics file.</p>
+            <p id="lyrics-output" class="placeholder">Open the playlist sidebar to add songs.</p>
         </div>
 
         <div id="controls-container">
@@ -1005,9 +1005,6 @@
             } catch (error) {
                 loadStatus.textContent = `Error: ${error.message}`;
                 console.error(`Error loading track ${index}:`, error);
-                // Optionally, remove the broken track from the playlist
-                // playlist.splice(index, 1);
-                // renderPlaylist();
                 playNextTrack(); // Try to play the next song
             }
         }
@@ -1024,10 +1021,8 @@
                 const fileNameLower = fileName.toLowerCase();
 
                 if (fileNameLower.endsWith('.mp3')) {
-                    // It's just an MP3 file
                     audioDataOffset = 0;
                 } else if (fileNameLower.endsWith('.songlyrics')) {
-                    // It's a combined file
                     const dataView = new DataView(arrayBuffer);
                     const magic = String.fromCharCode(...new Uint8Array(arrayBuffer, 0, 4));
                     if (magic !== "LYRX") {
@@ -1074,7 +1069,7 @@
         }
         
         function playNextTrack() {
-            if (!isPlaying) return; // Don't auto-advance if paused
+            if (currentPlaylistIndex === -1) return; // Don't do anything if no song was playing
             
             if (isLoopSong) {
                 loadAndPlayTrack(currentPlaylistIndex);
@@ -1323,7 +1318,10 @@
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
             sourceNode.connect(bassFilterNode);
             sourceNode.onended = () => {
-                if(isPlaying) playNextTrack(); // Only advance if it ended naturally, not from stop/pause
+                if(isPlaying) {
+                    isPlaying = false; // Prevent race conditions
+                    playNextTrack();
+                }
             };
             startTime = audioContext.currentTime;
             sourceNode.start(0, startOffset);
