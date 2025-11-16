@@ -12,8 +12,8 @@
 
     <style>
         :root {
-            color-scheme: dark;
-        }
+  color-scheme: dark;
+}
         * {
             box-sizing: border-box;
             margin: 0;
@@ -39,284 +39,7 @@
             font-family: inherit;
         }
 
-        /* ===================== PLAYLIST SIDEBAR ===================== */
-
-        #playlistSidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 320px;
-            max-width: 85vw;
-            background-color: #050505;
-            border-right: 1px solid #111111;
-            transform: translateX(-100%);
-            transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background-color 0.3s ease;
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            padding: 16px 18px;
-        }
-
-        #playlistSidebar.open {
-            transform: translateX(0);
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        #playlistBackdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.35);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease-out;
-            z-index: 25;
-        }
-
-        #playlistBackdrop.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .playlist-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .playlist-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1.05em;
-            font-weight: 600;
-            color: #f0f0f0;
-        }
-
-        .playlist-title i {
-            color: #22c55e;
-        }
-
-        #closePlaylistBtn {
-            background: none;
-            border: none;
-            color: #777777;
-            font-size: 1.2em;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        #closePlaylistBtn:hover {
-            color: #ffffff;
-        }
-
-        .playlist-body {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow: hidden;
-            padding-top: 4px;
-        }
-
-        .playlist-upload {
-            margin-bottom: 10px;
-        }
-
-        .playlist-upload label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            border: 1px solid #1a1a1a;
-            cursor: pointer;
-            font-size: 0.85em;
-            color: #dddddd;
-            background-color: #080808;
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-        }
-
-        .playlist-upload label i {
-            font-size: 0.95em;
-        }
-
-        .playlist-upload label:hover {
-            background-color: #151515;
-            border-color: #2a2a2a;
-            color: #ffffff;
-        }
-
-        .playlist-upload input[type="file"] {
-            display: none;
-        }
-
-        .playlist-options {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .playlist-toggle-btn {
-            background-color: #050505;
-            border: 1px solid #181818;
-            border-radius: 999px;
-            width: 36px;
-            height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #aaaaaa;
-            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease-out;
-            font-size: 0.95em;
-        }
-
-        .playlist-toggle-btn:hover {
-            background-color: #111111;
-            border-color: #2a2a2a;
-            color: #ffffff;
-        }
-
-        .playlist-toggle-btn.active {
-            background-color: #22c55e;
-            border-color: #22c55e;
-            color: #ffffff;
-        }
-
-        .playlist-toggle-btn:active {
-            transform: scale(0.96);
-        }
-
-        .playlist-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            flex: 1;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #333333 transparent;
-        }
-
-        .playlist-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .playlist-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .playlist-list::-webkit-scrollbar-thumb {
-            background: #333333;
-            border-radius: 3px;
-        }
-
-        .playlist-item,
-        .playlist-empty {
-            padding: 8px 6px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            color: #cccccc;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-        }
-
-        .playlist-item {
-            cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease;
-        }
-
-        .playlist-item:hover {
-            background-color: #141414;
-            color: #ffffff;
-        }
-
-        .playlist-item.active {
-            background-color: #22c55e1a;
-            color: #22c55e;
-        }
-
-        .playlist-item .track-name {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .playlist-empty {
-            color: #666666;
-            justify-content: flex-start;
-        }
-
-        @media (max-width: 768px) {
-            #playlistSidebar {
-                width: 80vw;
-                padding: 14px 14px;
-            }
-        }
-
-        body.light-mode #playlistSidebar {
-            background-color: #ffffff;
-            border-right: 1px solid #dddddd;
-        }
-
-        body.light-mode .playlist-title {
-            color: #222222;
-        }
-
-        body.light-mode .playlist-upload label {
-            background-color: #f5f5f5;
-            color: #444444;
-            border-color: #d5d5d5;
-        }
-
-        body.light-mode .playlist-upload label:hover {
-            background-color: #e8e8e8;
-            border-color: #c5c5c5;
-            color: #111111;
-        }
-
-        body.light-mode .playlist-toggle-btn {
-            background-color: #f5f5f5;
-            border-color: #dddddd;
-            color: #555555;
-        }
-
-        body.light-mode .playlist-toggle-btn:hover {
-            background-color: #e9e9e9;
-            border-color: #cccccc;
-            color: #111111;
-        }
-
-        body.light-mode .playlist-toggle-btn.active {
-            background-color: #22c55e;
-            border-color: #22c55e;
-            color: #ffffff;
-        }
-
-        body.light-mode .playlist-item {
-            color: #444444;
-        }
-
-        body.light-mode .playlist-item:hover {
-            background-color: #f1f1f1;
-            color: #111111;
-        }
-
-        body.light-mode .playlist-item.active {
-            background-color: #22c55e1a;
-            color: #16a34a;
-        }
-
-        body.light-mode .playlist-empty {
-            color: #999999;
-        }
-
-        /* ===================== LYRICS & PLAYER ===================== */
-
-        #lyrics-container {
+#lyrics-container {
             flex-grow: 1;
             overflow-y: auto;
             padding: 40px 5% 200px 5%;
@@ -329,7 +52,7 @@
             -ms-overflow-style: none;
         }
 
-        #lyrics-container::-webkit-scrollbar {
+       #lyrics-container::-webkit-scrollbar {
             display: none;
         }
 
@@ -338,6 +61,7 @@
             width: 100%;
             text-align: left;
         }
+
 
         #lyrics-output span {
             display: none;
@@ -362,7 +86,7 @@
             pointer-events: auto;
         }
 
-        #lyrics-output span.highlighted {
+ #lyrics-output span.highlighted {
             color: #50d060;
             font-weight: 600;
             transform: translateY(-1px) scale(1.05);
@@ -371,16 +95,18 @@
             transition-timing-function: ease-in-out, ease-in-out, ease-out;
         }
 
+
         #lyrics-output.placeholder {
-            display: block;
-            opacity: 1;
-            transform: none;
-            color: #555;
-            font-style: italic;
-            text-align: center;
-            margin: auto;
-            font-weight: normal;
+             display: block;
+             opacity: 1;
+             transform: none;
+             color: #555;
+             font-style: italic;
+             text-align: center;
+             margin: auto;
+             font-weight: normal;
         }
+
 
         #controls-container {
             position: fixed;
@@ -407,6 +133,7 @@
         .file-inputs label {
             font-size: 0.9em;
         }
+
 
         .file-inputs input[type="file"] {
             font-size: 0.8em;
@@ -483,12 +210,13 @@
           cursor: pointer;
           transition: background-color 0.2s, transform 0.15s ease-out;
         }
-        #progressBar:hover::-webkit-slider-thumb {
-            background: #2e2e2e;
-        }
-        #progressBar:active::-webkit-slider-thumb {
-            transform: scale(1.1);
-        }
+         #progressBar:hover::-webkit-slider-thumb {
+              background: #2e2e2e;
+         }
+         #progressBar:active::-webkit-slider-thumb {
+             transform: scale(1.1);
+         }
+
 
         #progressBar::-moz-range-thumb {
           width: 16px;
@@ -499,29 +227,31 @@
           border: none;
           transition: background-color 0.2s, transform 0.15s ease-out;
         }
-        #progressBar:hover::-moz-range-thumb {
-            background: #888;
-        }
-        #progressBar:active::-moz-range-thumb {
-            transform: scale(1.1);
-        }
+         #progressBar:hover::-moz-range-thumb {
+              background: #888;
+         }
+         #progressBar:active::-moz-range-thumb {
+             transform: scale(1.1);
+         }
+
 
         #progressBar:disabled::-webkit-slider-thumb {
             background: #333;
             cursor: not-allowed;
             transition: none;
-            transform: none;
+             transform: none;
         }
         #progressBar:disabled::-moz-range-thumb {
             background: #333;
             cursor: not-allowed;
-            transition: none;
-            transform: none;
+             transition: none;
+             transform: none;
         }
         #progressBar:disabled {
             cursor: not-allowed;
-            background: #0a0a0a;
+             background: #0a0a0a;
         }
+
 
         #currentTime, #totalDuration {
             font-size: 0.9em;
@@ -546,7 +276,8 @@
              transition: color 0.3s ease;
         }
 
-        .control-icon-btn {
+
+       .control-icon-btn {
             background: none;
             border: none;
             color: #4c4c4c;
@@ -556,13 +287,14 @@
             transition: color 0.2s;
             line-height: 1;
             font-family: inherit;
-        }
-        .control-icon-btn:hover:enabled {
-            color: #646464;
-        }
-        .control-icon-btn:disabled {
-            cursor: not-allowed;
-        }
+       }
+       .control-icon-btn:hover:enabled {
+           color: #646464;
+       }
+       .control-icon-btn:disabled {
+           cursor: not-allowed;
+       }
+
 
         .volume-control-wrapper,
         .speed-control-wrapper,
@@ -634,6 +366,7 @@
             transition: background-color 0.2s;
         }
 
+
         .slider-vertical:disabled { cursor: not-allowed; background: #444; }
         .slider-vertical:disabled::-webkit-slider-thumb { background: #666; cursor: not-allowed; }
         .slider-vertical:disabled::-moz-range-thumb { background: #666; cursor: not-allowed; }
@@ -648,6 +381,7 @@
             transition: color 0.3s ease;
         }
 
+
         .popup-control.show {
             visibility: visible;
             opacity: 1;
@@ -655,33 +389,36 @@
             transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s 0s, background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
+
+
         @media (max-width: 768px) {
-            #lyrics-container {
-                font-size: 2em;
-                padding: 20px 5% 150px 5%;
-            }
-            .player-controls { gap: 10px; }
-            #playPauseBtn { padding: 6px 10px; font-size: 0.9em; }
+             #lyrics-container {
+                 font-size: 2em;
+                 padding: 20px 5% 150px 5%;
+             }
+             .player-controls { gap: 10px; }
+             #playPauseBtn { padding: 6px 10px; font-size: 0.9em; }
             #currentTime, #totalDuration { font-size: 0.8em; min-width: 40px; }
             .file-inputs label { font-size: 0.8em; }
-            .control-icon-btn { font-size: 1.1em; }
+           .control-icon-btn { font-size: 1.1em; }
 
-            .popup-control {
-                padding: 12px 10px 12px 10px;
-                height: 140px;
-            }
-            .slider-wrapper-vertical {
-                width: 75px;
-                height: 22px;
-                margin-bottom: 15px;
-            }
-            .slider-vertical {
-                width: 75px;
-                height: 6px;
-            }
+
+           .popup-control {
+               padding: 12px 10px 12px 10px;
+               height: 140px;
+           }
+           .slider-wrapper-vertical {
+               width: 75px;
+               height: 22px;
+               margin-bottom: 15px;
+           }
+           .slider-vertical {
+               width: 75px;
+               height: 6px;
+           }
             .slider-vertical::-webkit-slider-thumb { width: 14px; height: 14px; }
             .slider-vertical::-moz-range-thumb { width: 14px; height: 14px; }
-            .popup-text-display { font-size: 0.75em; }
+           .popup-text-display { font-size: 0.75em; }
         }
 
         body.light-mode {
@@ -725,7 +462,7 @@
             color: #222;
         }
         body.light-mode #playPauseBtn:hover:enabled {
-            background-color: #d0d0d0;
+             background-color: #d0d0d0;
         }
         body.light-mode #playPauseBtn:disabled {
             background-color: #f0f0f0;
@@ -739,16 +476,16 @@
         body.light-mode #progressBar::-webkit-slider-thumb {
           background: #aaaaaa;
         }
-        body.light-mode #progressBar:hover::-webkit-slider-thumb {
-            background: #888888;
-        }
+         body.light-mode #progressBar:hover::-webkit-slider-thumb {
+              background: #888888;
+         }
 
         body.light-mode #progressBar::-moz-range-thumb {
           background: #aaaaaa;
         }
-        body.light-mode #progressBar:hover::-moz-range-thumb {
-            background: #888888;
-        }
+         body.light-mode #progressBar:hover::-moz-range-thumb {
+              background: #888888;
+         }
 
         body.light-mode #progressBar:disabled::-webkit-slider-thumb {
             background: #cccccc;
@@ -757,7 +494,7 @@
             background: #cccccc;
         }
         body.light-mode #progressBar:disabled {
-            background: #eeeeee;
+             background: #eeeeee;
         }
 
         body.light-mode #currentTime,
@@ -766,18 +503,18 @@
         }
 
         body.light-mode #loadStatus {
-            color: #777;
+             color: #777;
         }
 
-        body.light-mode .control-icon-btn {
+       body.light-mode .control-icon-btn {
             color: #444;
-        }
-        body.light-mode .control-icon-btn:hover:enabled {
-            color: #000;
-        }
-        body.light-mode .control-icon-btn:disabled {
-            color: #bbbbbb;
-        }
+       }
+       body.light-mode .control-icon-btn:hover:enabled {
+           color: #000;
+       }
+       body.light-mode .control-icon-btn:disabled {
+           color: #bbbbbb;
+       }
 
         body.light-mode .popup-control {
             background-color: #f8f8f8;
@@ -802,45 +539,10 @@
         body.light-mode .popup-text-display {
             color: #333333;
         }
+
     </style>
 </head>
 <body>
-
-    <!-- Playlist Sidebar -->
-    <div id="playlistSidebar">
-        <div class="playlist-header">
-            <div class="playlist-title">
-                <i class="fas fa-music"></i>
-                <span>Playlist</span>
-            </div>
-            <button id="closePlaylistBtn" aria-label="Close playlist">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="playlist-body">
-            <div class="playlist-upload">
-                <label for="playlistFileInput">
-                    <i class="fas fa-file-upload"></i>
-                    <span>Add .songlyrics or .mp3 files</span>
-                </label>
-                <input type="file" id="playlistFileInput" multiple accept=".songlyrics, .mp3">
-            </div>
-            <div class="playlist-options">
-                <button id="shuffleBtn" class="playlist-toggle-btn" title="Shuffle">
-                    <i class="fas fa-random"></i>
-                </button>
-                <button id="loopTrackBtn" class="playlist-toggle-btn" title="Loop current track">
-                    <i class="fas fa-repeat-1"></i>
-                </button>
-                <button id="loopPlaylistBtn" class="playlist-toggle-btn" title="Loop playlist">
-                    <i class="fas fa-repeat"></i>
-                </button>
-            </div>
-            <ul id="playlistList" class="playlist-list"></ul>
-        </div>
-    </div>
-
-    <div id="playlistBackdrop"></div>
 
     <div id="lyrics-container">
         <p id="lyrics-output" class="placeholder">Load a .songlyrics file.</p>
@@ -848,20 +550,18 @@
 
     <div id="controls-container">
         <div class="file-inputs">
+
             <input type="file" id="songLyricsFile" accept=".songlyrics, .mp3" title="Select .songlyrics file">
-            <span id="loadStatus"></span>
+             <span id="loadStatus"></span>
         </div>
 
         <audio id="audioPlayer" style="display: none;"></audio>
         <div class="player-controls">
-            <button id="playlistToggleBtn" class="control-icon-btn" title="Open playlist">
-                <i class="fas fa-list"></i>
-            </button>
-
             <button id="playPauseBtn" disabled>▶ Play</button>
             <span id="currentTime">0:00</span>
             <input type="range" id="progressBar" value="0" step="0.01" disabled>
             <span id="totalDuration">0:00</span>
+
 
             <div class="volume-control-wrapper">
                 <button id="volumeBtn" class="control-icon-btn" disabled title="Volume">
@@ -874,6 +574,7 @@
                     <span id="volumePercentage" class="popup-text-display">100%</span>
                 </div>
             </div>
+
 
             <div class="speed-control-wrapper">
                 <button id="speedBtn" class="control-icon-btn" disabled title="Playback Speed">
@@ -928,9 +629,12 @@
                 <i class="fas fa-circle-notch fa-spin" style="display: none;"></i>
             </button>
 
+
             <button id="themeToggleBtn" class="control-icon-btn" title="Toggle Theme" disabled>
                 <i id="themeIcon" class="fas fa-sun"></i>
             </button>
+
+
         </div>
     </div>
 
@@ -938,17 +642,6 @@
         const songLyricsFileInput = document.getElementById('songLyricsFile');
         const lyricsOutput = document.getElementById('lyrics-output');
         const lyricsContainer = document.getElementById('lyrics-container');
-
-        const playlistSidebar = document.getElementById('playlistSidebar');
-        const playlistBackdrop = document.getElementById('playlistBackdrop');
-        const playlistToggleBtn = document.getElementById('playlistToggleBtn');
-        const closePlaylistBtn = document.getElementById('closePlaylistBtn');
-        const playlistFileInput = document.getElementById('playlistFileInput');
-        const playlistList = document.getElementById('playlistList');
-        const shuffleBtn = document.getElementById('shuffleBtn');
-        const loopTrackBtn = document.getElementById('loopTrackBtn');
-        const loopPlaylistBtn = document.getElementById('loopPlaylistBtn');
-
         const playPauseBtn = document.getElementById('playPauseBtn');
         const progressBar = document.getElementById('progressBar');
         const currentTimeDisplay = document.getElementById('currentTime');
@@ -981,6 +674,7 @@
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
 
+
         let audioContext;
         let audioBuffer;
         let sourceNode;
@@ -1007,18 +701,10 @@
         let isMuted = false;
         let previousVolumeBeforeMute = 1.0;
 
-        // Playlist state
-        let playlist = [];
-        let currentTrackIndex = -1;
-        let isShuffleEnabled = false;
-        let isLoopTrackEnabled = false;
-        let isLoopPlaylistEnabled = false;
-        let shouldAutoplayAfterLoad = true;
 
         const VOLUME_STORAGE_KEY = 'playerVolumeSetting';
         const SPEED_STORAGE_KEY = 'playerSpeedSetting_v2';
         const BASS_BOOST_STORAGE_KEY = 'playerBassBoostSetting';
-        const UNDERWOOD_STORAGE_KEY = 'playerUnderwaterSetting'; // (typo kept for backward-compat if needed)
         const UNDERWATER_STORAGE_KEY = 'playerUnderwaterSetting';
         const MUFFLED_STORAGE_KEY = 'playerMuffledSetting';
         const THEME_STORAGE_KEY = 'playerTheme';
@@ -1031,19 +717,20 @@
         let muffledPopupTimeout = null;
         const POPUP_CLOSE_DELAY = 6000;
 
+
         function isPlayerReady() {
             return audioLoaded && !!audioContext && !!audioBuffer;
         }
-
         function getCurrentBufferTime() {
-            let time = startOffset;
-            if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
-                const elapsedRealTime = audioContext.currentTime - startTime;
-                time = startOffset + (elapsedRealTime * currentPlaybackRate);
-                time = time % audioBuffer.duration;
-            }
-            return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
+             let time = startOffset;
+             if (isPlayerReady() && isPlaying && audioContext && startTime > 0) {
+                 const elapsedRealTime = audioContext.currentTime - startTime;
+                 time = startOffset + (elapsedRealTime * currentPlaybackRate);
+                 time = time % audioBuffer.duration;
+             }
+             return Math.max(0, Math.min(time, audioBuffer?.duration ?? 0));
         }
+
 
         function initializeAudioContext() {
             if (!audioContext) {
@@ -1086,8 +773,10 @@
             }
         }
 
+
+
         function loadSetting(key, defaultValue, validator) {
-            try {
+             try {
                 const savedValue = localStorage.getItem(key);
                 if (savedValue !== null) {
                     if (key === THEME_STORAGE_KEY) {
@@ -1103,9 +792,9 @@
         }
 
         function saveSetting(key, value) {
-            try {
+             try {
                 localStorage.setItem(key, value.toString());
-            } catch (e) {
+             } catch (e) {
                 console.error("Error saving setting:", key, value, e);
             }
         }
@@ -1116,9 +805,9 @@
                 gainNode.gain.value = vol;
             }
             if(volumeSlider) {
-                volumeSlider.value = vol;
-                if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
-                updateVolumeIcon(vol);
+                 volumeSlider.value = vol;
+                 if(volumePercentage) volumePercentage.textContent = `${Math.round(vol * 100)}%`;
+                 updateVolumeIcon(vol);
             }
             isMuted = false;
             previousVolumeBeforeMute = vol;
@@ -1126,8 +815,8 @@
 
         function loadSpeedSetting() {
             const speed = loadSetting(SPEED_STORAGE_KEY, 1, s => !isNaN(s) && s>=0.01 && s<=2);
-            setPlaybackSpeed(speed, false);
-            updateTotalDurationDisplay();
+             setPlaybackSpeed(speed, false);
+             updateTotalDurationDisplay();
         }
 
         function loadBassBoostSetting() {
@@ -1171,21 +860,24 @@
             applyTheme(isLightMode ? 'dark' : 'light');
         }
 
-        function setVolume(newVolume) {
-            const clampedVolume = Math.max(0, Math.min(1, newVolume));
-            if (gainNode && audioContext) {
-                gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
-            }
-            if (volumeSlider) {
-                volumeSlider.value = clampedVolume;
-                updateVolumeIcon(clampedVolume);
-                volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
 
-                if (!isMuted) {
+
+        function setVolume(newVolume) {
+             const clampedVolume = Math.max(0, Math.min(1, newVolume));
+             if (gainNode && audioContext) {
+                gainNode.gain.setValueAtTime(clampedVolume, audioContext.currentTime);
+             }
+             if (volumeSlider) {
+                 volumeSlider.value = clampedVolume;
+                 updateVolumeIcon(clampedVolume);
+                 volumePercentage.textContent = `${Math.round(clampedVolume * 100)}%`;
+
+                 if (!isMuted) {
                     saveSetting(VOLUME_STORAGE_KEY, clampedVolume);
-                }
+                 }
             }
         }
+
 
         // =========================================================================
         // START OF BUG FIX
@@ -1210,12 +902,18 @@
                 const wasPlaying = isPlaying;
                 
                 if (wasPlaying && isFirefox) {
+                    // BUG FIX: The "rewind" issue was caused by calling getCurrentBufferTime()
+                    // AFTER currentPlaybackRate was already updated. This caused a miscalculation.
+                    // The fix is to manually calculate the current time here using the *previousRate*.
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
                     const correctCurrentBufferTime = (startOffset + elapsedBufferTime) % audioBuffer.duration;
+                    
+                    // Now seek using the correctly calculated time.
                     seekAudio(correctCurrentBufferTime);
 
                 } else if (wasPlaying && sourceNode?.playbackRate) {
+                    // This is the standard path for non-Firefox browsers or when paused. It works correctly.
                     const elapsedRealTime = audioContext.currentTime - startTime;
                     const elapsedBufferTime = elapsedRealTime * previousRate;
 
@@ -1232,6 +930,7 @@
         // =========================================================================
         // END OF BUG FIX
         // =========================================================================
+
 
         function setBassBoost(levelInDb) {
             if (isNaN(levelInDb) || !bassFilterNode || !audioContext) return;
@@ -1314,24 +1013,24 @@
             }
         }
 
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
-            resetPlayerAndLyrics(false);
-            renderPlaylistUI();
-            checkEnablePlayer();
+             loadTheme();
+             resetPlayerAndLyrics(false);
+             checkEnablePlayer();
             document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible') {
-                    if (lyricsContainer) {
-                        lyricsContainer.style.scrollBehavior = 'auto';
-                        requestAnimationFrame(() => {
-                            lyricsContainer.style.scrollBehavior = 'smooth';
-                        });
-                    }
-                }
-            });
+                 if (document.visibilityState === 'visible') {
+                     if (lyricsContainer) {
+                         lyricsContainer.style.scrollBehavior = 'auto';
+                         requestAnimationFrame(() => {
+                             lyricsContainer.style.scrollBehavior = 'smooth';
+                         });
+                     }
+                 }
+             });
         });
 
-        // Single-file input
+
         songLyricsFileInput.addEventListener('change', (event) => {
             const files = event.target.files;
 
@@ -1342,9 +1041,6 @@
             const fileNameLower = file.name.toLowerCase();
 
             currentSongFilename = file.name;
-            currentTrackIndex = -1; // this song is not part of playlist
-            renderPlaylistUI();
-            shouldAutoplayAfterLoad = true;
             resetPlayerAndLyrics(false);
             loadStatus.textContent = '';
             
@@ -1386,82 +1082,6 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // Playlist controls
-        playlistToggleBtn.addEventListener('click', () => {
-            const isOpen = playlistSidebar.classList.toggle('open');
-            playlistBackdrop.classList.toggle('visible', isOpen);
-        });
-
-        closePlaylistBtn.addEventListener('click', () => {
-            playlistSidebar.classList.remove('open');
-            playlistBackdrop.classList.remove('visible');
-        });
-
-        playlistBackdrop.addEventListener('click', () => {
-            playlistSidebar.classList.remove('open');
-            playlistBackdrop.classList.remove('visible');
-        });
-
-        playlistFileInput.addEventListener('change', (event) => {
-            const files = Array.from(event.target.files || []);
-            if (!files.length) return;
-
-            let addedAny = false;
-            files.forEach(file => {
-                const fileNameLower = file.name.toLowerCase();
-                if (!fileNameLower.endsWith('.songlyrics') && !fileNameLower.endsWith('.mp3')) {
-                    return;
-                }
-                playlist.push({
-                    file,
-                    name: file.name,
-                    type: fileNameLower.endsWith('.songlyrics') ? 'songlyrics' : 'mp3'
-                });
-                addedAny = true;
-            });
-
-            if (!addedAny) {
-                alert('No valid .songlyrics or .mp3 files were selected for the playlist.');
-                playlistFileInput.value = '';
-                return;
-            }
-
-            renderPlaylistUI();
-
-            // Auto-play first added track if nothing is loaded yet
-            if (!audioLoaded && playlist.length > 0 && currentTrackIndex === -1) {
-                loadTrackFromPlaylist(0, true);
-            }
-
-            // Reset input so same files can be re-selected later if needed
-            playlistFileInput.value = '';
-        });
-
-        shuffleBtn.addEventListener('click', () => {
-            isShuffleEnabled = !isShuffleEnabled;
-            shuffleBtn.classList.toggle('active', isShuffleEnabled);
-        });
-
-        loopTrackBtn.addEventListener('click', () => {
-            isLoopTrackEnabled = !isLoopTrackEnabled;
-            loopTrackBtn.classList.toggle('active', isLoopTrackEnabled);
-
-            if (isLoopTrackEnabled) {
-                isLoopPlaylistEnabled = false;
-                loopPlaylistBtn.classList.remove('active');
-            }
-        });
-
-        loopPlaylistBtn.addEventListener('click', () => {
-            isLoopPlaylistEnabled = !isLoopPlaylistEnabled;
-            loopPlaylistBtn.classList.toggle('active', isLoopPlaylistEnabled);
-
-            if (isLoopPlaylistEnabled) {
-                isLoopTrackEnabled = false;
-                loopTrackBtn.classList.remove('active');
-            }
-        });
-
         volumeBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             if (!volumeBtn.disabled) {
@@ -1485,12 +1105,14 @@
                 
                 if (isMuted && newVolume > 0) {
                     isMuted = false;
+                } else if (isMuted && newVolume === 0) {
                 }
                 
                 setVolume(newVolume);
                 resetPopupTimer(volumePopup);
             }
         });
+
 
         volumeSlider.addEventListener('wheel', (event) => {
             if (volumeSlider.disabled) return;
@@ -1505,6 +1127,7 @@
             else if (event.shiftKey) step = 0.005;
             else if (Math.abs(delta) > 100) step = 0.05;
             else if (Math.abs(delta) > 50) step = 0.03;
+
 
             let newValue = delta < 0 ? currentValue + step : currentValue - step;
             newValue = Math.max(0, Math.min(1, newValue));
@@ -1525,7 +1148,7 @@
                 hidePopup(bassBoostPopup);
                 hidePopup(underwaterPopup);
                 hidePopup(muffledPopup);
-                if (!wasVisible && speedPopup.classList.contains('show')) {
+                 if (!wasVisible && speedPopup.classList.contains('show')) {
                     resetPopupTimer(speedPopup);
                 } else if (wasVisible && !speedPopup.classList.contains('show')) {
                     clearPopupTimer(speedPopup);
@@ -1541,8 +1164,9 @@
             }
         });
 
+
         speedSlider.addEventListener('wheel', (event) => {
-            if (speedSlider.disabled) return;
+             if (speedSlider.disabled) return;
             event.preventDefault();
             event.stopPropagation();
             const delta = event.deltaY;
@@ -1683,10 +1307,10 @@
         });
 
         volumePopup.addEventListener('mousemove', () => {
-            if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
+             if (volumePopup.classList.contains('show')) resetPopupTimer(volumePopup);
         });
         speedPopup.addEventListener('mousemove', () => {
-            if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
+             if (speedPopup.classList.contains('show')) resetPopupTimer(speedPopup);
         });
         bassBoostPopup.addEventListener('mousemove', () => {
             if (bassBoostPopup.classList.contains('show')) resetPopupTimer(bassBoostPopup);
@@ -1697,6 +1321,7 @@
         muffledPopup.addEventListener('mousemove', () => {
             if (muffledPopup.classList.contains('show')) resetPopupTimer(muffledPopup);
         });
+
 
         document.addEventListener('click', (event) => {
             if (volumePopup.classList.contains('show') && !volumeBtn.contains(event.target) && !volumePopup.contains(event.target)) {
@@ -1716,17 +1341,20 @@
             }
         });
 
+
         volumePopup.addEventListener('click', (event) => event.stopPropagation());
         speedPopup.addEventListener('click', (event) => event.stopPropagation());
         bassBoostPopup.addEventListener('click', (event) => event.stopPropagation());
         underwaterPopup.addEventListener('click', (event) => event.stopPropagation());
         muffledPopup.addEventListener('click', (event) => event.stopPropagation());
 
+
         themeToggleBtn.addEventListener('click', () => {
             if (!themeToggleBtn.disabled) {
-                toggleTheme();
+                 toggleTheme();
             }
         });
+
 
         playPauseBtn.addEventListener('click', () => {
             if (!isPlayerReady()) return;
@@ -1738,6 +1366,7 @@
             }
         });
 
+
         progressBar.addEventListener('input', () => {
             if (!isPlayerReady()) return;
             isSeeking = true;
@@ -1747,12 +1376,14 @@
             updateLyricsHighlight(seekBufferTime, true, false);
         });
 
+
         progressBar.addEventListener('change', () => {
             if (!isPlayerReady()) return;
             const seekBufferTime = parseFloat(progressBar.value);
             seekAudio(seekBufferTime);
             isSeeking = false;
-            if (!isPlaying) {
+            if (isPlaying) {
+            } else {
                 updateCurrentTimeDisplay(startOffset);
                 updateLyricsHighlight(startOffset, true, false);
             }
@@ -1848,7 +1479,9 @@
             seekAudio(newTime);
         });
 
+
         downloadBtn.addEventListener('click', handleDownload);
+
 
         async function handleDownload() {
             if (!isPlayerReady()) {
@@ -1856,7 +1489,10 @@
                 return;
             }
 
+            // A file without lyrics is still valid for download, so the lyricsLoaded check is adjusted.
+            // If there are no lyrics, an empty lyrics block will be created.
             if (!lyricsLoaded) lyricsData = [];
+
 
             downloadIcon.style.display = 'none';
             downloadSpinnerIcon.style.display = 'inline-block';
@@ -1880,11 +1516,12 @@
 
                 const targetDuration = audioBuffer.duration / currentPlaybackRate;
                 if (targetDuration <= 0 || !isFinite(targetDuration)) {
-                    throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`);
+                    throw new Error(`Invalid target duration (${targetDuration.toFixed(2)}s) due to playback rate.`)
                 }
-                if (targetDuration > 60 * 45) {
-                    throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
+                 if (targetDuration > 60 * 45) {
+                     throw new Error(`The selected speed results in audio too long to process (${Math.round(targetDuration/60)} mins). Try a higher speed or shorter source.`);
                 }
+
 
                 const offlineCtx = new OfflineAudioContext(
                     audioBuffer.numberOfChannels,
@@ -2016,8 +1653,9 @@
             return wavBuffer;
         }
 
+
         function updateTotalDurationDisplay() {
-            if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+             if (audioBuffer?.duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const adjustedDuration = audioBuffer.duration / currentPlaybackRate;
                 totalDurationDisplay.textContent = formatTime(adjustedDuration);
                 progressBar.max = audioBuffer.duration;
@@ -2028,24 +1666,25 @@
         }
 
         function updateCurrentTimeDisplay(bufferTime) {
-            const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
-            const duration = audioBuffer?.duration ?? 0;
+             const validBufferTime = (typeof bufferTime === 'number' && isFinite(bufferTime)) ? bufferTime : 0;
+             const duration = audioBuffer?.duration ?? 0;
 
-            let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
+             let clampedBufferTime = Math.max(0, Math.min(validBufferTime, duration));
 
-            if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
+
+             if (duration > 0 && currentPlaybackRate > 0 && isFinite(currentPlaybackRate)) {
                 const displayTime = clampedBufferTime / currentPlaybackRate;
                 currentTimeDisplay.textContent = formatTime(displayTime);
 
                 if (!isSeeking) {
-                    progressBar.value = clampedBufferTime;
+                     progressBar.value = clampedBufferTime;
                 }
-            } else {
-                currentTimeDisplay.textContent = '0:00';
-                if (!isSeeking) {
-                    progressBar.value = 0;
-                }
-            }
+             } else {
+                 currentTimeDisplay.textContent = '0:00';
+                 if (!isSeeking) {
+                     progressBar.value = 0;
+                 }
+             }
         }
 
         function handleMp3File(arrayBuffer) {
@@ -2053,11 +1692,12 @@
             loadStatus.textContent = 'Processing MP3 file...';
 
             try {
-                // No lyrics in bare MP3
+                // Step 1: Handle lyrics part (i.e., no lyrics)
                 lyricsData = [];
-                lyricsLoaded = true;
-                renderLyrics();
+                lyricsLoaded = true; // Mark as processed, even though there are no lyrics. This enables download.
+                renderLyrics(); // This will display "No lyrics content in file."
 
+                // Step 2: Handle audio part
                 if (arrayBuffer.byteLength === 0) {
                     throw new Error("MP3 file is empty.");
                 }
@@ -2084,14 +1724,7 @@
                         updateLyricsHighlight(0, true, false);
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
-
-                        if (shouldAutoplayAfterLoad) {
-                            playAudio();
-                        } else {
-                            isPlaying = false;
-                            isPaused = false;
-                            playPauseBtn.textContent = '▶ Play';
-                        }
+                        playAudio();
                     })
                     .catch(e => {
                         audioLoaded = false;
@@ -2110,6 +1743,7 @@
             }
         }
 
+
         function parseCombinedFile(arrayBuffer) {
             resetPlayerAndLyrics(false);
             loadStatus.textContent = 'Processing file...';
@@ -2118,6 +1752,7 @@
                 const dataView = new DataView(arrayBuffer);
                 let offset = 0;
 
+
                 const magicBytes = new Uint8Array(arrayBuffer, offset, 4);
                 const magic = String.fromCharCode(...magicBytes);
                 offset += 4;
@@ -2125,11 +1760,13 @@
                     throw new Error("Invalid file signature. Expected 'LYRX'.");
                 }
 
+
                 if (offset + 4 > arrayBuffer.byteLength) {
                     throw new Error("File incomplete: Cannot read JSON length.");
                 }
                 const jsonLength = dataView.getUint32(offset, false);
                 offset += 4;
+
 
                 if (jsonLength < 0 || offset + jsonLength > arrayBuffer.byteLength) {
                     throw new Error(`Invalid JSON data length: ${jsonLength}. File might be corrupt or incomplete.`);
@@ -2138,6 +1775,7 @@
                 let jsonData = null;
                 let jsonParseSuccess = false;
                 lyricsData = [];
+
 
                 if (jsonLength > 0) {
                     const jsonBytes = new Uint8Array(arrayBuffer, offset, jsonLength);
@@ -2157,10 +1795,10 @@
                                         typeof word.text === 'string' && word.text.trim()) {
                                         lyricsData.push({ word: word.text.trim(), start: word.start });
                                     }
-                                });
+                                })
                             });
                         } else {
-                            jsonParseSuccess = false;
+                             jsonParseSuccess = false;
                         }
                     } catch (jsonError) {
                         jsonParseSuccess = false;
@@ -2171,18 +1809,22 @@
                     jsonParseSuccess = true;
                 }
 
+
                 if (!jsonParseSuccess && jsonLength > 0) {
-                    lyricsData = [];
+                     lyricsData = [];
                 }
 
+
                 lyricsData.sort((a, b) => a.start - b.start);
-                lyricsLoaded = jsonParseSuccess;
+                                lyricsLoaded = jsonParseSuccess;
                 renderLyrics();
+
 
                 const audioData = arrayBuffer.slice(offset);
                 if (audioData.byteLength === 0) {
                     throw new Error("No audio data found after JSON in the file.");
                 }
+
 
                 if (!audioContext) {
                     initializeAudioContext();
@@ -2192,6 +1834,7 @@
                 }
 
                 loadStatus.textContent = 'Decoding audio...';
+
 
                 audioContext.decodeAudioData(audioData)
                     .then(buffer => {
@@ -2206,14 +1849,7 @@
                         updateLyricsHighlight(0, true, false);
                         loadStatus.textContent = 'File loaded successfully.';
                         checkEnablePlayer();
-
-                        if (shouldAutoplayAfterLoad) {
-                            playAudio();
-                        } else {
-                            isPlaying = false;
-                            isPaused = false;
-                            playPauseBtn.textContent = '▶ Play';
-                        }
+                        playAudio();
                     })
                     .catch(e => {
                         audioLoaded = false;
@@ -2243,6 +1879,7 @@
         function playAudio() {
             if (!audioContext || !audioBuffer || isPlaying) return;
 
+
             if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
                     playAudioInternal();
@@ -2259,20 +1896,25 @@
         function playAudioInternal() {
             if (isPlaying || !audioContext || !audioBuffer) return;
 
+
             startOffset = Math.max(0, Math.min(startOffset, audioBuffer.duration));
+
 
             if (startOffset >= audioBuffer.duration) {
                 startOffset = 0;
             }
 
+
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = audioBuffer;
             sourceNode.playbackRate.setValueAtTime(currentPlaybackRate, audioContext.currentTime);
-            sourceNode.loop = false; // playlist/loop logic handled manually
+            sourceNode.loop = true;
             sourceNode.connect(bassFilterNode);
             sourceNode.onended = handleAudioEnd;
 
+
             startTime = audioContext.currentTime;
+            
             sourceNode.start(0, startOffset);
 
             isPlaying = true;
@@ -2284,8 +1926,10 @@
         function pauseAudio() {
             if (!isPlaying || !sourceNode || !audioContext) return;
 
+
             const elapsedRealTime = audioContext.currentTime - startTime;
             const elapsedBufferTime = elapsedRealTime * currentPlaybackRate;
+
 
             startOffset = (startOffset + elapsedBufferTime) % audioBuffer.duration;
             startOffset = Math.max(0, startOffset);
@@ -2296,21 +1940,25 @@
             isPaused = true;
             playPauseBtn.textContent = '▶ Play';
 
+
             updateCurrentTimeDisplay(startOffset);
         }
 
+
         function stopAudioInternals() {
-            if (sourceNode) {
+             if (sourceNode) {
                 sourceNode.onended = null;
                 sourceNode.loop = false;
                 try {
                     sourceNode.stop(0);
-                } catch (e) {}
+                } catch (e) {
+                }
                 sourceNode.disconnect();
                 sourceNode = null;
             }
             stopUpdatingTime();
         }
+
 
         function stopAudio() {
             stopAudioInternals();
@@ -2323,95 +1971,30 @@
             const wasPlaying = isPlaying;
             stopAudio();
 
+
             startOffset = Math.max(0, bufferTime);
             startOffset = Math.min(startOffset, audioBuffer.duration);
+
 
             progressBar.value = startOffset;
             updateCurrentTimeDisplay(startOffset);
             updateLyricsHighlight(startOffset, true, false);
 
+
             if (wasPlaying) {
-                playAudio();
+                 playAudio();
             } else {
                 isPaused = true;
                 playPauseBtn.textContent = '▶ Play';
             }
         }
 
-        function handleTrackEnd() {
-            // Loop current track (single-song loop) always takes priority
-            if (isLoopTrackEnabled && audioBuffer) {
-                startOffset = 0;
-                shouldAutoplayAfterLoad = true;
-                playAudio();
-                return;
-            }
-
-            // If track is part of playlist, decide next track
-            if (playlist.length > 0 && currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
-                const nextIndex = getNextTrackIndex();
-                if (nextIndex !== null && nextIndex !== undefined) {
-                    loadTrackFromPlaylist(nextIndex, true);
-                    return;
-                }
-            }
-            // Otherwise stop at end (no extra action needed)
-        }
-
-        function getNextTrackIndex() {
-            if (playlist.length === 0) return null;
-            if (currentTrackIndex < 0 || currentTrackIndex >= playlist.length) return null;
-
-            if (isShuffleEnabled) {
-                if (playlist.length === 1) {
-                    // Only one track in playlist
-                    return isLoopPlaylistEnabled ? currentTrackIndex : null;
-                }
-
-                const candidateIndices = [];
-                for (let i = 0; i < playlist.length; i++) {
-                    if (i !== currentTrackIndex) candidateIndices.push(i);
-                }
-                if (candidateIndices.length === 0) {
-                    return isLoopPlaylistEnabled ? currentTrackIndex : null;
-                }
-                const randomIndex = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
-                return randomIndex;
-            } else {
-                const isLastTrack = currentTrackIndex === playlist.length - 1;
-                if (!isLastTrack) {
-                    return currentTrackIndex + 1;
-                } else if (isLoopPlaylistEnabled) {
-                    return 0;
-                } else {
-                    return null;
-                }
-            }
-        }
 
         function handleAudioEnd() {
-            // Called when track finishes naturally
-            sourceNode = null;
-
-            if (!audioBuffer) {
-                isPlaying = false;
-                isPaused = false;
-                startOffset = 0;
-                stopUpdatingTime();
-                playPauseBtn.textContent = '▶ Play';
-                return;
-            }
-
-            isPlaying = false;
-            isPaused = false;
-            startOffset = audioBuffer.duration;
-            stopUpdatingTime();
-            updateCurrentTimeDisplay(audioBuffer.duration);
-            updateLyricsHighlight(audioBuffer.duration, true, false);
-            playPauseBtn.textContent = '▶ Play';
-
-            handleTrackEnd();
+             sourceNode = null;
         }
+
+
 
         function startUpdatingTime() {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -2431,6 +2014,7 @@
                     updateCurrentTimeDisplay(getCurrentBufferTime());
                 }
 
+
                 animationFrameId = requestAnimationFrame(updateLoop);
             }
 
@@ -2443,6 +2027,8 @@
                 animationFrameId = null;
             }
         }
+
+
 
         function checkEnablePlayer() {
             const audioReady = isPlayerReady();
@@ -2461,6 +2047,7 @@
             themeToggleBtn.disabled = !audioReady;
             downloadBtn.disabled = !audioReady;
 
+
             if (!audioReady) {
                 hidePopup(volumePopup);
                 hidePopup(speedPopup);
@@ -2469,14 +2056,15 @@
                 hidePopup(muffledPopup);
             }
 
+
             if (audioContext) {
                 const currentVolume = gainNode ? gainNode.gain.value : parseFloat(volumeSlider.value);
                 updateVolumeIcon(currentVolume);
                 if (volumePercentage) volumePercentage.textContent = `${Math.round(currentVolume * 100)}%`;
                 if (speedRateDisplay) speedRateDisplay.textContent = `${currentPlaybackRate.toFixed(2)}x`;
                 if (bassFilterNode && bassBoostLevelDisplay) {
-                    const currentBoost = bassFilterNode.gain.value;
-                    bassBoostLevelDisplay.textContent = `${currentBoost > 0 ? '+' : ''}${Math.round(currentBoost)} dB`;
+                     const currentBoost = bassFilterNode.gain.value;
+                     bassBoostLevelDisplay.textContent = `${currentBoost > 0 ? '+' : ''}${Math.round(currentBoost)} dB`;
                 }
                 if (underwaterFilterNode && underwaterLevelDisplay) {
                     const currentLevel = parseFloat(underwaterSlider.value);
@@ -2491,10 +2079,10 @@
                 updateTotalDurationDisplay();
                 updateCurrentTimeDisplay(startOffset);
             } else {
-                totalDurationDisplay.textContent = '0:00';
-                currentTimeDisplay.textContent = '0:00';
-                progressBar.value = 0;
-                progressBar.max = 1;
+                 totalDurationDisplay.textContent = '0:00';
+                 currentTimeDisplay.textContent = '0:00';
+                 progressBar.value = 0;
+                 progressBar.max = 1;
             }
         }
 
@@ -2556,6 +2144,7 @@
             checkEnablePlayer();
         }
 
+
         function renderLyrics() {
             lyricsOutput.innerHTML = '';
             currentWordSpans = [];
@@ -2563,10 +2152,12 @@
             previousWordIndex = -1;
             lyricsContainer.scrollTop = 0;
 
+
             if (lyricsLoaded && lyricsData.length > 0) {
                 lyricsOutput.className = '';
                 lyricsContainer.style.justifyContent = 'flex-start';
                 lyricsContainer.style.alignItems = 'flex-start';
+
 
                 lyricsData.forEach((line, index) => {
                     const span = document.createElement('span');
@@ -2576,6 +2167,8 @@
                     lyricsOutput.appendChild(span);
                     currentWordSpans.push(span);
                 });
+
+
             } else {
                 lyricsOutput.innerHTML = 'No lyrics content in file.';
                 lyricsOutput.className = 'placeholder';
@@ -2585,16 +2178,18 @@
         }
 
         function updateLyricsHighlight(currentBufferTime, forceUpdate = false, allowScroll = false) {
-            const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
+             const effectiveTime = audioBuffer ? (currentBufferTime % audioBuffer.duration) : 0;
+
 
             if (!lyricsLoaded || currentWordSpans.length === 0) {
-                if (currentWordIndex !== -1) {
-                    highlightWord(-1, false);
-                    currentWordIndex = -1;
-                    previousWordIndex = -1;
-                }
+                 if (currentWordIndex !== -1) {
+                     highlightWord(-1, false);
+                     currentWordIndex = -1;
+                     previousWordIndex = -1;
+                 }
                 return;
             }
+
 
             let newWordIndex = -1;
             const lookaheadTime = effectiveTime + 0.05;
@@ -2606,30 +2201,38 @@
                 }
             }
 
-            if (newWordIndex !== currentWordIndex || forceUpdate) {
+
+             if (newWordIndex !== currentWordIndex || forceUpdate) {
                 const shouldScroll = allowScroll && !isSeeking && isPlaying;
                 highlightWord(newWordIndex, shouldScroll);
                 previousWordIndex = currentWordIndex;
                 currentWordIndex = newWordIndex;
-            }
+             }
         }
+
 
         function highlightWord(indexToHighlight, shouldAutoScroll = false) {
             let wordToScroll = null;
+
 
             currentWordSpans.forEach((span, index) => {
                 const isVisible = index <= indexToHighlight;
                 span.classList.toggle('visible', isVisible);
 
+
                 const isHighlighted = index === indexToHighlight;
                 span.classList.toggle('highlighted', isHighlighted);
 
-                if (isHighlighted) wordToScroll = span;
+
+                if(isHighlighted) wordToScroll = span;
             });
 
-            if (indexToHighlight < 0) {
-                currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
-            }
+
+             if (indexToHighlight < 0) {
+                 currentWordSpans.forEach(s => s.classList.remove('highlighted', 'visible'));
+             }
+
+
 
             if (shouldAutoScroll && wordToScroll) {
                 const containerRect = lyricsContainer.getBoundingClientRect();
@@ -2649,6 +2252,8 @@
             }
         }
 
+
+
         function updateVolumeIcon(volume) {
             if (!volumeIcon) return;
             volumeIcon.className = 'fas ';
@@ -2661,12 +2266,15 @@
             }
         }
 
+
         function resetPopupTimer(popupElement) {
             clearPopupTimer(popupElement);
+
 
             const timerCallback = () => {
                 hidePopup(popupElement);
             };
+
 
             if (popupElement === volumePopup) {
                 volumePopupTimeout = setTimeout(timerCallback, POPUP_CLOSE_DELAY);
@@ -2681,8 +2289,9 @@
             }
         }
 
+
         function clearPopupTimer(popupElement) {
-            if (popupElement === volumePopup && volumePopupTimeout) {
+             if (popupElement === volumePopup && volumePopupTimeout) {
                 clearTimeout(volumePopupTimeout);
                 volumePopupTimeout = null;
             } else if (popupElement === speedPopup && speedPopupTimeout) {
@@ -2700,14 +2309,17 @@
             }
         }
 
+
         function togglePopup(el) {
             el.classList.toggle('show');
         }
+
 
         function hidePopup(el) {
             el.classList.remove('show');
             clearPopupTimer(el);
         }
+
 
         function formatTime(seconds) {
             if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '0:00';
@@ -2717,102 +2329,12 @@
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        // Playlist helpers
-        function renderPlaylistUI() {
-            if (!playlistList) return;
 
-            playlistList.innerHTML = '';
-
-            if (!playlist || playlist.length === 0) {
-                const emptyItem = document.createElement('li');
-                emptyItem.className = 'playlist-empty';
-                emptyItem.textContent = 'No tracks yet. Add files above.';
-                playlistList.appendChild(emptyItem);
-                return;
-            }
-
-            playlist.forEach((track, index) => {
-                const li = document.createElement('li');
-                li.className = 'playlist-item';
-                if (index === currentTrackIndex) {
-                    li.classList.add('active');
-                }
-
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'track-name';
-                nameSpan.textContent = track.name;
-                li.appendChild(nameSpan);
-
-                li.addEventListener('click', () => {
-                    loadTrackFromPlaylist(index, true);
-                });
-
-                playlistList.appendChild(li);
-            });
-        }
-
-        function loadTrackFromPlaylist(index, autoPlay = true) {
-            if (index < 0 || index >= playlist.length) return;
-            const track = playlist[index];
-            if (!track || !track.file) return;
-
-            initializeAudioContext();
-            if (!audioContext) {
-                loadStatus.textContent = 'Error: Audio system not ready.';
-                return;
-            }
-
-            shouldAutoplayAfterLoad = autoPlay;
-            currentTrackIndex = index;
-            currentSongFilename = track.name;
-            renderPlaylistUI();
-
-            stopAudio();
-
-            const file = track.file;
-            const fileNameLower = file.name.toLowerCase();
-            loadStatus.textContent = `Loading ${file.name}...`;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const arrayBuffer = e.target.result;
-                if (fileNameLower.endsWith('.songlyrics')) {
-                    parseCombinedFile(arrayBuffer);
-                } else if (fileNameLower.endsWith('.mp3')) {
-                    handleMp3File(arrayBuffer);
-                }
-            };
-            reader.onerror = () => {
-                alert("Error reading the selected playlist file.");
-                loadStatus.textContent = 'Error reading playlist file.';
-            };
-            reader.readAsArrayBuffer(file);
-        }
 
         document.addEventListener('keydown', handleKeyboardShortcuts);
 
         function handleKeyboardShortcuts(event) {
             const activeElement = document.activeElement;
-
-            // Escape to close popups / playlist
-            if (event.key === 'Escape') {
-                let handled = false;
-                [volumePopup, speedPopup, bassBoostPopup, underwaterPopup, muffledPopup].forEach(popup => {
-                    if (popup.classList.contains('show')) {
-                        hidePopup(popup);
-                        handled = true;
-                    }
-                });
-                if (playlistSidebar.classList.contains('open')) {
-                    playlistSidebar.classList.remove('open');
-                    playlistBackdrop.classList.remove('visible');
-                    handled = true;
-                }
-                if (handled) {
-                    event.preventDefault();
-                    return;
-                }
-            }
 
             const isTextInputFocused = (activeElement.tagName === 'INPUT' && /text|search|password|email|number|tel|url/.test(activeElement.type)) ||
                                       activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
@@ -2873,7 +2395,7 @@
                         return;
                     }
                 }
-                if (underwaterPopup.classList.contains('show')) {
+                 if (underwaterPopup.classList.contains('show')) {
                     if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
                         event.preventDefault();
                         const currentValue = parseFloat(underwaterSlider.value);
@@ -2888,7 +2410,7 @@
                         return;
                     }
                 }
-                if (muffledPopup.classList.contains('show')) {
+                 if (muffledPopup.classList.contains('show')) {
                     if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
                         event.preventDefault();
                         const currentValue = parseFloat(muffledSlider.value);
@@ -2914,8 +2436,8 @@
                         event.preventDefault();
                         togglePlayback();
                     } else if (playerReady && activeElement.tagName === 'BUTTON' && !isRangeInputFocused) {
-                        event.preventDefault();
-                        togglePlayback();
+                         event.preventDefault();
+                         togglePlayback();
                     }
                     break;
 
